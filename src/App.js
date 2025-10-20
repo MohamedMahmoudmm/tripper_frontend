@@ -1,11 +1,15 @@
-import logo from './logo.svg';
 import './App.css';
-
+import LoginPage from './pages/auth';
+import OnboardingPage from './pages/onBoarding';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 function App() {
   return (
-    <div className="App">
-      Tripper Website
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<OnboardingPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
