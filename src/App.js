@@ -8,6 +8,7 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import OnboardingPage from "./pages/onBoarding";
 import HomePage from "./pages/home";
 import PlaceDetails from "./pages/details";
+import ChatPage from "./pages/ChatPage";
 function App() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -17,6 +18,8 @@ function App() {
           <Route path="/login" element={<LoginPage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/details" element={<PlaceDetails />} />
+          <Route path="/chat" element={<ChatPage />} />
+
         </Routes>
       </BrowserRouter>
     </LocalizationProvider>
