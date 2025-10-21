@@ -1,11 +1,9 @@
-// src/pages/ChatPage.jsx
 import React, { useState } from "react";
 import { Box, Drawer, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ChatSidebar from "../components/chat/ChatSidebar";
 import ChatWindow from "../components/chat/ChatWindow";
 
-/* dummy data */
 const DUMMY = [
   {
     id: "c1",
@@ -18,9 +16,9 @@ const DUMMY = [
     lastSeen: "online",
     typing: false,
     messages: [
-      { id: "m1", text: "Hi 👋", time: "09:20", fromMe: false, avatar: "https://randomuser.me/api/portraits/women/44.jpg", status: "delivered" },
+      { id: "m1", text: "Hi ", time: "09:20", fromMe: false, avatar: "https://randomuser.me/api/portraits/women/44.jpg", status: "delivered" },
       { id: "m2", text: "Hey Sara, how are you?", time: "09:21", fromMe: true, status: "delivered" },
-      { id: "m3", text: "All good! Ready for tomorrow.", time: "09:22", fromMe: false, status: "delivered" },
+      { id: "m3", text: "ALi good! Ready for tomorrow.", time: "09:22", fromMe: false, status: "delivered" },
     ],
   },
   {
