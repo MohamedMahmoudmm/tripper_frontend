@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
-import HeaderSection from "../components/headerSection";
-import ServicesSection from "../components/serviceSection";
-import TopPlacesSection from "../components/topPlacesSection";
-import AuthNavBar from "../components/authNavBar";
-import FooterComponent from "../components/footer";
+import AuthNavBar from "../components/onBoardingComponents/authNavBar";
+import HeaderSection from "../components/onBoardingComponents/headerSection";
+import ServicesSection from "../components/onBoardingComponents/serviceSection";
+import TopPlacesSection from "../components/onBoardingComponents/topPlacesSection";
+import FooterComponent from "../components/onBoardingComponents/footer";
 
 
 export default function OnboardingPage() {

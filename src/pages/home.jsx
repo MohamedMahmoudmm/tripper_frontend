@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../components/NavbarMina";
+import Navbar from "../components/navbar";
 import PopularHomesCarousel from "../components/PopularHomesCarousel";
 
 
