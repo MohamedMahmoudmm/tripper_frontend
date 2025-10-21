@@ -1,9 +1,9 @@
 import { Box } from "@mui/material";
-import Footer from "../components/footer";
 import HeaderSection from "../components/headerSection";
 import ServicesSection from "../components/serviceSection";
 import TopPlacesSection from "../components/topPlacesSection";
 import AuthNavBar from "../components/authNavBar";
+import FooterComponent from "../components/footer";
 
 
 export default function OnboardingPage() {
@@ -13,7 +13,7 @@ export default function OnboardingPage() {
             <HeaderSection></HeaderSection>
             <ServicesSection></ServicesSection>
             <TopPlacesSection></TopPlacesSection>
-            <Footer></Footer>
+            <FooterComponent></FooterComponent>
         </Box>
     );
 }

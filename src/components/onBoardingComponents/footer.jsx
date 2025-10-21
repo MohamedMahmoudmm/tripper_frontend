@@ -2,7 +2,7 @@ import React from "react";
 import { Box, Typography, Link, Stack, IconButton } from "@mui/material";
 import { Facebook, Instagram, Twitter } from "@mui/icons-material";
 
-export default function Footer() {
+export default function FooterComponent() {
   return (
     <Box
       sx={{
