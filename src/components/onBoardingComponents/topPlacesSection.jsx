@@ -23,7 +23,7 @@ export default function TopPlacesSection() {
       ];
     
     return (
-          <Box sx={{ textAlign: "center", py: 10, backgroundColor: "#f9f9f9" }}>
+        <Box sx={{ textAlign: "center", py: 10, backgroundColor: "#f9f9f9" }}>
         <Typography
           variant="subtitle2"
           sx={{
