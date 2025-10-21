@@ -1,16 +1,10 @@
-// src/components/chat/ChatWindow.jsx
 import React, { useRef, useEffect, useState } from "react";
 import { Box, Typography, IconButton, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MessageBubble from "./MessageBubble";
 import NewMessageInput from "./NewMessageInput";
 
-/**
- * props:
- * - conversation: { id, name, avatar, messages: [{id,text,time,fromMe,avatar,status}], typing (bool) }
- * - onBack() optional for mobile to go back to sidebar
- * - onSendMessage(text, files)
- */
+
 const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
   const scrollRef = useRef(null);
   const [messages, setMessages] = useState(conversation?.messages || []);
@@ -28,7 +22,6 @@ const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
   }, [messages, conversation]);
 
   const handleSend = (text, files) => {
-    // placeholder local add; in real app you'd send to server then update via socket/response
     const newMsg = {
       id: `tmp-${Date.now()}`,
       text,
@@ -65,7 +58,6 @@ const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
         )}
 
         {messages.map((m, i) => {
-          // show avatar for incoming when previous message was from different sender
           const prev = messages[i - 1];
           const showAvatar = !m.fromMe && (!prev || prev.fromMe);
           return <MessageBubble key={m.id} message={m} showAvatar={showAvatar} />;

@@ -1,4 +1,3 @@
-// src/components/chat/ChatSidebar.jsx
 import React from "react";
 import {
   Box,
@@ -12,12 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 
-/**
- * props:
- * - conversations: [{ id, name, lastMessage, avatar, time, unreadCount, online }]
- * - onSelectConversation(id)
- * - activeId
- */
+
 const ChatSidebar = ({ conversations = [], onSelectConversation, activeId }) => {
   return (
     <Box sx={{ width: { xs: "100%", sm: 340 }, borderRight: { xs: "none", sm: "1px solid #eee" }, height: "100%" }}>

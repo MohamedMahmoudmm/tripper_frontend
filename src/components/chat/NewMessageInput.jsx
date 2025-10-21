@@ -1,14 +1,10 @@
-// src/components/chat/NewMessageInput.jsx
 import React, { useState, useRef } from "react";
 import {  IconButton, InputBase, Paper } from "@mui/material";
 import AttachFileIcon from "@mui/icons-material/AttachFile";
 import SendIcon from "@mui/icons-material/Send";
 import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 
-/**
- * props:
- * - onSend(text, attachments) => function
- */
+
 const NewMessageInput = ({ onSend, placeholder = "Write a message..." }) => {
   const [text, setText] = useState("");
   const [files, setFiles] = useState([]);
@@ -33,7 +29,6 @@ const NewMessageInput = ({ onSend, placeholder = "Write a message..." }) => {
   const handleFiles = (e) => {
     const chosen = Array.from(e.target.files);
     setFiles((prev) => [...prev, ...chosen].slice(0, 5)); // limit to 5 for UX
-    // reset input to allow same file reselect
     e.target.value = null;
   };
 

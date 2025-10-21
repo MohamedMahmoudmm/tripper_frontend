@@ -1,12 +1,7 @@
-// src/components/chat/MessageBubble.jsx
 import React from "react";
 import { Box, Typography, Avatar } from "@mui/material";
 
-/**
- * props:
- * - message: { id, text, time, fromMe (bool), avatarUrl?, status: 'sent'|'delivered'|'read' }
- * - showAvatar (bool) => whether to show avatar on left (for incoming messages)
- */
+
 const MessageBubble = ({ message, showAvatar = true }) => {
   const { text, time, fromMe, avatarUrl, status } = message;
 
@@ -58,10 +53,7 @@ const MessageBubble = ({ message, showAvatar = true }) => {
 
       {fromMe && showAvatar && (
         <Avatar src={avatarUrl} sx={{ width: 36, height: 36, opacity: 0 }} />
-        /*
-          For alignment we optionally render an invisible avatar on the right so layout consistent.
-          In production you might want to render the user's avatar if needed.
-        */
+       
       )}
     </Box>
   );
