@@ -1,49 +1,12 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Box, Typography, IconButton, useMediaQuery } from "@mui/material";
+import { Box, Typography, IconButton, useMediaQuery, Paper } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import HomeCard from "./HomeCard";
+import SearchBarFields from "./SearchBarFields";
 
-const homes = [
-  {
-    image:
-      "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=60",
-    title: "Apartment in El Maadi",
-    price: "4,774 ج.م / 2 nights",
-    rating: 4.93,
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1568605114967-8130f3a36994?auto=format&fit=crop&w=800&q=60",
-    title: "Apartment in Giza",
-    price: "6,184 ج.م / 2 nights",
-    rating: 5.0,
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1600585154217-8a9a99a6a53e?auto=format&fit=crop&w=800&q=60",
-    title: "Apartment in Downtown",
-    price: "1,997 ج.م / 2 nights",
-    rating: 4.87,
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1586105251261-72a756497a12?auto=format&fit=crop&w=800&q=60",
-    title: "Room in Nasr City",
-    price: "1,845 ج.م / 2 nights",
-    rating: 4.98,
-  },
-  {
-    image:
-      "https://images.unsplash.com/photo-1600585154780-0c77d90d1b1c?auto=format&fit=crop&w=800&q=60",
-    title: "Apartment in Bab El Louk",
-    price: "13,833 ج.م / 2 nights",
-    rating: 4.96,
-  },
-];
-
-const PopularHomesCarousel = () => {
+const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) => {
   const scrollRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -66,7 +29,7 @@ const PopularHomesCarousel = () => {
   const scroll = (direction) => {
     const { current } = scrollRef;
     if (current) {
-      const scrollAmount = current.clientWidth * 0.9; // smoother scroll
+      const scrollAmount = current.clientWidth * 0.9;
       const newScroll =
         direction === "left"
           ? current.scrollLeft - scrollAmount
@@ -91,14 +54,39 @@ const PopularHomesCarousel = () => {
         py: 4,
         position: "relative",
         overflow: "hidden",
+        maxWidth: "1400px",
+        margin: "0 auto",
       }}
     >
+      {/* Search Bar */}
+      <Paper
+        elevation={3}
+        sx={{
+          width: { xs: "95%", sm: "85%", md: "70%" },
+          maxWidth: "900px",
+          mx: "auto",
+          mt: { xs: 2, md: 3 },
+          mb: { xs: 2, md: 4 },
+          borderRadius: "40px",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          overflow: "hidden",
+        }}
+      >
+        <SearchBarFields />
+      </Paper>
+
       <Typography
         variant="h6"
         fontWeight="bold"
-        sx={{ mb: 2, textAlign: { xs: "center", md: "left" } }}
+        sx={{
+          mb: 2,
+          textAlign: { xs: "center", md: "left" },
+          px: { xs: 1, md: 3 },
+        }}
       >
-        Popular homes in Cairo
+        {title}
       </Typography>
 
       {/* Left Arrow */}

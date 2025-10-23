@@ -7,7 +7,6 @@ import {
   Button,
   Tabs,
   Tab,
-  Paper,
   useMediaQuery,
   Drawer,
   List,
@@ -15,24 +14,30 @@ import {
   ListItemButton,
   ListItemText,
   Divider,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import HomeIcon from "@mui/icons-material/Home";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import RoomServiceIcon from "@mui/icons-material/RoomService";
-import LanguageIcon from "@mui/icons-material/Language";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchBarFields from "./SearchBarFields";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { FavoriteBorder } from "@mui/icons-material";
 
-const Navbar = () => {
-  const [tabValue, setTabValue] = useState(0);
+const Navbar = ({ tabValue, setTabValue }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [lang, setLang] = useState("EN");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
 
+
   const handleDrawerToggle = () => {
     setOpenDrawer(!openDrawer);
+  };
+
+  const handleTabChange = (e, newVal) => {
+    setTabValue(newVal);
   };
 
   return (
@@ -55,7 +60,7 @@ const Navbar = () => {
             flexWrap: "wrap",
           }}
         >
-          {/* Left Logo */}
+          {/* Logo */}
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg"
@@ -68,7 +73,7 @@ const Navbar = () => {
             />
           </Box>
 
-          {/* Center Tabs or Menu Icon */}
+          {/* Tabs or Menu */}
           {isMobile ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <IconButton onClick={handleDrawerToggle}>
@@ -79,44 +84,38 @@ const Navbar = () => {
               </IconButton>
             </Box>
           ) : (
-            <Box>
-              <Tabs
-                value={tabValue}
-                onChange={(e, val) => setTabValue(val)}
-                sx={{
-                  "& .MuiTab-root": {
-                    textTransform: "none",
-                    fontSize: 14,
-                    minWidth: 80,
-                    color: "#555",
-                    "&.Mui-selected": { color: "black" },
-                  },
-                  "& .MuiTabs-flexContainer": {
-                    alignItems: "flex-end",
-                    gap: "20px",
-                  },
-                }}
-              >
-                <Tab
-                  icon={<HomeIcon sx={{ fontSize: 24 }} />}
-                  iconPosition="top"
-                  label="Homes"
-                />
-                <Tab
-                  icon={<EmojiEventsIcon sx={{ fontSize: 24 }} />}
-                  iconPosition="top"
-                  label="Experiences"
-                />
-                <Tab
-                  icon={<RoomServiceIcon sx={{ fontSize: 24 }} />}
-                  iconPosition="top"
-                  label="Services"
-                />
-              </Tabs>
-            </Box>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              sx={{
+                "& .MuiTab-root": {
+                  textTransform: "none",
+                  fontSize: 14,
+                  minWidth: 80,
+                  color: "#555",
+                  "&.Mui-selected": { color: "black" },
+                },
+                "& .MuiTabs-flexContainer": {
+                  alignItems: "flex-end",
+                  gap: "20px",
+                },
+              }}
+            >
+              <Tab icon={<HomeIcon />} iconPosition="top" label="Homes" />
+              <Tab
+                icon={<EmojiEventsIcon />}
+                iconPosition="top"
+                label="Experiences"
+              />
+              <Tab
+                icon={<FavoriteBorder />}
+                iconPosition="top"
+                label="Favourites"
+              />
+            </Tabs>
           )}
 
-          {/* Right side */}
+          {/* Right section */}
           {!isMobile && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Button
@@ -124,9 +123,23 @@ const Navbar = () => {
               >
                 Become a host
               </Button>
-              <IconButton>
-                <LanguageIcon />
-              </IconButton>
+              <Select
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                variant="outlined"
+                size="small"
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                }}
+                IconComponent={ExpandMoreIcon}
+              >
+                <MenuItem value="EN">EN</MenuItem>
+                <MenuItem value="AR">AR</MenuItem>
+                <MenuItem value="FR">FR</MenuItem>
+              </Select>
+
               <Box
                 sx={{
                   display: "flex",
@@ -146,28 +159,9 @@ const Navbar = () => {
           )}
         </Toolbar>
 
-        {/* Search Bar */}
-        <Paper
-          elevation={3}
-          sx={{
-            width: { xs: "95%", sm: "85%", md: "70%" },
-            maxWidth: "900px",
-            mx: "auto",
-            mt: { xs: 2, md: 3 },
-            mb: { xs: 2, md: 4 },
-            borderRadius: "40px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
-            transition: "all 0.3s ease",
-          }}
-        >
-          <SearchBarFields />
-        </Paper>
+       
       </AppBar>
 
-      {/* Drawer for mobile */}
       <Drawer
         anchor="left"
         open={openDrawer}
@@ -177,37 +171,20 @@ const Navbar = () => {
         }}
       >
         <List>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Homes" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Experiences" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Services" />
-            </ListItemButton>
-          </ListItem>
+          {["Homes", "Experiences", "Services", "Favourites"].map((text, index) => (
+            <ListItem disablePadding key={text}>
+              <ListItemButton
+                onClick={() => {
+                  setTabValue(index);
+                  handleDrawerToggle();
+                }}
+              >
+                <ListItemText primary={text} />
+              </ListItemButton>
+            </ListItem>
+          ))}
         </List>
-
-        <Divider sx={{ my: 1 }} />
-
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Become a host" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Language" />
-            </ListItemButton>
-          </ListItem>
-        </List>
+        <Divider />
       </Drawer>
     </>
   );
