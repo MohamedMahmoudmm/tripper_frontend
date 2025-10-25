@@ -11,6 +11,8 @@ import PlaceDetails from "./pages/details";
 import FavouritePage from "./pages/favourite";
 import ExperiencePage from "./pages/experience";
 import PlanPage from "./pages/plan";
+import HostRoutes from "./routes/HostRoutes";
+
 function App() {
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -24,6 +26,10 @@ function App() {
           <Route path="/favourites" element={<FavouritePage />} />
           <Route path="/experiences" element={<ExperiencePage />} />
           <Route path="/plan" element={<PlanPage />} />
+
+
+             {/*  host */}
+          <Route path="/host/*" element={<HostRoutes />} />
         </Routes>
       </BrowserRouter>
     </LocalizationProvider>

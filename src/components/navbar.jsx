@@ -10,7 +10,6 @@ import {
   useMediaQuery,
   Drawer,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   Divider,
@@ -24,13 +23,14 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { FavoriteBorder } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ tabValue, setTabValue }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [lang, setLang] = useState("EN");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
     setOpenDrawer(!openDrawer);
@@ -39,6 +39,16 @@ const Navbar = ({ tabValue, setTabValue }) => {
   const handleTabChange = (e, newVal) => {
     setTabValue(newVal);
   };
+
+  const handleSwitchToHost = () => {
+    navigate("/host/dashboard");
+  };
+
+  const tabs = [
+    { label: "Homes", icon: <HomeIcon /> },
+    { label: "Experiences", icon: <EmojiEventsIcon /> },
+    { label: "Favourites", icon: <FavoriteBorder /> },
+  ];
 
   return (
     <>
@@ -61,15 +71,11 @@ const Navbar = ({ tabValue, setTabValue }) => {
           }}
         >
           {/* Logo */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }} onClick={() => navigate("/")}>
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg"
               alt="Airbnb logo"
-              style={{
-                height: 36,
-                width: "auto",
-                cursor: "pointer",
-              }}
+              style={{ height: 36, width: "auto" }}
             />
           </Box>
 
@@ -95,23 +101,12 @@ const Navbar = ({ tabValue, setTabValue }) => {
                   color: "#555",
                   "&.Mui-selected": { color: "black" },
                 },
-                "& .MuiTabs-flexContainer": {
-                  alignItems: "flex-end",
-                  gap: "20px",
-                },
+                "& .MuiTabs-flexContainer": { alignItems: "flex-end", gap: "20px" },
               }}
             >
-              <Tab icon={<HomeIcon />} iconPosition="top" label="Homes" />
-              <Tab
-                icon={<EmojiEventsIcon />}
-                iconPosition="top"
-                label="Experiences"
-              />
-              <Tab
-                icon={<FavoriteBorder />}
-                iconPosition="top"
-                label="Favourites"
-              />
+              {tabs.map((tab, index) => (
+                <Tab key={tab.label} icon={tab.icon} iconPosition="top" label={tab.label} />
+              ))}
             </Tabs>
           )}
 
@@ -120,9 +115,11 @@ const Navbar = ({ tabValue, setTabValue }) => {
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Button
                 sx={{ textTransform: "none", fontSize: 14, color: "black" }}
+                onClick={handleSwitchToHost}
               >
-                Become a host
+                Switch to Host
               </Button>
+
               <Select
                 value={lang}
                 onChange={(e) => setLang(e.target.value)}
@@ -158,33 +155,32 @@ const Navbar = ({ tabValue, setTabValue }) => {
             </Box>
           )}
         </Toolbar>
-
-       
       </AppBar>
 
+      {/* Drawer for mobile */}
       <Drawer
         anchor="left"
         open={openDrawer}
         onClose={handleDrawerToggle}
-        PaperProps={{
-          sx: { width: 250, paddingTop: 2 },
-        }}
+        PaperProps={{ sx: { width: 250, paddingTop: 2 } }}
       >
         <List>
-          {["Homes", "Experiences", "Services", "Favourites"].map((text, index) => (
-            <ListItem disablePadding key={text}>
-              <ListItemButton
-                onClick={() => {
-                  setTabValue(index);
-                  handleDrawerToggle();
-                }}
-              >
-                <ListItemText primary={text} />
-              </ListItemButton>
-            </ListItem>
+          {tabs.map((tab, index) => (
+            <ListItemButton
+              key={tab.label}
+              onClick={() => {
+                setTabValue(index);
+                handleDrawerToggle();
+              }}
+            >
+              <ListItemText primary={tab.label} />
+            </ListItemButton>
           ))}
+          <Divider />
+          <ListItemButton onClick={handleSwitchToHost}>
+            <ListItemText primary="Switch to Host" />
+          </ListItemButton>
         </List>
-        <Divider />
       </Drawer>
     </>
   );
