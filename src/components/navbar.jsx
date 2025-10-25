@@ -7,33 +7,48 @@ import {
   Button,
   Tabs,
   Tab,
-  Paper,
   useMediaQuery,
   Drawer,
   List,
-  ListItem,
   ListItemButton,
   ListItemText,
   Divider,
+  Select,
+  MenuItem,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import HomeIcon from "@mui/icons-material/Home";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
-import RoomServiceIcon from "@mui/icons-material/RoomService";
-import LanguageIcon from "@mui/icons-material/Language";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
-import SearchBarFields from "./SearchBarFields";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { FavoriteBorder } from "@mui/icons-material";
+import { useNavigate } from "react-router-dom";
 
-const Navbar = () => {
-  const [tabValue, setTabValue] = useState(0);
+const Navbar = ({ tabValue, setTabValue }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
+  const [lang, setLang] = useState("EN");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const navigate = useNavigate();
 
   const handleDrawerToggle = () => {
     setOpenDrawer(!openDrawer);
   };
+
+  const handleTabChange = (e, newVal) => {
+    setTabValue(newVal);
+  };
+
+  const handleSwitchToHost = () => {
+    navigate("/host/dashboard");
+  };
+
+  const tabs = [
+    { label: "Homes", icon: <HomeIcon /> },
+    { label: "Experiences", icon: <EmojiEventsIcon /> },
+    { label: "Favourites", icon: <FavoriteBorder /> },
+  ];
 
   return (
     <>
@@ -55,20 +70,16 @@ const Navbar = () => {
             flexWrap: "wrap",
           }}
         >
-          {/* Left Logo */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          {/* Logo */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }} onClick={() => navigate("/")}>
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg"
               alt="Airbnb logo"
-              style={{
-                height: 36,
-                width: "auto",
-                cursor: "pointer",
-              }}
+              style={{ height: 36, width: "auto" }}
             />
           </Box>
 
-          {/* Center Tabs or Menu Icon */}
+          {/* Tabs or Menu */}
           {isMobile ? (
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <IconButton onClick={handleDrawerToggle}>
@@ -79,54 +90,53 @@ const Navbar = () => {
               </IconButton>
             </Box>
           ) : (
-            <Box>
-              <Tabs
-                value={tabValue}
-                onChange={(e, val) => setTabValue(val)}
-                sx={{
-                  "& .MuiTab-root": {
-                    textTransform: "none",
-                    fontSize: 14,
-                    minWidth: 80,
-                    color: "#555",
-                    "&.Mui-selected": { color: "black" },
-                  },
-                  "& .MuiTabs-flexContainer": {
-                    alignItems: "flex-end",
-                    gap: "20px",
-                  },
-                }}
-              >
-                <Tab
-                  icon={<HomeIcon sx={{ fontSize: 24 }} />}
-                  iconPosition="top"
-                  label="Homes"
-                />
-                <Tab
-                  icon={<EmojiEventsIcon sx={{ fontSize: 24 }} />}
-                  iconPosition="top"
-                  label="Experiences"
-                />
-                <Tab
-                  icon={<RoomServiceIcon sx={{ fontSize: 24 }} />}
-                  iconPosition="top"
-                  label="Services"
-                />
-              </Tabs>
-            </Box>
+            <Tabs
+              value={tabValue}
+              onChange={handleTabChange}
+              sx={{
+                "& .MuiTab-root": {
+                  textTransform: "none",
+                  fontSize: 14,
+                  minWidth: 80,
+                  color: "#555",
+                  "&.Mui-selected": { color: "black" },
+                },
+                "& .MuiTabs-flexContainer": { alignItems: "flex-end", gap: "20px" },
+              }}
+            >
+              {tabs.map((tab, index) => (
+                <Tab key={tab.label} icon={tab.icon} iconPosition="top" label={tab.label} />
+              ))}
+            </Tabs>
           )}
 
-          {/* Right side */}
+          {/* Right section */}
           {!isMobile && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <Button
                 sx={{ textTransform: "none", fontSize: 14, color: "black" }}
+                onClick={handleSwitchToHost}
               >
-                Become a host
+                Switch to Host
               </Button>
-              <IconButton>
-                <LanguageIcon />
-              </IconButton>
+
+              <Select
+                value={lang}
+                onChange={(e) => setLang(e.target.value)}
+                variant="outlined"
+                size="small"
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 500,
+                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+                }}
+                IconComponent={ExpandMoreIcon}
+              >
+                <MenuItem value="EN">EN</MenuItem>
+                <MenuItem value="AR">AR</MenuItem>
+                <MenuItem value="FR">FR</MenuItem>
+              </Select>
+
               <Box
                 sx={{
                   display: "flex",
@@ -145,26 +155,6 @@ const Navbar = () => {
             </Box>
           )}
         </Toolbar>
-
-        {/* Search Bar */}
-        <Paper
-          elevation={3}
-          sx={{
-            width: { xs: "95%", sm: "85%", md: "70%" },
-            maxWidth: "900px",
-            mx: "auto",
-            mt: { xs: 2, md: 3 },
-            mb: { xs: 2, md: 4 },
-            borderRadius: "40px",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center",
-            overflow: "hidden",
-            transition: "all 0.3s ease",
-          }}
-        >
-          <SearchBarFields />
-        </Paper>
       </AppBar>
 
       {/* Drawer for mobile */}
@@ -172,41 +162,24 @@ const Navbar = () => {
         anchor="left"
         open={openDrawer}
         onClose={handleDrawerToggle}
-        PaperProps={{
-          sx: { width: 250, paddingTop: 2 },
-        }}
+        PaperProps={{ sx: { width: 250, paddingTop: 2 } }}
       >
         <List>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Homes" />
+          {tabs.map((tab, index) => (
+            <ListItemButton
+              key={tab.label}
+              onClick={() => {
+                setTabValue(index);
+                handleDrawerToggle();
+              }}
+            >
+              <ListItemText primary={tab.label} />
             </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Experiences" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Services" />
-            </ListItemButton>
-          </ListItem>
-        </List>
-
-        <Divider sx={{ my: 1 }} />
-
-        <List>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Become a host" />
-            </ListItemButton>
-          </ListItem>
-          <ListItem disablePadding>
-            <ListItemButton>
-              <ListItemText primary="Language" />
-            </ListItemButton>
-          </ListItem>
+          ))}
+          <Divider />
+          <ListItemButton onClick={handleSwitchToHost}>
+            <ListItemText primary="Switch to Host" />
+          </ListItemButton>
         </List>
       </Drawer>
     </>
