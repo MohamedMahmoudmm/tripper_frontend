@@ -8,6 +8,8 @@ import HostProfile from "../pages/host/HostProfile";
 import Reservations from "../pages/host/Reservations";
 import Dashboard from "../pages/host/Dashboard";
 import EditProfile from "../pages/host/EditProfile";
+import TopAttractions from "../pages/host/Places";
+import Places from "../pages/host/Places";
 
 const HostRoutes = () => {
   return (
@@ -29,6 +31,7 @@ const HostRoutes = () => {
 
         {/* reservations */}
         <Route path="/reservations" element={<Reservations />} />
+        <Route path = "/places" element={<Places />} />
       </Routes>
     </HostLayout>
   );
