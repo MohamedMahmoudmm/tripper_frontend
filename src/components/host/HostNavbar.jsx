@@ -69,21 +69,17 @@ const HostNavbar = () => {
         }}
       >
         {/* ✅ Left - Logo */}
-        <Box
+         <Box
+          component="img"
+          src="navImage.png"
+          alt="Tripper logo with slogan"
           sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1.5,
-            cursor: "pointer",
+            height: 40,
+            width: 200,
+            objectFit: "cover",
+            mb: 1,
           }}
-          onClick={() => navigate("/host/dashboard")}
-        >
-          <img
-            src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg"
-            alt="logo"
-            style={{ height: 34 }}
-          />
-        </Box>
+        />
 
         {/*  Center - Navigation (desktop only) */}
         <Box
@@ -102,7 +98,7 @@ const HostNavbar = () => {
                 fontWeight:
                   location.pathname === item.path ? "bold" : 500,
                 color:
-                  location.pathname === item.path ? "#FF385C" : "black",
+                  location.pathname === item.path ? "#f27244" : "black",
                 "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
               }}
             >

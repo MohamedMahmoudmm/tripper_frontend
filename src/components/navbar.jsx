@@ -58,8 +58,7 @@ const Navbar = ({ tabValue, setTabValue }) => {
         elevation={0}
         sx={{
           borderBottom: "1px solid #ddd",
-          px: { xs: 2, sm: 4, md: 6 },
-          py: 1,
+          px: { xs: 2, sm: 3, md: 5 },
           backgroundColor: "white",
         }}
       >
@@ -71,13 +70,17 @@ const Navbar = ({ tabValue, setTabValue }) => {
           }}
         >
           {/* Logo */}
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }} onClick={() => navigate("/")}>
-            <img
-              src="https://upload.wikimedia.org/wikipedia/commons/6/69/Airbnb_Logo_B%C3%A9lo.svg"
-              alt="Airbnb logo"
-              style={{ height: 36, width: "auto" }}
-            />
-          </Box>
+           <Box
+          component="img"
+          src="navImage.png"
+          alt="Tripper logo with slogan"
+          sx={{
+            height: 40,
+            width: 200,
+            objectFit: "cover",
+            mb: 1,
+          }}
+        />
 
           {/* Tabs or Menu */}
           {isMobile ? (

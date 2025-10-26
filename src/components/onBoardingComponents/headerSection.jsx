@@ -12,7 +12,8 @@ export default function HeaderSection() {
                 alignItems: "center",
                 justifyContent: "space-between",
                 px: 6,
-                background: "linear-gradient(90deg, #fff 60%, #f8f9ff 40%)",
+                mt: 12,
+                background: "#fff",
               }}
             >
               <Box sx={{ maxWidth: "50%" }}>
@@ -28,7 +29,7 @@ export default function HeaderSection() {
                   sx={{
                     fontWeight: 700,
                     fontSize: 70,
-                    color: "#14183E",
+                    color: "#034959",
                   }}
                 >
                   Travel,enjoy and live a new and full life
@@ -52,27 +53,27 @@ export default function HeaderSection() {
                     variant="contained"
                     size="large"
                     sx={{
-                      backgroundColor: "#FF5A5F",
+                      backgroundColor: "#f27244",
                       borderRadius: "25px",
                       px: 4,
                       textTransform: "none",
                       fontWeight: 600,
-                      "&:hover": { backgroundColor: "#ff7b7f" },
+                      "&:hover": { backgroundColor: "#034959" },
                     }}
-                    onClick={() => navigate("/login")}
+                    onClick={() => navigate("/home")}
                   >
-                    Get Started
+                    Explore Now
                   </Button>
                 </Stack>
               </Box>
               <Box
                 component="img"
-                src="https://img.freepik.com/free-photo/full-length-traveling-woman-holding-passport-tickets_23-2148688704.jpg"
+                src="Traveller 1.png"
                 alt="Travel girl"
                 sx={{
+                  
                   width: "40%",
                   maxHeight: "80vh",
-                  objectFit: "contain",
                 }}
               />
               

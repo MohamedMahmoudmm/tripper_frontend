@@ -64,7 +64,7 @@ export default function TopPlacesSection() {
         variant="h4"
         sx={{
           fontWeight: 800,
-          color: "#14183E",
+          color: "#034959",
           mb: 6,
         }}
       >
@@ -92,7 +92,7 @@ export default function TopPlacesSection() {
                 sx={{ objectFit: "cover" }}
               />
               <CardContent>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: "#14183E" }}>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: "#034959" }}>
                   {place.title}
                 </Typography>
                 <Typography variant="body2" color="#5E6282">
@@ -103,11 +103,11 @@ export default function TopPlacesSection() {
                   variant="contained"
                   sx={{
                     mt: 2,
-                    backgroundColor: "#14183E",
+                    backgroundColor: "#f27244",
                     borderRadius: "12px",
                     textTransform: "none",
                     fontWeight: 600,
-                    "&:hover": { backgroundColor: "#14186E" },
+                    "&:hover": { backgroundColor: "#034959" },
                   }}
                   onClick={() => handleAddToPlan(place)}
                 >

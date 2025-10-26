@@ -28,24 +28,13 @@ export default function ServicesSection() {
           backgroundColor: "#fff",
         }}
       >
-        <Typography
-          variant="subtitle2"
-          sx={{
-            textTransform: "uppercase",
-            color: "#5E6282",
-            fontWeight: 600,
-            letterSpacing: 2,
-            mb: 1,
-          }}
-        >
-          Category
-        </Typography>
+       
 
         <Typography
           variant="h4"
           sx={{
             fontWeight: 800,
-            color: "#14183E",
+            color: "#f27244",
             mb: 2,
           }}
         >
@@ -93,7 +82,7 @@ export default function ServicesSection() {
                 sx={{
                   fontWeight: 700,
                   mb: 1,
-                  color: "#1e1e1e",
+                  color: "#034959",
                 }}
               >
                 {service.title}
