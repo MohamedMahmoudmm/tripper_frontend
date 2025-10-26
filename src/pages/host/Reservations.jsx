@@ -10,7 +10,6 @@ import {
   TableRow,
   Paper,
   Chip,
-  Box,
 } from "@mui/material";
 
 const reservations = [

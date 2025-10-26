@@ -14,21 +14,14 @@ import {
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import MenuIcon from "@mui/icons-material/Menu";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const HostNavbar = () => {
   const navigate = useNavigate();
-  const location = useLocation();
     const [lang, setLang] = useState("EN");
 
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
-
-  const navItems = [
-    { text: "Hotels", path: "/home" },
-    { text: "Experiences", path: "/experiences" },
-    { text: "Favourite", path: "/favourites" },
-  ];
 
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
   const handleMenuClose = () => setAnchorEl(null);

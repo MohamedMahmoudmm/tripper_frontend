@@ -69,17 +69,17 @@ const HostNavbar = () => {
         }}
       >
         {/* ✅ Left - Logo */}
-         <Box
-          component="img"
-          src="navImage.png"
-          alt="Tripper logo with slogan"
-          sx={{
-            height: 40,
-            width: 200,
-            objectFit: "cover",
-            mb: 1,
-          }}
-        />
+          <Box
+                   component="img"
+                   src="navImage.png"
+                   alt="Tripper logo with slogan"
+                   sx={{
+                     height: 40,
+                     width: 200,
+                     objectFit: "cover",
+                     mb: 1,
+                   }}
+                 />
 
         {/*  Center - Navigation (desktop only) */}
         <Box
