@@ -13,7 +13,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import StarIcon from "@mui/icons-material/Star";
 import { useNavigate } from "react-router-dom";
 
-const HomeCard = ({ image, title, price, rating }) => {
+const HomeCard = ({ image, title, price, rating,model, id }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const navigate = useNavigate();
 
@@ -47,7 +47,7 @@ const HomeCard = ({ image, title, price, rating }) => {
       "selectedPlace",
       JSON.stringify({ image, title, price, rating })
     );
-    navigate("/details");
+    navigate(`/${model}/details/${id}`);
   };
 
   return (

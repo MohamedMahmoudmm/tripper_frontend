@@ -135,6 +135,7 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
       <Box
         ref={scrollRef}
         sx={{
+          p:2,
           display: "flex",
           gap: 2,
           overflowX: "auto",

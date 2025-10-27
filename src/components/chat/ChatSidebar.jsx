@@ -47,7 +47,7 @@ const ChatSidebar = ({ conversations = [], onSelectConversation, activeId }) => 
               <ListItemText
                 primary={
                   <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" }}>{c.name}</Typography>
+                    <Typography variant="subtitle2" sx={{ fontWeight: "bold" , color: "#034959"}}>{c.name}</Typography>
                     <Typography variant="caption" sx={{ color: "gray" }}>{c.time}</Typography>
                   </Box>
                 }
@@ -56,7 +56,7 @@ const ChatSidebar = ({ conversations = [], onSelectConversation, activeId }) => 
                     <Typography variant="body2" noWrap sx={{ color: "gray" }}>{c.lastMessage}</Typography>
                     {c.unreadCount > 0 && (
                       <Box sx={{
-                        bgcolor: "#FF385C",
+                        bgcolor: "#f27244",
                         color: "white",
                         px: 0.8,
                         py: 0.3,

@@ -114,8 +114,17 @@ export default function LoginPage() {
         }}
       >
         <Box textAlign="center" mb={3}>
-          <LockIcon sx={{ color: "#1976d2", fontSize: 40 }} />
-          <Typography variant="h4" fontWeight={700} mb={1}>
+<Box
+          component="img"
+          src="navImage.png"
+          alt="Tripper logo with slogan"
+          sx={{
+            height: 40,
+            width: 200,
+            objectFit: "cover",
+            mb: 1,
+          }}
+        />          <Typography variant="h5" fontWeight={700} mb={1}>
             {tab === 0 ? "Welcome Back" : "Create Account"}
           </Typography>
           <Typography variant="body2" color="text.secondary">
@@ -129,14 +138,14 @@ export default function LoginPage() {
           <Button
             onClick={() => setTab(0)}
             variant={tab === 0 ? "contained" : "text"}
-            sx={{ borderRadius: 2, mx: 1, px: 4 }}
+            sx={{ borderRadius: 2, mx: 1, px: 4,bgcolor:tab===0&&"#f27244" }}
           >
             Log In
           </Button>
           <Button
             onClick={() => setTab(1)}
             variant={tab === 1 ? "contained" : "text"}
-            sx={{ borderRadius: 2, mx: 1, px: 4 }}
+            sx={{ borderRadius: 2, mx: 1, px: 4,bgcolor:tab===1&&"#f27244" }}
           >
             Sign Up
           </Button>
@@ -213,7 +222,7 @@ export default function LoginPage() {
           variant="contained"
           fullWidth
           sx={{
-            bgcolor: "#1976d2",
+            bgcolor: "#f27244",
             py: 1.2,
             borderRadius: 2,
             textTransform: "none",

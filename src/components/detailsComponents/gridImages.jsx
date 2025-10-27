@@ -1,22 +1,16 @@
 import { Box, IconButton, Typography, CardMedia } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 
-export default function GridImages({ image, title }) {
+export default function GridImages({ images, title }) {
   // الصورة الأساسية
-  const images = [
-    image,
-    "https://images.unsplash.com/photo-1519125323398-675f0ddb6308",
-    "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-    "https://images.unsplash.com/photo-1470770903676-69b98201ea1c",
-    "https://images.unsplash.com/photo-1501785888041-af3ef285b470",
-  ];
+
 
   return (
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", mb: 3 }}>
         <Typography
           variant="h4"
-          sx={{ flexGrow: 1, fontWeight: 700, color: "#1a1a3c" }}
+          sx={{ flexGrow: 1, fontWeight: 700, color: "#034959" }}
         >
           {title}
         </Typography>
@@ -28,7 +22,7 @@ export default function GridImages({ image, title }) {
             "&:hover": { backgroundColor: "#f5f5f5" },
           }}
         >
-          <FavoriteBorderIcon color="error" />
+          <FavoriteBorderIcon sx={{color:"#f27244"}}/>
         </IconButton>
       </Box>
 
@@ -52,7 +46,7 @@ export default function GridImages({ image, title }) {
         >
           <CardMedia
             component="img"
-            image={images[0]}
+            image={images?.[0]}
             alt="main"
             sx={{
               width: "100%",
@@ -70,7 +64,7 @@ export default function GridImages({ image, title }) {
             gap: "6px",
           }}
         >
-          {images.slice(1, 5).map((img, index) => (
+          {images?.slice(1, 5).map((img, index) => (
             <CardMedia
               key={index}
               component="img"

@@ -10,14 +10,14 @@ import {
 } from "@mui/material";
 import LocalOfferIcon from "@mui/icons-material/LocalOffer";
 
-export default function BookingBox() {
+export default function BookingBox({place}) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
-  const [nights, setNights] = useState(0);
-  const [totalPrice, setTotalPrice] = useState(0);
+  const [nights, setNights] = useState(1);
+  const [totalPrice, setTotalPrice] = useState(place.price);
 
-  const pricePerNight = 1000;
+  const pricePerNight = place.price;
 
   const getTodayDate = () => {
     const today = new Date();
@@ -118,11 +118,11 @@ export default function BookingBox() {
             sx={{
               py: 1.3,
               borderRadius: 3,
-              backgroundColor: "#FF385C",
+              backgroundColor: "#f27244",
               fontWeight: 600,
               textTransform: "none",
               fontSize: "1rem",
-              "&:hover": { backgroundColor: "#E21B5A" },
+              "&:hover": { backgroundColor: "#034959" },
             }}
           >
             Reserve
@@ -138,14 +138,7 @@ export default function BookingBox() {
           </Typography>
         </Box>
 
-        <Divider sx={{ my: 2 }} />
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-          <LocalOfferIcon color="primary" />
-          <Typography variant="body2" color="text.secondary">
-            Prices include all fees
-          </Typography>
-        </Box>
+        
       </Paper>
     </Box>
   );

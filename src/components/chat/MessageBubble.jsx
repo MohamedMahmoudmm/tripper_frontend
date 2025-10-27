@@ -23,7 +23,7 @@ const MessageBubble = ({ message, showAvatar = true }) => {
         sx={{
           maxWidth: "78%",
           display: "inline-block",
-          bgcolor: fromMe ? "#FF385C" : "#F1F3F5",
+          bgcolor: fromMe ? "#f27244" : "#F1F3F5",
           color: fromMe ? "white" : "black",
           px: 2,
           py: 1,

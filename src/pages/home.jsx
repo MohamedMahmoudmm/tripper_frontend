@@ -4,6 +4,7 @@ import PopularHomesCarousel from "../components/PopularHomesCarousel";
 import ExperiencePage from "./experience";
 import FavouritePage from "./favourite";
 import hotelService from "../services/hotels.service";
+import Places from "./host/Places";
 
 const HomePage = () => {
   const [tabValue, setTabValue] = useState(0);
@@ -19,6 +20,8 @@ const HomePage = () => {
           title: h.name,
           rating: h.starRating || 4.5,
           price: `${h.price} ج.م / night`,
+          id: h._id,
+          model: "hotel",
         }));
         setHomes(formatted);
       } catch (err) {
@@ -41,6 +44,8 @@ const HomePage = () => {
         return <ExperiencePage />;
       case 2:
         return <FavouritePage />;
+      case 3:
+        return <Places />;
       default:
         return null;
     }

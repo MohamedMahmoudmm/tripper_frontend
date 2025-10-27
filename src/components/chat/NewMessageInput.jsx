@@ -73,9 +73,9 @@ const NewMessageInput = ({ onSend, placeholder = "Write a message..." }) => {
         color="primary"
         onClick={handleSend}
         sx={{
-          bgcolor: "#FF385C",
+          bgcolor: "#f27244",
           color: "white",
-          "&:hover": { bgcolor: "#E31C5F" },
+          "&:hover": { bgcolor: "#034959" },
         }}
       >
         <SendIcon />

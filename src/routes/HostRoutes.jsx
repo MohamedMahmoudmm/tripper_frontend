@@ -31,7 +31,6 @@ const HostRoutes = () => {
 
         {/* reservations */}
         <Route path="/reservations" element={<Reservations />} />
-        <Route path = "/places" element={<Places />} />
       </Routes>
     </HostLayout>
   );

@@ -22,12 +22,13 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import MenuIcon from "@mui/icons-material/Menu";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { FavoriteBorder } from "@mui/icons-material";
+import { FavoriteBorder, LocationOn } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
 const Navbar = ({ tabValue, setTabValue }) => {
   const [openDrawer, setOpenDrawer] = useState(false);
   const [lang, setLang] = useState("EN");
+  const token = localStorage.getItem("token");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const navigate = useNavigate();
@@ -48,6 +49,7 @@ const Navbar = ({ tabValue, setTabValue }) => {
     { label: "Homes", icon: <HomeIcon /> },
     { label: "Experiences", icon: <EmojiEventsIcon /> },
     { label: "Favourites", icon: <FavoriteBorder /> },
+    { label: "Discover", icon: <LocationOn /> },
   ];
 
   return (
@@ -104,7 +106,7 @@ const Navbar = ({ tabValue, setTabValue }) => {
                   color: "#555",
                   "&.Mui-selected": { color: "black" },
                 },
-                "& .MuiTabs-flexContainer": { alignItems: "flex-end", gap: "20px" },
+                "& .MuiTabs-flexContainer": { alignItems: "flex-end"},
               }}
             >
               {tabs.map((tab, index) => (
@@ -116,12 +118,25 @@ const Navbar = ({ tabValue, setTabValue }) => {
           {/* Right section */}
           {!isMobile && (
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <Button
+              {token ? <Button
                 sx={{ textTransform: "none", fontSize: 14, color: "black" }}
                 onClick={handleSwitchToHost}
               >
                 Switch to Host
-              </Button>
+              </Button> : <Button
+                variant="contained"
+                size="medium"
+                sx={{
+                  backgroundColor: "#f27244",
+                  borderRadius: "15px",
+                  textTransform: "none",
+                  fontWeight: 600,
+                  "&:hover": { backgroundColor: "#034959" },
+                }}
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>}
 
               <Select
                 value={lang}
@@ -140,7 +155,7 @@ const Navbar = ({ tabValue, setTabValue }) => {
                 <MenuItem value="FR">FR</MenuItem>
               </Select>
 
-              <Box
+             { token && <Box
                 sx={{
                   display: "flex",
                   alignItems: "center",
@@ -152,9 +167,8 @@ const Navbar = ({ tabValue, setTabValue }) => {
                   "&:hover": { boxShadow: "0 0 5px rgba(0,0,0,0.1)" },
                 }}
               >
-                <MenuIcon fontSize="small" />
                 <AccountCircleIcon fontSize="medium" />
-              </Box>
+              </Box>}
             </Box>
           )}
         </Toolbar>
@@ -180,9 +194,13 @@ const Navbar = ({ tabValue, setTabValue }) => {
             </ListItemButton>
           ))}
           <Divider />
-          <ListItemButton onClick={handleSwitchToHost}>
+          {
+            token?<ListItemButton onClick={handleSwitchToHost}>
             <ListItemText primary="Switch to Host" />
+          </ListItemButton>: <ListItemButton onClick={() => navigate("/login")}>
+            <ListItemText primary="Login" />
           </ListItemButton>
+          }
         </List>
       </Drawer>
     </>

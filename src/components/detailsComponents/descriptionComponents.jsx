@@ -1,23 +1,20 @@
 import { Avatar, Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BookingBox from "./bookingBox";
+import { useState } from "react";
 
-export default function DescriptonComponent() {
+export default function DescriptonComponent({ place }) {
   const navigate = useNavigate();
+const [expanded, setExpanded] = useState(false);
 
-  const host = {
-    id: "123",
-    name: "John Doe",
-    img: "https://i.pravatar.cc/100",
-    date: "1 month ago",
-  };
+  const host = place.hostId
 
   return (
     <Box sx={{ display: "flex", gap: 4, mt: 5, alignItems: "flex-start" }}>
       <Box sx={{ flex: 1 }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Avatar
-            src={host.img}
+            src={host.image}
             alt={host.name}
             sx={{
               width: 64,
@@ -27,19 +24,17 @@ export default function DescriptonComponent() {
               transition: "transform 0.2s ease",
               "&:hover": { transform: "scale(1.05)" },
             }}
-            onClick={() => navigate(`/profile/${host.id}`)}
+            // onClick={() => navigate(`/profile/${host.id}`)}
           />
 
           <Box>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              Created by{" "}
-              <span style={{ color: "#FF385C", cursor: "pointer" }}>
+              Created by{" : "}
+              <span style={{ color: "#f27244", cursor: "pointer" }}>
                 {host.name}
               </span>
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {host.date}
-            </Typography>
+            
 
             <Button
               variant="outlined"
@@ -48,12 +43,12 @@ export default function DescriptonComponent() {
                 textTransform: "none",
                 borderRadius: 3,
                 fontWeight: 600,
-                color: "#FF385C",
-                borderColor: "#FF385C",
+                color: "#f27244",
+                borderColor: "#f27244",
                 "&:hover": {
-                  backgroundColor: "#FF385C",
+                  backgroundColor: "#034959",
                   color: "#fff",
-                  borderColor: "#FF385C",
+                  borderColor: "#034959",
                 },
               }}
               onClick={() => navigate("/chat")}
@@ -67,26 +62,31 @@ export default function DescriptonComponent() {
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
             Description
           </Typography>
-          <Typography color="text.secondary" sx={{ lineHeight: 1.6 }}>
-            Santorini is one of the most breathtaking islands in Greece, known
-            for its whitewashed houses, blue-domed churches, and stunning
-            sunsets that paint the sky over the Aegean Sea. Formed by a
-            volcanic eruption thousands of years ago, the island features
-            dramatic cliffs, black-sand beaches, and charming villages perched
-            high above the caldera. Visitors can explore the iconic towns of
-            Oia and Fira, where narrow cobblestone streets wind through
-            boutique shops, restaurants, and cozy cafes overlooking endless
-            ocean views. Santorini is also famous for its luxurious villas,
-            romantic atmosphere, and local wines produced from volcanic soil.
-            Whether you’re seeking relaxation, adventure, or a romantic escape,
-            Santorini offers a unique blend of natural beauty, history, and
-            Greek hospitality that makes it one of the world’s top travel
-            destinations.
+          <Typography color="text.secondary" sx={{
+  lineHeight: 1.6,
+  display: "-webkit-box",
+  WebkitLineClamp: expanded ? "unset" : 5,
+  WebkitBoxOrient: "vertical",
+  overflow: "hidden",
+}}>
+            {place.description}
           </Typography>
+          <Typography
+  onClick={() => setExpanded(!expanded)}
+  sx={{
+    color: "#034959",
+    fontWeight: 600,
+    cursor: "pointer",
+    mt: 1,
+    "&:hover": { textDecoration: "underline", color: "#f27244" },
+  }}
+>
+  {expanded ? "See less" : "See more"}
+</Typography>
         </Box>
       </Box>
 
-      <BookingBox />
+      <BookingBox place={place} />
     </Box>
   );
 }
