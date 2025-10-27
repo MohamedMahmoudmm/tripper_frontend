@@ -2,30 +2,28 @@ import React, { useState } from "react";
 import {
   Box,
   Button,
-  Checkbox,
-  FormControlLabel,
-  Tab,
-  Tabs,
   TextField,
   Typography,
   Divider,
   Alert,
   Container,
-  MenuItem,
 } from "@mui/material";
 import LockIcon from "@mui/icons-material/Lock";
+import authService from "../services/authservice";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState(0); // 0 => login, 1 => signup
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     password: "",
+    confirmPassword: "",
     phone: "",
-    role: "",
   });
   const [errors, setErrors] = useState({});
   const [success, setSuccess] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -33,31 +31,67 @@ export default function LoginPage() {
   };
 
   const validate = () => {
-    let newErrors = {};
+    const newErrors = {};
     if (tab === 1 && !formData.name.trim()) newErrors.name = "Name is required";
     if (!formData.email.trim()) newErrors.email = "Email is required";
     else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = "Invalid email format";
     if (!formData.password.trim())
       newErrors.password = "Password is required";
-    else if (formData.password.length < 6)
-      newErrors.password = "Password must be at least 6 characters";
+    else if (formData.password.length < 8)
+      newErrors.password = "Password must be at least 8 characters";
+    if (tab === 1 && formData.password !== formData.confirmPassword)
+      newErrors.confirmPassword = "Passwords do not match";
     if (tab === 1 && !formData.phone.trim())
       newErrors.phone = "Phone number is required";
-    if (tab === 1 && !formData.role)
-      newErrors.role = "Please select a role";
     return newErrors;
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       setErrors(validationErrors);
       setSuccess("");
       return;
     }
-    setSuccess(tab === 0 ? "Logged in successfully!" : "Account created!");
-    setFormData({ name: "", email: "", password: "", phone: "", role: "" });
+
+    try {
+      if (tab === 0) {
+        // 🔹 Login
+        const data = await authService.signin({
+          email: formData.email,
+          password: formData.password,
+        });
+
+        authService.saveAuthData(data.user, data.token);
+        setSuccess(`Welcome back, ${data.user.email}`);
+
+        if (data.user.activeRole === "host") navigate("/host");
+        else navigate("/home");
+      } else {
+        // 🔹 Signup
+        const data = await authService.signup({
+          name: formData.name,
+          email: formData.email,
+          password: formData.password,
+          phone: formData.phone,
+        });
+
+        setSuccess("Account created! Please verify your email before login.");
+      }
+
+      setFormData({
+        name: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phone: "",
+      });
+    } catch (err) {
+      const message = err.response?.data?.message || "Something went wrong";
+      setErrors({ general: message });
+      setSuccess("");
+    }
   };
 
   return (
@@ -67,7 +101,7 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "#fff",
+        background: "#f9f9f9",
       }}
     >
       <Container
@@ -91,23 +125,24 @@ export default function LoginPage() {
           </Typography>
         </Box>
 
-        <Tabs
-          value={tab}
-          onChange={(e, val) => {
-            setTab(val);
-            setErrors({});
-            setSuccess("");
-          }}
-          centered
-          sx={{
-            "& .MuiTab-root": { textTransform: "none", fontWeight: 600 },
-            mb: 3,
-          }}
-        >
-          <Tab label="Log In" />
-          <Tab label="Sign Up" />
-        </Tabs>
+        <Box display="flex" justifyContent="center" mb={3}>
+          <Button
+            onClick={() => setTab(0)}
+            variant={tab === 0 ? "contained" : "text"}
+            sx={{ borderRadius: 2, mx: 1, px: 4 }}
+          >
+            Log In
+          </Button>
+          <Button
+            onClick={() => setTab(1)}
+            variant={tab === 1 ? "contained" : "text"}
+            sx={{ borderRadius: 2, mx: 1, px: 4 }}
+          >
+            Sign Up
+          </Button>
+        </Box>
 
+        {/* 🔹 Form */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 2, mb: 3 }}>
           {tab === 1 && (
             <TextField
@@ -145,6 +180,17 @@ export default function LoginPage() {
           {tab === 1 && (
             <>
               <TextField
+                label="Confirm Password"
+                name="confirmPassword"
+                type="password"
+                value={formData.confirmPassword}
+                onChange={handleChange}
+                error={!!errors.confirmPassword}
+                helperText={errors.confirmPassword}
+                fullWidth
+              />
+
+              <TextField
                 label="Phone"
                 name="phone"
                 value={formData.phone}
@@ -153,43 +199,14 @@ export default function LoginPage() {
                 helperText={errors.phone}
                 fullWidth
               />
-
-              <TextField
-                select
-                label="Role"
-                name="role"
-                value={formData.role}
-                onChange={handleChange}
-                error={!!errors.role}
-                helperText={errors.role}
-                fullWidth
-              >
-                <MenuItem value="guest">Guest</MenuItem>
-                <MenuItem value="host">Host</MenuItem>
-              </TextField>
             </>
           )}
         </Box>
 
-        {tab === 0 && (
-          <Box
-            display="flex"
-            justifyContent="space-between"
-            alignItems="center"
-            mb={3}
-          >
-            <FormControlLabel
-              control={<Checkbox size="small" />}
-              label="Remember me"
-            />
-            <Typography
-              variant="body2"
-              color="primary"
-              sx={{ cursor: "pointer" }}
-            >
-              Forgot Password?
-            </Typography>
-          </Box>
+        {errors.general && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errors.general}
+          </Alert>
         )}
 
         <Button
@@ -216,7 +233,7 @@ export default function LoginPage() {
 
         <Divider sx={{ my: 2 }}>Or</Divider>
 
-          <Typography variant="body2" textAlign="center">
+        <Typography variant="body2" textAlign="center">
           {tab === 0 ? (
             <>
               Don't have an account?{" "}
