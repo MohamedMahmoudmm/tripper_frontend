@@ -8,21 +8,33 @@ import FooterComponent from "../components/onBoardingComponents/footer";
 import DescriptonComponent from "../components/detailsComponents/descriptionComponents";
 import DefaultNavBar from "../components/defaultNavBar";
 import { useEffect, useState } from "react";
+import Navbar from "../components/navbar";
+import axiosInstance from "../axiousInstance/axoiusInstance";
+import { useParams } from "react-router-dom";
 
 export default function PlaceDetails() {
   const [place, setPlace] = useState(null);
+  const { model, id } = useParams(); 
 
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("selectedPlace"));
-    setPlace(stored);
+    
+    
+    if (id) {
+      axiosInstance.get(`/${model}/${id}`).then((res) => {
+        console.log(res.data);
+        
+        setPlace(res.data);
+      })
+        
+    }
   }, []);
 
   if (!place) return null;
 
   return (
     <Box sx={{ p: 4, backgroundColor: "#fafafa", minHeight: "100vh" }}>
-      <DefaultNavBar />
-      <GridImages image={place.image} title={place.title} />
+      {/* <Navbar tabValue={tabValue} setTabValue={setTabValue} /> */}
+      <GridImages images={place.images} title={place.name+", "+place.address.city} />
       <DescriptonComponent place={place} />
       <PlaceOffers />
       <PlaceReviews />

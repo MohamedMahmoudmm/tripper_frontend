@@ -20,6 +20,7 @@ const HostNavbar = () => {
   const navigate = useNavigate();
     const [lang, setLang] = useState("EN");
 
+    const token = localStorage.getItem("token");
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 
@@ -82,7 +83,24 @@ const HostNavbar = () => {
       
 
         {/*  Right - Switch + Avatar + Menu Icon */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+
+        {
+          token==null?
+                  <Button
+                    variant="contained"
+                    size="medium"
+                    sx={{
+                      backgroundColor: "#f27244",
+                      borderRadius: "15px",
+                      textTransform: "none",
+                      fontWeight: 600,
+                      "&:hover": { backgroundColor: "#034959" },
+                    }}
+                    onClick={() => navigate("/login")}
+                  >
+                    Login
+                  </Button>
+                :<Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
           {/* Switch to Guest */}
           <Button
             variant="text"
@@ -165,6 +183,8 @@ const HostNavbar = () => {
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>
         </Box>
+        }
+        
       </Toolbar>
     </AppBar>
   );

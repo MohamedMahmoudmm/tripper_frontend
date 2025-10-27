@@ -43,7 +43,7 @@ const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
           </IconButton>
         )}
         <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold" }}>{conversation?.name}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#034959" }}>{conversation?.name}</Typography>
           <Typography variant="caption" color="gray">Last active: {conversation?.lastSeen || "now"}</Typography>
         </Box>
       </Box>

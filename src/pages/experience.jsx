@@ -15,6 +15,8 @@ export default function ExperiencePage() {
           title: exp.name,
           rating: exp.starRating || 4.8,
           price: exp.price ? `${exp.price} ج.م` : "Price not set",
+          id: exp._id,
+          model: "experiance",
         }));
         setExperiences(formatted);
       } catch (err) {

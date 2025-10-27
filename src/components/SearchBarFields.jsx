@@ -226,7 +226,7 @@ const SearchBarFields = () => {
         </Box>
         <Box
           sx={{
-            backgroundColor: "#FF385C",
+            backgroundColor: "#f27244",
             color: "white",
             borderRadius: "50%",
             width: 40,
@@ -234,7 +234,7 @@ const SearchBarFields = () => {
             display: "flex",
             justifyContent: "center",
             alignItems: "center",
-            "&:hover": { backgroundColor: "#E31C5F" },
+            "&:hover": { backgroundColor: "#034959" },
           }}
         >
           <SearchIcon />
@@ -267,7 +267,7 @@ const SearchBarFields = () => {
       </Box>
       <Box
         sx={{
-          backgroundColor: "#FF385C",
+          backgroundColor: "#f27244",
           color: "white",
           borderRadius: "50%",
           width: 36,
