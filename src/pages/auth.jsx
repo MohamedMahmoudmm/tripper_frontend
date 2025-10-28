@@ -8,12 +8,11 @@ import {
   Alert,
   Container,
 } from "@mui/material";
-import LockIcon from "@mui/icons-material/Lock";
 import authService from "../services/authservice";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const [tab, setTab] = useState(0); // 0 => login, 1 => signup
+  const [tab, setTab] = useState(0); 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -76,7 +75,8 @@ export default function LoginPage() {
           password: formData.password,
           phone: formData.phone,
         });
-
+        console.log(data);
+        
         setSuccess("Account created! Please verify your email before login.");
       }
 

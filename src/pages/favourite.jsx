@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Box, Typography, Grid, Button, Container } from "@mui/material";
-import HomeCard from "../components/HomeCard";
+import HomeCard from "../components/sharedComponents/HomeCard";
 import { useNavigate } from "react-router-dom";
 import FooterComponent from "../components/onBoardingComponents/footer";
 

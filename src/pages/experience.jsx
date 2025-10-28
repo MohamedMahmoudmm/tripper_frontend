@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import PopularHomesCarousel from "../components/PopularHomesCarousel";
+import PopularHomesCarousel from "../components/sharedComponents/PopularHomesCarousel";
 import experienceService from "../services/experince.service";
 
 export default function ExperiencePage() {
