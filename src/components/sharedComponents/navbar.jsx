@@ -8,17 +8,29 @@ import {
   Select,
   MenuItem,
   Menu,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  CircularProgress,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate, useLocation } from "react-router-dom";
+import authService from "../../services/authservice";
+import axiosInstance from "../../axiousInstance/axoiusInstance";
 
 const Navbar = () => {
   const [lang, setLang] = useState("EN");
   const [anchorEl, setAnchorEl] = useState(null);
-  const token = localStorage.getItem("token");
+  const [openDialog, setOpenDialog] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
 
+  const { user, token } = authService.getAuthData() || {};
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,126 +49,204 @@ const Navbar = () => {
     handleMenuClose();
   };
 
-  return (
-    <AppBar
-      position="sticky"
-      sx={{
-        background: "#fff",
-        boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
-        px: { xs: 2, md: 4 },
-      }}
-    >
-      <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
-        <Box
-          component="img"
-          src="/navImage.png"
-          alt="Tripper Logo"
-          sx={{ height: 40, cursor: "pointer" }}
-          onClick={() => navigate("/home")}
-        />
+  // 🔹 رفع البطاقة
+  const handleUpload = async () => {
+    if (!selectedFile) return setMessage("Please select your ID image first");
+    setLoading(true);
+    setMessage("");
 
-        <Box
+    const formData = new FormData();
+    formData.append("identityImageUrl", selectedFile);
+
+    try {
+      const res = await axiosInstance.patch("/user/upload-id", formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      setMessage(res.data.message);
+      setSelectedFile(null);
+      setTimeout(() => setOpenDialog(false), 2000);
+    } catch (err) {
+      setMessage(err.response?.data?.message || "Error uploading ID");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <>
+      <AppBar
+        position="sticky"
+        sx={{
+          background: "#fff",
+          boxShadow: "0 2px 10px rgba(0,0,0,0.05)",
+          px: { xs: 2, md: 4 },
+        }}
+      >
+        <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
+          <Box
+            component="img"
+            src="/navImage.png"
+            alt="Tripper Logo"
+            sx={{ height: 40, cursor: "pointer" }}
+            onClick={() => navigate("/home")}
+          />
+
+          <Box
+            sx={{
+              display: { xs: "none", md: "flex" },
+              alignItems: "center",
+              gap: 3,
+            }}
+          >
+            {navLinks.map((link) => (
+              <Button
+                key={link.label}
+                onClick={() => handleNavigate(link.path)}
+                sx={{
+                  color: location.pathname === link.path ? "#f27244" : "#333",
+                  textTransform: "none",
+                  fontWeight: location.pathname === link.path ? "bold" : "500",
+                  "&:hover": { color: "#f27244" },
+                }}
+              >
+                {link.label}
+              </Button>
+            ))}
+          </Box>
+
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+            <Select
+              value={lang}
+              onChange={(e) => setLang(e.target.value)}
+              size="small"
+              variant="outlined"
+              IconComponent={ExpandMoreIcon}
+              sx={{
+                minWidth: 70,
+                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
+              }}
+            >
+              <MenuItem value="EN">EN</MenuItem>
+              <MenuItem value="AR">AR</MenuItem>
+              <MenuItem value="FR">FR</MenuItem>
+            </Select>
+
+            {/* ✅ Switch To Host Button */}
+            {token && user?.activeRole === "guest" && (
+              <Button
+                variant="text"
+                sx={{
+                  color: "#f27244",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+                onClick={() => setOpenDialog(true)}
+              >
+                Switch to Host
+              </Button>
+            )}
+
+            {token ? (
+              <IconButton
+                color="inherit"
+                onClick={() => navigate("/host/dashboard")}
+              >
+                <AccountCircle sx={{ color: "#333" }} />
+              </IconButton>
+            ) : (
+              <Button
+                variant="contained"
+                sx={{
+                  bgcolor: "#f27244",
+                  textTransform: "none",
+                  borderRadius: "20px",
+                  px: 3,
+                  "&:hover": { bgcolor: "#034959" },
+                }}
+                onClick={() => navigate("/login")}
+              >
+                Login
+              </Button>
+            )}
+
+            <IconButton
+              sx={{ display: { xs: "flex", md: "none" } }}
+              onClick={handleMenuOpen}
+            >
+              <MenuIcon />
+            </IconButton>
+          </Box>
+        </Toolbar>
+
+        {/* 🔹 Mobile Menu */}
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={handleMenuClose}
           sx={{
-            display: { xs: "none", md: "flex" },
-            alignItems: "center",
-            gap: 3,
+            display: { xs: "block", md: "none" },
+            "& .MuiPaper-root": { width: 200, mt: 1 },
           }}
         >
           {navLinks.map((link) => (
-            <Button
+            <MenuItem
               key={link.label}
               onClick={() => handleNavigate(link.path)}
               sx={{
                 color: location.pathname === link.path ? "#f27244" : "#333",
-                textTransform: "none",
                 fontWeight: location.pathname === link.path ? "bold" : "500",
-                "&:hover": { color: "#f27244" },
               }}
             >
               {link.label}
-            </Button>
+            </MenuItem>
           ))}
-        </Box>
+        </Menu>
+      </AppBar>
 
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Select
-            value={lang}
-            onChange={(e) => setLang(e.target.value)}
-            size="small"
-            variant="outlined"
-            IconComponent={ExpandMoreIcon}
-            sx={{
-              minWidth: 70,
-              "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-            }}
-          >
-            <MenuItem value="EN">EN</MenuItem>
-            <MenuItem value="AR">AR</MenuItem>
-            <MenuItem value="FR">FR</MenuItem>
-          </Select>
-
-          {token ? (
-            <IconButton
-              color="inherit"
-              onClick={() => navigate("/host/dashboard")}
+      {/* 🔹 Upload ID Modal */}
+      <Dialog open={openDialog} onClose={() => setOpenDialog(false)}>
+        <DialogTitle fontWeight={600} textAlign="center">
+          Upload Your ID Card
+        </DialogTitle>
+        <DialogContent sx={{ textAlign: "center", p: 3 }}>
+          <Typography variant="body2" mb={2}>
+            Please upload a clear image of your national ID for verification.
+          </Typography>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setSelectedFile(e.target.files[0])}
+          />
+          {message && (
+            <Typography
+              variant="body2"
+              color={
+                message.includes("successfully") ? "success.main" : "error.main"
+              }
+              mt={2}
             >
-              <AccountCircle sx={{ color: "#333" }} />
-            </IconButton>
-          ) : (
-            <Button
-              variant="contained"
-              sx={{
-                bgcolor: "#f27244",
-                textTransform: "none",
-                borderRadius: "20px",
-                px: 3,
-                "&:hover": { bgcolor: "#034959" },
-              }}
-              onClick={() => navigate("/login")}
-            >
-              Login
-            </Button>
+              {message}
+            </Typography>
           )}
-
-          <IconButton
-            sx={{ display: { xs: "flex", md: "none" } }}
-            onClick={handleMenuOpen}
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", mb: 2 }}>
+          <Button onClick={() => setOpenDialog(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleUpload}
+            disabled={loading}
+            sx={{ bgcolor: "#f27244", textTransform: "none" }}
           >
-            <MenuIcon />
-          </IconButton>
-        </Box>
-      </Toolbar>
-
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        sx={{
-          display: { xs: "block", md: "none" },
-          "& .MuiPaper-root": { width: 200, mt: 1 },
-        }}
-      >
-        {navLinks.map((link) => (
-          <MenuItem
-            key={link.label}
-            onClick={() => handleNavigate(link.path)}
-            sx={{
-              color: location.pathname === link.path ? "#f27244" : "#333",
-              fontWeight: location.pathname === link.path ? "bold" : "500",
-            }}
-          >
-            {link.label}
-          </MenuItem>
-        ))}
-        <MenuItem
-          onClick={() =>
-            token ? navigate("/host/dashboard") : navigate("/login")
-          }
-        >
-          {token ? "Host Dashboard" : "Login"}
-        </MenuItem>
-      </Menu>
-    </AppBar>
+            {loading ? <CircularProgress size={20} /> : "Upload"}
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
