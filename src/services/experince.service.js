@@ -6,7 +6,7 @@ const experienceService = {
   },
 
   getExperienceById: async (id) => {
-    const res = await axiosInstance.get(`/experience/${id}`);
+    const res = await axiosInstance.get(`/experiance/${id}`);
     return res.data;
   },
 
