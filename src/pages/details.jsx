@@ -7,6 +7,7 @@ import DescriptonComponent from "../components/detailsComponents/descriptionComp
 import { useEffect, useState } from "react";
 import axiosInstance from "../axiousInstance/axoiusInstance";
 import { useParams } from "react-router-dom";
+import WhatYoullDo from "../components/detailsComponents/experienceActivity";
 
 export default function PlaceDetails() {
   const [place, setPlace] = useState(null);
@@ -31,7 +32,9 @@ export default function PlaceDetails() {
         title={place.name + ", " + place.address.city}
       />
       <DescriptonComponent place={place} />
-      <PlaceOffers />
+      {
+        model === "hotel" ? <PlaceOffers amenities={place.amenities} />:<WhatYoullDo activities={place.activities} />
+      }
 
       <PlaceReviews model={formatModel(model)} itemId={id} />
 
