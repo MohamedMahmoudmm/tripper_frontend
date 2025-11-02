@@ -13,6 +13,8 @@ import PlanPage from "./pages/plan";
 import HostRoutes from "./routes/HostRoutes";
 import Places from "./pages/host/Places";
 import Navbar from "./components/sharedComponents/navbar";
+import CityHotelsPage from "./pages/cityhotelPage";
+import CityExperiencePage from "./pages/cityExperincePage";
 
 function AppContent() {
   const location = useLocation();
@@ -38,6 +40,9 @@ function AppContent() {
         <Route path="/plan" element={<PlanPage />} />
 
         <Route path="/host/*" element={<HostRoutes />} />
+        <Route path="/city/:city" element={<CityHotelsPage />} />
+        <Route path="/experience-city/:city" element={<CityExperiencePage />} />
+
       </Routes>
     </>
   );
