@@ -14,7 +14,7 @@ const HostLayout = ({ children }) => {
         component="main"
         sx={{
           flexGrow: 1,
-          mt: 6,
+          mt: 3,
           p: { xs: 2, md: 3 },
           backgroundColor: "#f5f5f5",
         }}
