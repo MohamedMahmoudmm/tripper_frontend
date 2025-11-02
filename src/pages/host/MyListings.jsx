@@ -1,40 +1,113 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
-  Grid,
-  Card,
-  CardMedia,
-  CardContent,
   Typography,
   Box,
-  IconButton,
-  Stack,
-  Chip,
   Button,
-  Divider,
+  Tabs,
+  Tab,
+  Snackbar,
+  Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Grid,
 } from "@mui/material";
-import { Edit, Delete } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
-const listings = [
-  { id: 1, title: "Modern Apartment", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", price: 120, status: "active" },
-  { id: 2, title: "Modern Apartment", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", price: 120, status: "active" },
-  { id: 3, title: "Modern Apartment", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", price: 120, status: "active" },
-  { id: 4, title: "Modern Apartment", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", price: 120, status: "active" },
-  { id: 5, title: "Modern Apartment", image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80", price: 120, status: "active" },
-
-];
+import hotelService from "../../services/hotels.service";
+import experienceService from "../../services/experince.service";
+import ListingCard from "../../components/host/ListingCard";
 
 const MyListings = () => {
   const navigate = useNavigate();
+  const [tab, setTab] = useState(0);
+  const [listings, setListings] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    id: null,
+  });
 
-  const handleEdit = (listing) =>
-    navigate(`/host/edit/${listing.id}`, { state: { listing } });
-  const handleDelete = (id) => console.log("Delete listing:", id);
+  const handleCloseSnackbar = () =>
+    setSnackbar((prev) => ({ ...prev, open: false }));
+
+  const handleTabChange = (e, newValue) => setTab(newValue);
+
+  const fetchListings = async () => {
+    try {
+      setLoading(true);
+      const data =
+        tab === 0
+          ? await hotelService.getHostHotels()
+          : await experienceService.getHostExperiences();
+      setListings(data);
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: "Error fetching listings",
+        severity: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchListings();
+  }, [tab]);
+
+const handleEdit = (listing) => {
+  if (tab === 0) {
+    navigate(`/host/hotels/edit/${listing._id}`);
+  } else {
+    navigate(`/host/experiences/update/${listing._id}`);
+  }
+};
+
+
+  const handleAddListing = () => {
+  if (tab === 0) navigate("/host/add-hotel");
+  else navigate("/host/experiences/add");
+};
+
+  const handleOpenDialog = (id) => setDeleteDialog({ open: true, id });
+  const handleCloseDialog = () => setDeleteDialog({ open: false, id: null });
+
+  const confirmDelete = async () => {
+    try {
+      if (tab === 0) await hotelService.deleteHotel(deleteDialog.id);
+      else await experienceService.deleteExperience(deleteDialog.id);
+      setListings((prev) =>
+        prev.filter((item) => item._id !== deleteDialog.id)
+      );
+      setSnackbar({
+        open: true,
+        message: "Listing deleted successfully!",
+        severity: "success",
+      });
+    } catch (err) {
+      console.error(err);
+      setSnackbar({
+        open: true,
+        message: "Failed to delete listing",
+        severity: "error",
+      });
+    } finally {
+      handleCloseDialog();
+    }
+  };
 
   return (
-    <Container maxWidth="lg" sx={{ py: 6 }}>
-      {/* Header */}
+    <Container maxWidth="lg" sx={{ py: 8 }}>
       <Box
         sx={{
           display: "flex",
@@ -48,7 +121,7 @@ const MyListings = () => {
         </Typography>
         <Button
           variant="contained"
-          onClick={() => navigate("/host/add")}
+          onClick={handleAddListing}
           sx={{
             bgcolor: "#FF385C",
             borderRadius: 3,
@@ -63,114 +136,72 @@ const MyListings = () => {
         </Button>
       </Box>
 
-      <Grid container spacing={3}>
-        {listings.map((listing) => (
-          <Grid item xs={12} sm={6} md={4} key={listing.id}>
-            <Card
-              sx={{
-                borderRadius: 4,
-                overflow: "hidden",
-                boxShadow: "0px 2px 10px rgba(0,0,0,0.1)",
-                transition: "0.3s ease",
-                backgroundColor: "#fff",
-                "&:hover": {
-                  boxShadow: "0px 6px 20px rgba(0,0,0,0.15)",
-                  transform: "translateY(-5px)",
-                },
-              }}
-            >
-              {/* Image */}
-              <Box sx={{ position: "relative" }}>
-                <CardMedia
-                  component="img"
-                  image={listing.image}
-                  alt={listing.title}
-                  sx={{ height: 220, objectFit: "cover" }}
-                />
-                <Chip
-                  label={
-                    listing.status === "active" ? "Active" : "Inactive"
-                  }
-                  color={listing.status === "active" ? "success" : "default"}
-                  size="small"
-                  sx={{
-                    position: "absolute",
-                    top: 10,
-                    left: 10,
-                    fontWeight: "bold",
-                    backgroundColor:
-                      listing.status === "active" ? "#4CAF50" : "#9e9e9e",
-                    color: "#fff",
-                  }}
-                />
-                <Box
-                  sx={{
-                    position: "absolute",
-                    bottom: 10,
-                    left: 10,
-                    backgroundColor: "rgba(0,0,0,0.6)",
-                    color: "#fff",
-                    borderRadius: 2,
-                    px: 1.2,
-                    py: 0.3,
-                    fontSize: "0.9rem",
-                    fontWeight: 500,
-                  }}
-                >
-                  ${listing.price} / night
-                </Box>
-              </Box>
+      <Tabs
+        value={tab}
+        onChange={handleTabChange}
+        sx={{
+          borderBottom: "1px solid #eee",
+          mb: 4,
+          "& .MuiTab-root": { textTransform: "none", fontWeight: 600 },
+          "& .Mui-selected": { color: "#FF385C !important" },
+          "& .MuiTabs-indicator": { backgroundColor: "#FF385C" },
+        }}
+      >
+        <Tab label="Hotels" />
+        <Tab label="Experiences" />
+      </Tabs>
 
-              {/* Card Content */}
-              <CardContent
-                sx={{
-                  px: 2.5,
-                  py: 2,
-                  display: "flex",
-                  flexDirection: "column",
-                  justifyContent: "space-between",
-                  height: "100%",
-                }}
-              >
-                <Typography
-                  variant="h6"
-                  fontWeight="bold"
-                  noWrap
-                  gutterBottom
-                >
-                  {listing.title}
-                </Typography>
-                <Divider sx={{ my: 1.5 }} />
-                <Stack
-                  direction="row"
-                  justifyContent="space-between"
-                  alignItems="center"
-                >
-                  <Stack direction="row" spacing={1}>
-                    <IconButton
-                      color="primary"
-                      size="small"
-                      onClick={() => handleEdit(listing)}
-                    >
-                      <Edit />
-                    </IconButton>
-                    <IconButton
-                      color="error"
-                      size="small"
-                      onClick={() => handleDelete(listing.id)}
-                    >
-                      <Delete />
-                    </IconButton>
-                  </Stack>
-                  <Typography variant="body2" color="text.secondary">
-                    ID: {listing.id}
-                  </Typography>
-                </Stack>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+      {loading ? (
+        <Typography align="center" color="text.secondary" sx={{ mt: 6 }}>
+          Loading listings...
+        </Typography>
+      ) : listings.length === 0 ? (
+        <Typography align="center" color="text.secondary" sx={{ mt: 6 }}>
+          You have no {tab === 0 ? "hotels" : "experiences"} yet.
+        </Typography>
+      ) : (
+        <Grid container spacing={3}>
+          {listings.map((listing) => (
+            <ListingCard
+              key={listing._id}
+              listing={listing}
+              onEdit={() => handleEdit(listing)}
+              onDelete={() => handleOpenDialog(listing._id)}
+            />
+          ))}
+        </Grid>
+      )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={handleCloseSnackbar}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      <Dialog open={deleteDialog.open} onClose={handleCloseDialog}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this listing? This action cannot be
+            undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseDialog}>Cancel</Button>
+          <Button onClick={confirmDelete} variant="contained" color="error">
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };
