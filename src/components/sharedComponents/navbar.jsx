@@ -43,6 +43,26 @@ const Navbar = () => {
     { label: "Favourites", path: "/favourites" },
     { label: "Places", path: "/places" },
   ];
+const switchRole = async (role) => {
+  console.log("Selected role:", role);
+  console.log("Current user role:", user.role);
+
+  try {
+    if (role === "guest" && user.role.includes("host") ) {
+      // Switch from host → guest
+      await authService.swichRole({ newRole: "host" });
+      navigate("/host/listings");
+    } else if (role === "host" && user.role.includes("guest")) {
+      // Switch from guest → host
+      await authService.swichRole({ newRole: "guest" });
+      navigate("/home");
+    } else {
+      console.log("No role change needed.");
+    }
+  } catch (error) {
+    console.error("Error switching role:", error);
+  }
+};
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -136,7 +156,7 @@ const Navbar = () => {
             </Select>
 
             {/* ✅ Switch To Host Button */}
-            {token && user?.activeRole === "guest" && (
+            {token && user?.activeRole === "guest" && !user.role.includes("host") ? (
               <Button
                 variant="text"
                 sx={{
@@ -148,6 +168,19 @@ const Navbar = () => {
                 onClick={() => setOpenDialog(true)}
               >
                 Switch to Host
+              </Button>
+            ):(
+              <Button
+                variant="text"
+                sx={{
+                  color: "#f27244",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  "&:hover": { textDecoration: "underline" },
+                }}
+                onClick={() => switchRole(user.activeRole)}
+              >
+                 Switch to {user.activeRole === "host" ? "Guest" : "Host"}
               </Button>
             )}
 
