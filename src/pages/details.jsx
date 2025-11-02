@@ -31,7 +31,7 @@ export default function PlaceDetails() {
         images={place.images}
         title={place.name + ", " + place.address.city}
       />
-      <DescriptonComponent place={place} />
+      <DescriptonComponent place={place} model={formatModel(model)} />
       {
         model === "hotel" ? <PlaceOffers amenities={place.amenities} />:<WhatYoullDo activities={place.activities} />
       }
