@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import BookingBox from "./bookingBox";
 import { useState } from "react";
 
-export default function DescriptonComponent({ place }) {
+export default function DescriptonComponent({ place, model }) {
   const navigate = useNavigate();
 const [expanded, setExpanded] = useState(false);
 
@@ -86,7 +86,7 @@ const [expanded, setExpanded] = useState(false);
         </Box>
       </Box>
 
-      <BookingBox place={place} />
+      <BookingBox place={place} model={model} />
     </Box>
   );
 }
