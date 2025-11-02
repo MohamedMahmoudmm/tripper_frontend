@@ -97,7 +97,7 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
     "&:hover": { bgcolor: "#f27244", color: "white" },
   }}
   onClick={() => {
-    const isExperience = homes?.[0]?.model === "experience";
+    const isExperience = homes?.[0]?.model === "experiance";
     const basePath = isExperience ? "/experience-city" : "/city";
     navigate(`${basePath}/${cityName}`);
   }}
