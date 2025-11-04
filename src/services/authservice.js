@@ -10,6 +10,7 @@ const authService = {
     const res = await axiosInstance.post("/user/signin", data);
     return res.data;
   },
+
   swichRole: async (data) => {
     const res = await axiosInstance.patch("/user/switch-role", data);
     return res.data;
@@ -29,6 +30,11 @@ const authService = {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
     return { user, token };
+  },
+
+  getCurrentUser: async () => {
+    const res = await axiosInstance.get("/user/profile");
+    return res.data.user;
   },
 };
 
