@@ -7,11 +7,10 @@ import {
   Button,
   Typography,
   Grid,
-  Snackbar,
-  Alert,
 } from "@mui/material";
+import { toast } from "react-hot-toast";
 import experienceService from "../../../../../services/experince.service";
-import { basicInfoUpdateSchema } from "../../validation/experienceSchema";
+import { basicInfoUpdateSchema } from "../../../validation/experienceSchema";
 
 const BasicInfoSection = ({ experience, onUpdate }) => {
   const [form, setForm] = useState({
@@ -23,73 +22,68 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [errors, setErrors] = useState({}); 
+  const [isDirty, setIsDirty] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" }); 
+    setIsDirty(true);
   };
 
-const handleSave = async () => {
-  try {
-    
-    const basicInfoData = {
-      name: form.name,
-      description: form.description,
-      price: Number(form.price),
-      country: form.country,
-      city: form.city,
-    };
+  const handleSave = async () => {
+    try {
+      setErrors({});
+      const basicInfoData = {
+        name: form.name,
+        description: form.description,
+        price: Number(form.price),
+        country: form.country,
+        city: form.city,
+      };
 
-  
-    await basicInfoUpdateSchema.validate(basicInfoData, {
-      abortEarly: false, 
-    });
-
-    setLoading(true);
-    const updatedData = {
-      ...basicInfoData,
-      address: { country: form.country, city: form.city },
-    };
-
-    const res = await experienceService.updateExperience(
-      experience._id,
-      updatedData
-    );
-
-    onUpdate(res);
-    setSnackbar({
-      open: true,
-      message: "Basic info updated successfully!",
-      severity: "success",
-    });
-  } catch (err) {
-    if (err.name === "ValidationError") {
       
-      setSnackbar({
-        open: true,
-        message: err.errors[0],
-        severity: "warning",
+      await basicInfoUpdateSchema.validate(basicInfoData, {
+        abortEarly: false,
       });
-    } else {
-      console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to update basic info.",
-        severity: "error",
-      });
+
+      setLoading(true);
+
+      const updatedData = {
+        ...basicInfoData,
+        address: { country: form.country, city: form.city },
+      };
+
+      const res = await experienceService.updateExperience(
+        experience._id,
+        updatedData
+      );
+
+      onUpdate(res);
+      toast.success("Basic info updated successfully!");
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        
+        const fieldErrors = {};
+        err.inner.forEach((e) => {
+          fieldErrors[e.path] = e.message;
+        });
+        setErrors(fieldErrors);
+      } else {
+        console.error(err);
+        toast.error("Failed to update basic info.");
+      }
+    } finally {
+      setLoading(false);
+      setIsDirty(false);
+
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
+
   return (
     <Card elevation={3}>
       <CardContent>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
+        <Typography variant="h5" fontWeight="bold" mb={2} gutterBottom>
           Basic Information
         </Typography>
 
@@ -101,6 +95,8 @@ const handleSave = async () => {
               fullWidth
               value={form.name}
               onChange={handleChange}
+              error={!!errors.name}
+              helperText={errors.name}
             />
           </Grid>
 
@@ -113,6 +109,8 @@ const handleSave = async () => {
               value={form.price}
               onChange={handleChange}
               inputProps={{ min: 0 }}
+              error={!!errors.price}
+              helperText={errors.price}
             />
           </Grid>
 
@@ -125,6 +123,8 @@ const handleSave = async () => {
               rows={3}
               value={form.description}
               onChange={handleChange}
+              error={!!errors.description}
+              helperText={errors.description}
             />
           </Grid>
 
@@ -135,6 +135,8 @@ const handleSave = async () => {
               fullWidth
               value={form.country}
               onChange={handleChange}
+              error={!!errors.country}
+              helperText={errors.country}
             />
           </Grid>
 
@@ -145,6 +147,8 @@ const handleSave = async () => {
               fullWidth
               value={form.city}
               onChange={handleChange}
+              error={!!errors.city}
+              helperText={errors.city}
             />
           </Grid>
         </Grid>
@@ -154,26 +158,12 @@ const handleSave = async () => {
             variant="contained"
             color="primary"
             onClick={handleSave}
-            disabled={loading}
+            disabled={loading || !isDirty}
           >
             {loading ? "Saving..." : "Save Changes"}
           </Button>
         </Box>
       </CardContent>
-
-              <Snackbar
-                open={snackbar.open}
-                autoHideDuration={3000}
-                anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
-              >
-                <Alert
-                  severity={snackbar.severity}
-                  onClose={() => setSnackbar({ ...snackbar, open: false })}
-                >
-                  {snackbar.message}
-                </Alert>
-              </Snackbar>
     </Card>
   );
 };

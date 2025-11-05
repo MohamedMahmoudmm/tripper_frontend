@@ -8,8 +8,6 @@ import {
   Button,
   Grid,
   IconButton,
-  Snackbar,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -17,8 +15,9 @@ import {
   DialogActions,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { activitiesUpdateSchema } from "../../validation/experienceSchema";
-import experienceService from "../../../../../services/experince.service"; 
+import { activitiesUpdateSchema } from "../../../validation/experienceSchema";
+import experienceService from "../../../../../services/experince.service";
+import toast from "react-hot-toast";
 
 const ActivitiesSection = ({ experience, onUpdate }) => {
   const [activities, setActivities] = useState(experience.activities || []);
@@ -27,13 +26,8 @@ const ActivitiesSection = ({ experience, onUpdate }) => {
     description: "",
     image: null,
   });
+  const [errors, setErrors] = useState({}); 
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     activityId: null,
@@ -43,46 +37,38 @@ const ActivitiesSection = ({ experience, onUpdate }) => {
     setNewActivity({ ...newActivity, image: e.target.files[0] });
   };
 
-const handleAddActivity = async () => {
-  try {
-    await activitiesUpdateSchema.validate(newActivity, { abortEarly: false });
+  const handleAddActivity = async () => {
+    try {
+      setErrors({}); 
+      await activitiesUpdateSchema.validate(newActivity, { abortEarly: false });
 
-    const formData = new FormData();
-    formData.append("title", newActivity.title);
-    formData.append("description", newActivity.description);
-    formData.append("image", newActivity.image);
+      const formData = new FormData();
+      formData.append("title", newActivity.title);
+      formData.append("description", newActivity.description);
+      formData.append("image", newActivity.image);
 
-    setLoading(true);
-    const res = await experienceService.addActivity(experience._id, formData);
+      setLoading(true);
+      const res = await experienceService.addActivity(experience._id, formData);
 
-    setActivities(res.activities);
-    onUpdate(res);
-    setNewActivity({ title: "", description: "", image: null });
-    setSnackbar({
-      open: true,
-      message: "Activity added successfully!",
-      severity: "success",
-    });
-  } catch (err) {
-    if (err.name === "ValidationError") {
-      const messages = err.errors.join(", ");
-      setSnackbar({
-        open: true,
-        message: messages,
-        severity: "warning",
-      });
-    } else {
-      console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to add activity",
-        severity: "error",
-      });
+      setActivities(res.activities);
+      onUpdate(res);
+      setNewActivity({ title: "", description: "", image: null });
+      toast.success("Activity added successfully!");
+    } catch (err) {
+      if (err.name === "ValidationError") {
+        const fieldErrors = {};
+        err.inner.forEach((e) => {
+          fieldErrors[e.path] = e.message;
+        });
+        setErrors(fieldErrors);
+      } else {
+        console.error(err);
+        toast.error("Failed to add activity");
+      }
+    } finally {
+      setLoading(false);
     }
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   const confirmDeleteActivity = (activityId) => {
     setDeleteDialog({ open: true, activityId });
@@ -95,18 +81,10 @@ const handleAddActivity = async () => {
       const res = await experienceService.removeActivity(experience._id, activityId);
       setActivities(res.activities);
       onUpdate(res);
-      setSnackbar({
-        open: true,
-        message: "Activity deleted successfully!",
-        severity: "success",
-      });
+      toast.success("Activity deleted successfully!");
     } catch (err) {
       console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to delete activity",
-        severity: "error",
-      });
+      toast.error("Failed to delete activity");
     } finally {
       setLoading(false);
       setDeleteDialog({ open: false, activityId: null });
@@ -116,7 +94,7 @@ const handleAddActivity = async () => {
   return (
     <Card elevation={4} sx={{ p: 2, borderRadius: 3 }}>
       <CardContent>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
+        <Typography variant="h5" fontWeight="bold" mb={2} gutterBottom>
           Activities
         </Typography>
 
@@ -181,6 +159,7 @@ const handleAddActivity = async () => {
           )}
         </Grid>
 
+        {/*  Add New Activity */}
         <Box
           sx={{
             p: 3,
@@ -194,6 +173,7 @@ const handleAddActivity = async () => {
           </Typography>
 
           <Grid container spacing={2}>
+            {/* Title */}
             <Grid item xs={12} md={6}>
               <TextField
                 label="Title"
@@ -202,8 +182,12 @@ const handleAddActivity = async () => {
                 onChange={(e) =>
                   setNewActivity({ ...newActivity, title: e.target.value })
                 }
+                error={!!errors.title}
+                helperText={errors.title}
               />
             </Grid>
+
+            {/* Description */}
             <Grid item xs={12} md={6}>
               <TextField
                 label="Description"
@@ -215,9 +199,12 @@ const handleAddActivity = async () => {
                     description: e.target.value,
                   })
                 }
+                error={!!errors.description}
+                helperText={errors.description}
               />
             </Grid>
 
+            {/* Image Upload */}
             <Grid item xs={12} md={6}>
               <Box display="flex" alignItems="center" gap={2}>
                 <Button
@@ -249,8 +236,16 @@ const handleAddActivity = async () => {
                   </Box>
                 )}
               </Box>
+
+              {/* Error Message */}
+              {errors.image && (
+                <Typography variant="caption" color="error" sx={{ mt: 1, display: "block" }}>
+                  {errors.image}
+                </Typography>
+              )}
             </Grid>
 
+            {/* Submit */}
             <Grid item xs={12} md={6} display="flex" alignItems="center">
               <Button
                 variant="contained"
@@ -258,31 +253,16 @@ const handleAddActivity = async () => {
                 onClick={handleAddActivity}
                 disabled={loading}
                 fullWidth
-                sx={{ py: 1.3 }}
+                sx={{ py: 1.3, fontWeight: "bold", borderRadius: "10px" }}
               >
                 {loading ? "Adding..." : "Add Activity"}
               </Button>
             </Grid>
           </Grid>
         </Box>
-
-        {/* Snackbar */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          <Alert
-            severity={snackbar.severity}
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </CardContent>
 
-      {/*  Confirm Delete Dialog */}
+      {/* Confirm Delete Dialog */}
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, activityId: null })}
@@ -290,8 +270,7 @@ const handleAddActivity = async () => {
         <DialogTitle>Confirm Deletion</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this activity? This action cannot be
-            undone.
+            Are you sure you want to delete this activity? This action cannot be undone.
           </DialogContentText>
         </DialogContent>
         <DialogActions>

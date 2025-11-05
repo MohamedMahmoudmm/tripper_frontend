@@ -7,8 +7,6 @@ import {
   TextField,
   Button,
   IconButton,
-  Snackbar,
-  Alert,
   Box,
   Dialog,
   DialogTitle,
@@ -18,16 +16,12 @@ import {
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import experienceService from "../../../../../services/experince.service";
+import toast from "react-hot-toast";
 
 const DatesSection = ({ experience, onUpdate }) => {
   const [dates, setDates] = useState(experience.dates || []);
   const [newDate, setNewDate] = useState("");
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
 
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
@@ -36,18 +30,12 @@ const DatesSection = ({ experience, onUpdate }) => {
 
   const handleAddDate = async () => {
     if (!newDate) {
-      return setSnackbar({
-        open: true,
-        message: "Please select a date.",
-        severity: "warning",
-      });
+      return toast.error("Please select a date.");
     }
 
     if (dates.includes(newDate)) {
-      return setSnackbar({
-        open: true,
-        message: "This date already exists.",
-        severity: "info",
+      return toast("This date already exists.", {
+        style: { background: "#fff7e6", color: "#000" },
       });
     }
 
@@ -63,18 +51,10 @@ const DatesSection = ({ experience, onUpdate }) => {
       setNewDate("");
       onUpdate(res);
 
-      setSnackbar({
-        open: true,
-        message: "Date added successfully!",
-        severity: "success",
-      });
+      toast.success("Date added successfully!");
     } catch (err) {
       console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to add date.",
-        severity: "error",
-      });
+      toast.error("Failed to add date.");
     } finally {
       setLoading(false);
     }
@@ -97,18 +77,10 @@ const DatesSection = ({ experience, onUpdate }) => {
       setDates(res.dates);
       onUpdate(res);
 
-      setSnackbar({
-        open: true,
-        message: "Date removed successfully!",
-        severity: "success",
-      });
+      toast.success("Date removed successfully!");
     } catch (err) {
       console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to delete date.",
-        severity: "error",
-      });
+      toast.error("Failed to delete date.");
     } finally {
       setLoading(false);
       setDeleteDialog({ open: false, index: null });
@@ -118,7 +90,7 @@ const DatesSection = ({ experience, onUpdate }) => {
   return (
     <Card elevation={3}>
       <CardContent>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
+        <Typography variant="h5" fontWeight="bold" mb={2} gutterBottom>
           Experience Dates
         </Typography>
 
@@ -184,21 +156,6 @@ const DatesSection = ({ experience, onUpdate }) => {
             </Grid>
           </Grid>
         </Box>
-
-        {/* Snackbar */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          <Alert
-            severity={snackbar.severity}
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </CardContent>
 
       {/* Confirm Delete Dialog */}

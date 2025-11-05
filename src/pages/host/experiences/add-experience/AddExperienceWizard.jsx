@@ -14,8 +14,8 @@ import {
 } from "@mui/material";
 import { useForm, FormProvider } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { experienceSchema } from "../validation/experienceSchema";
-import experienceService from "../../../../services/experince.service"; 
+import { experienceSchema } from "../../validation/experienceSchema";
+import experienceService from "../../../../services/experince.service";
 
 // Steps
 import StepBasicInfo from "./steps/StepBasicInfo";
@@ -23,6 +23,8 @@ import StepPhotos from "./steps/StepPhotos";
 import StepActivities from "./steps/StepActivities";
 import StepDates from "./steps/StepDates";
 import StepReview from "./steps/StepReview";
+import { useNavigate } from "react-router-dom";
+import { ArrowBackIosNew } from "@mui/icons-material";
 
 const steps = ["Basic Info", "Photos", "Activities", "Dates", "Review"];
 
@@ -41,6 +43,7 @@ const AddExperienceWizard = () => {
     },
   });
 
+  const navigate = useNavigate();
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [experienceId, setExperienceId] = useState(null);
@@ -64,7 +67,6 @@ const AddExperienceWizard = () => {
         formData.append("description", act.description);
         formData.append("image", act.image);
 
-        
         return experienceService.addActivity(experienceId, formData);
       });
 
@@ -138,37 +140,38 @@ const AddExperienceWizard = () => {
   const handleBack = () => setActiveStep((prev) => prev - 1);
 
   const handleCreateExperience = async () => {
-  const data = getValues();
-  setLoading(true);
+    const data = getValues();
+    setLoading(true);
 
-  try {
-    const formData = new FormData();
-    formData.append("name", data.name);
-    formData.append("description", data.description);
-    formData.append("price", data.price);
-    formData.append("address[country]", data.country);
-    formData.append("address[city]", data.city);
-    data.photos.forEach((file) => formData.append("images", file));
+    try {
+      const formData = new FormData();
+      formData.append("name", data.name);
+      formData.append("description", data.description);
+      formData.append("price", data.price);
+      formData.append("address[country]", data.country);
+      formData.append("address[city]", data.city);
+      data.photos.forEach((file) => formData.append("images", file));
 
-    const newExperience = await experienceService.addExperience(formData);
-    setExperienceId(newExperience._id);
+      const newExperience = await experienceService.addExperience(formData);
+      setExperienceId(newExperience._id);
 
-    showSnackbar("Basic info & photos saved successfully!", "success");
-    setActiveStep((prev) => prev + 1);
-  } catch (err) {
-    console.error(err);
-    showSnackbar("Error creating experience. Please try again.", "error");
-  } finally {
-    setLoading(false);
-  }
-};
+      showSnackbar("Basic info & photos saved successfully!", "success");
+      setActiveStep((prev) => prev + 1);
+    } catch (err) {
+      console.error(err);
+      showSnackbar("Error creating experience. Please try again.", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <FormProvider {...methods}>
       <Fade in timeout={500}>
-        <Paper 
+        <Paper
           elevation={4}
           sx={{
+            position: "relative",
             width: "100%",
             p: 4,
             borderRadius: 4,
@@ -177,6 +180,23 @@ const AddExperienceWizard = () => {
             margin: "40px auto",
           }}
         >
+          <Button
+            startIcon={<ArrowBackIosNew />}
+            onClick={() => navigate(-1)}
+            sx={{
+              position: "absolute",
+              top: 20,
+              left: 20,
+              color: "#FF385C",
+              fontWeight: 600,
+              textTransform: "none",
+              "&:hover": {
+                bgcolor: "rgba(255,56,92,0.08)",
+              },
+            }}
+          >
+            Back
+          </Button>
           <Typography
             variant="h4"
             fontWeight="bold"
@@ -222,9 +242,11 @@ const AddExperienceWizard = () => {
             sx={{
               display: "flex",
               justifyContent:
-                activeStep === 0 
-                ? "flex-end" 
-                :activeStep === steps.length - 1 ? "center" : "space-between",
+                activeStep === 0
+                  ? "flex-end"
+                  : activeStep === steps.length - 1
+                  ? "center"
+                  : "space-between",
               mt: 5,
               pt: 3,
               borderTop: "1px solid #eee",
