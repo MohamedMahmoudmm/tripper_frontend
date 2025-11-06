@@ -11,6 +11,11 @@ const authService = {
     return res.data;
   },
 
+  swichRole: async (data) => {
+    const res = await axiosInstance.patch("/user/switch-role", data);
+    return res.data;
+  },
+
   logout: () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
@@ -25,6 +30,11 @@ const authService = {
     const token = localStorage.getItem("token");
     const user = JSON.parse(localStorage.getItem("user"));
     return { user, token };
+  },
+
+  getCurrentUser: async () => {
+    const res = await axiosInstance.get("/user/profile");
+    return res.data.user;
   },
 };
 

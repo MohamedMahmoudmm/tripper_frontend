@@ -1,10 +1,16 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Box, Typography, IconButton, useMediaQuery, Paper } from "@mui/material";
+import {
+  Box,
+  Typography,
+  IconButton,
+  useMediaQuery,
+  Button,
+} from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import HomeCard from "./HomeCard";
-import SearchBarFields from "./SearchBarFields";
+import { useNavigate } from "react-router-dom";
 
 const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) => {
   const scrollRef = useRef(null);
@@ -13,6 +19,7 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
   const isTablet = useMediaQuery(theme.breakpoints.between("sm", "md"));
   const [showLeft, setShowLeft] = useState(false);
   const [showRight, setShowRight] = useState(true);
+  const navigate = useNavigate();
 
   const handleScroll = () => {
     const { current } = scrollRef;
@@ -47,6 +54,8 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
     return () => ref && ref.removeEventListener("scroll", handleScroll);
   }, []);
 
+  const cityName = title.split("in ")[1]?.trim()?.toLowerCase() || "city";
+
   return (
     <Box
       sx={{
@@ -58,38 +67,46 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
         margin: "0 auto",
       }}
     >
-      {/* Search Bar */}
-      <Paper
-        elevation={3}
+      <Box
         sx={{
-          width: { xs: "95%", sm: "85%", md: "70%" },
-          maxWidth: "900px",
-          mx: "auto",
-          mt: { xs: 2, md: 3 },
-          mb: { xs: 2, md: 4 },
-          borderRadius: "40px",
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
-          overflow: "hidden",
-        }}
-      >
-        <SearchBarFields />
-      </Paper>
-
-      <Typography
-        variant="h6"
-        fontWeight="bold"
-        sx={{
-          mb: 2,
-          textAlign: { xs: "center", md: "left" },
           px: { xs: 1, md: 3 },
+          mb: 2,
         }}
       >
-        {title}
-      </Typography>
+        <Typography
+          variant="h6"
+          fontWeight="bold"
+          sx={{
+            textAlign: { xs: "left", md: "left" },
+          }}
+        >
+          {title}
+        </Typography>
 
-      {/* Left Arrow */}
+     <Button
+  variant="outlined"
+  size="small"
+  sx={{
+    borderColor: "#f27244",
+    color: "#f27244",
+    borderRadius: "20px",
+    textTransform: "none",
+    "&:hover": { bgcolor: "#f27244", color: "white" },
+  }}
+  onClick={() => {
+    const isExperience = homes?.[0]?.model === "experiance";
+    const basePath = isExperience ? "/experience-city" : "/city";
+    navigate(`${basePath}/${cityName}`);
+  }}
+>
+  View More
+</Button>
+
+      </Box>
+
       {showLeft && (
         <IconButton
           onClick={() => scroll("left")}
@@ -110,7 +127,6 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
         </IconButton>
       )}
 
-      {/* Right Arrow */}
       {showRight && (
         <IconButton
           onClick={() => scroll("right")}
@@ -131,11 +147,10 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
         </IconButton>
       )}
 
-      {/* Cards Container */}
       <Box
         ref={scrollRef}
         sx={{
-          p:2,
+          p: 2,
           display: "flex",
           gap: 2,
           overflowX: "auto",

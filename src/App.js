@@ -14,6 +14,9 @@ import PlanPage from "./pages/plan";
 import HostRoutes from "./routes/HostRoutes";
 import Places from "./pages/host/Places";
 import Navbar from "./components/sharedComponents/navbar";
+import CityHotelsPage from "./pages/cityhotelPage";
+import CityExperiencePage from "./pages/cityExperincePage";
+import GuestProfile from "./pages/guestProfile";
 
 function AppContent() {
   const location = useLocation();
@@ -31,6 +34,7 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/home" element={<HomePage />} />
+        <Route path="/profile" element={<GuestProfile />} />
         <Route path="/experiences" element={<ExperiencePage />} />
         <Route path="/favourites" element={<FavouritePage />} />
         <Route path="/places" element={<Places />} />
@@ -39,6 +43,9 @@ function AppContent() {
         <Route path="/plan" element={<PlanPage />} />
 
         <Route path="/host/*" element={<HostRoutes />} />
+        <Route path="/city/:city" element={<CityHotelsPage />} />
+        <Route path="/experience-city/:city" element={<CityExperiencePage />} />
+
       </Routes>
     </>
   );
