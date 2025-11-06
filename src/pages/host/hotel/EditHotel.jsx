@@ -5,25 +5,32 @@ import {
   Typography,
   Divider,
   Box,
-  Snackbar,
-  Alert,
   CircularProgress,
+  Button,
 } from "@mui/material";
+import { ArrowBackIosNew } from "@mui/icons-material";
 import { useForm, FormProvider } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
+import { yupResolver } from "@hookform/resolvers/yup";
+
+import toast from "react-hot-toast";
+import { editHotelSchema } from "../validation/hotelSchema";
 
 import ListingDetailsForm from "../../../components/host/hotel/ListingDetailsForm";
 import AmenitiesForm from "../../../components/host/hotel/AmenitiesForm";
 import PhotosUploader from "../../../components/host/hotel/PhotosUploader";
 import SubmitSection from "../../../components/host/hotel/SubmitSection";
 import HostLayout from "../../../components/host/HostLayout";
-import hotelService from "../../../services/hotels.service"; 
+import hotelService from "../../../services/hotels.service";
 
 const EditHotel = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const methods = useForm({
+    resolver: yupResolver(editHotelSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -37,14 +44,7 @@ const EditHotel = () => {
     },
   });
 
-  const [loading, setLoading] = useState(true);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
 
-  
   useEffect(() => {
     const fetchHotel = async () => {
       try {
@@ -75,13 +75,8 @@ const EditHotel = () => {
           oldPhotos: hotel.images || [],
           photos: [],
         });
-      } catch (err) {
-        console.error("Fetch hotel error:", err);
-        setSnackbar({
-          open: true,
-          message: "Failed to load hotel data",
-          severity: "error",
-        });
+      } catch {
+        toast.error("Failed to load hotel data");
       } finally {
         setLoading(false);
       }
@@ -92,6 +87,7 @@ const EditHotel = () => {
 
   const onSubmit = async (data) => {
     try {
+      setSaving(true);
       const payload = {
         name: data.title,
         description: data.description,
@@ -104,22 +100,14 @@ const EditHotel = () => {
         amenities: data.amenities,
       };
 
-      await hotelService.updateHotel(id, payload); 
+      await hotelService.updateHotel(id, payload);
 
-      setSnackbar({
-        open: true,
-        message: "Hotel updated successfully!",
-        severity: "success",
-      });
-
-      setTimeout(() => navigate("/host/listings"), 1000);
+      toast.success("Hotel updated successfully!");
+      setTimeout(() => navigate("/host/listings"), 1200);
     } catch (err) {
-      console.error("Update hotel error:", err.response?.data || err);
-      setSnackbar({
-        open: true,
-        message: err.response?.data?.message || "Failed to update hotel",
-        severity: "error",
-      });
+      toast.error(err.response?.data?.message || "Failed to update hotel");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -134,8 +122,33 @@ const EditHotel = () => {
 
   return (
     <HostLayout>
-      <Container maxWidth="md" sx={{ py: 6 }}>
-        <Paper elevation={3} sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4 }}>
+      <Container maxWidth="md" >
+        <Paper
+          elevation={3}
+          sx={{
+            p: { xs: 2, sm: 4 },
+            borderRadius: 4,
+            position: "relative",
+          }}
+        >
+          <Button
+            startIcon={<ArrowBackIosNew />}
+            onClick={() => navigate(-1)}
+            sx={{
+              position: "absolute",
+              top: 20,
+              left: 20,
+              color: "#FF385C",
+              fontWeight: 600,
+              textTransform: "none",
+              "&:hover": {
+                bgcolor: "rgba(255,56,92,0.08)",
+              },
+            }}
+          >
+            Back
+          </Button>
+
           <Typography
             variant="h4"
             fontWeight="bold"
@@ -163,22 +176,11 @@ const EditHotel = () => {
               </Paper>
 
               <Box textAlign="center">
-                <SubmitSection onSubmit={methods.handleSubmit(onSubmit)} />
+                <SubmitSection onSubmit={methods.handleSubmit(onSubmit)} loading={saving}  />
               </Box>
             </Box>
           </FormProvider>
         </Paper>
-
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
-          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-        >
-          <Alert severity={snackbar.severity} sx={{ width: "100%" }}>
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </Container>
     </HostLayout>
   );

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   Box,
   CircularProgress,
@@ -7,15 +7,18 @@ import {
   Divider,
   Paper,
   Container,
+  Button,
 } from "@mui/material";
 import experienceService from "../../../../services/experince.service";
 import BasicInfoSection from "./EditSections/BasicInfoSection";
 import ActivitiesSection from "./EditSections/ActivitiesSection";
 import PhotosSection from "./EditSections/PhotosSection";
 import DatesSection from "./EditSections/DatesSection";
+import { ArrowBackIosNew } from "@mui/icons-material";
 
 const EditExperiencePage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [experience, setExperience] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -74,10 +77,26 @@ const EditExperiencePage = () => {
             backgroundColor: "#fff",
           }}
         >
-          <Typography variant="h4" fontWeight="bold" mb={2}>
+          <Button
+            startIcon={<ArrowBackIosNew />}
+            onClick={() => navigate(-1)}
+            sx={{
+              position: "absolute",
+              top: 20,
+              left: 20,
+              color: "#FF385C",
+              fontWeight: 600,
+              textTransform: "none",
+              "&:hover": {
+                bgcolor: "rgba(255,56,92,0.08)",
+              },
+            }}
+          >
+            Back
+          </Button>
+          <Typography variant="h4" fontWeight="bold" align="center" mb={2}>
             Edit Experience
           </Typography>
-         
 
           {/* BASIC INFO SECTION */}
           <BasicInfoSection experience={experience} onUpdate={setExperience} />
@@ -91,8 +110,6 @@ const EditExperiencePage = () => {
 
           {/* ACTIVITIES SECTION */}
           <ActivitiesSection experience={experience} onUpdate={setExperience} />
-
-
 
           <Divider sx={{ my: 4 }} />
 

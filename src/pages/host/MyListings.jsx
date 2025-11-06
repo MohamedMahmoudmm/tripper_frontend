@@ -6,16 +6,16 @@ import {
   Button,
   Tabs,
   Tab,
-  Snackbar,
-  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
   DialogActions,
   Grid,
+  CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import toast from "react-hot-toast";
 
 import hotelService from "../../services/hotels.service";
 import experienceService from "../../services/experince.service";
@@ -26,18 +26,10 @@ const MyListings = () => {
   const [tab, setTab] = useState(0);
   const [listings, setListings] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     id: null,
   });
-
-  const handleCloseSnackbar = () =>
-    setSnackbar((prev) => ({ ...prev, open: false }));
 
   const handleTabChange = (e, newValue) => setTab(newValue);
 
@@ -51,11 +43,7 @@ const MyListings = () => {
       setListings(data);
     } catch (err) {
       console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Error fetching listings",
-        severity: "error",
-      });
+      toast.error("Error fetching listings");
     } finally {
       setLoading(false);
     }
@@ -65,19 +53,18 @@ const MyListings = () => {
     fetchListings();
   }, [tab]);
 
-const handleEdit = (listing) => {
-  if (tab === 0) {
-    navigate(`/host/hotels/edit/${listing._id}`);
-  } else {
-    navigate(`/host/experiences/update/${listing._id}`);
-  }
-};
-
+  const handleEdit = (listing) => {
+    if (tab === 0) {
+      navigate(`/host/hotels/edit/${listing._id}`);
+    } else {
+      navigate(`/host/experiences/update/${listing._id}`);
+    }
+  };
 
   const handleAddListing = () => {
-  if (tab === 0) navigate("/host/add-hotel");
-  else navigate("/host/experiences/add");
-};
+    if (tab === 0) navigate("/host/add-hotel");
+    else navigate("/host/experiences/add");
+  };
 
   const handleOpenDialog = (id) => setDeleteDialog({ open: true, id });
   const handleCloseDialog = () => setDeleteDialog({ open: false, id: null });
@@ -86,21 +73,14 @@ const handleEdit = (listing) => {
     try {
       if (tab === 0) await hotelService.deleteHotel(deleteDialog.id);
       else await experienceService.deleteExperience(deleteDialog.id);
+
       setListings((prev) =>
         prev.filter((item) => item._id !== deleteDialog.id)
       );
-      setSnackbar({
-        open: true,
-        message: "Listing deleted successfully!",
-        severity: "success",
-      });
+      toast.success("Listing deleted successfully!");
     } catch (err) {
       console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to delete listing",
-        severity: "error",
-      });
+      toast.error("Failed to delete listing");
     } finally {
       handleCloseDialog();
     }
@@ -108,6 +88,7 @@ const handleEdit = (listing) => {
 
   return (
     <Container maxWidth="lg" sx={{ py: 8 }}>
+      {/* Header Section */}
       <Box
         sx={{
           display: "flex",
@@ -119,6 +100,7 @@ const handleEdit = (listing) => {
         <Typography variant="h4" fontWeight="bold">
           My Listings
         </Typography>
+
         <Button
           variant="contained"
           onClick={handleAddListing}
@@ -129,13 +111,15 @@ const handleEdit = (listing) => {
             py: 1,
             textTransform: "none",
             fontWeight: "bold",
+            fontSize: "1rem",
             "&:hover": { bgcolor: "#e22d50" },
           }}
         >
-          + Add Listing
+          {tab === 0 ? "+ Add Hotel" : "+ Add Experience"}
         </Button>
       </Box>
 
+      {/* Tabs */}
       <Tabs
         value={tab}
         onChange={handleTabChange}
@@ -151,10 +135,22 @@ const handleEdit = (listing) => {
         <Tab label="Experiences" />
       </Tabs>
 
+      {/* Loading State */}
       {loading ? (
-        <Typography align="center" color="text.secondary" sx={{ mt: 6 }}>
-          Loading listings...
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "50vh",
+            flexDirection: "column",
+          }}
+        >
+          <CircularProgress sx={{ color: "#FF385C", mb: 2 }} />
+          <Typography color="text.secondary">
+            Loading your listings...
+          </Typography>
+        </Box>
       ) : listings.length === 0 ? (
         <Typography align="center" color="text.secondary" sx={{ mt: 6 }}>
           You have no {tab === 0 ? "hotels" : "experiences"} yet.
@@ -172,33 +168,24 @@ const handleEdit = (listing) => {
         </Grid>
       )}
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      >
-        <Alert
-          severity={snackbar.severity}
-          onClose={handleCloseSnackbar}
-          sx={{ width: "100%" }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-
+      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialog.open} onClose={handleCloseDialog}>
-        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogTitle>
+          {tab === 0 ? "Delete Hotel" : "Delete Experience"}
+        </DialogTitle>
+
         <DialogContent>
           <DialogContentText>
-            Are you sure you want to delete this listing? This action cannot be
-            undone.
+            {tab === 0
+              ? "Are you sure you want to delete this hotel? This action cannot be undone."
+              : "Are you sure you want to delete this experience? This action cannot be undone."}
           </DialogContentText>
         </DialogContent>
+
         <DialogActions>
           <Button onClick={handleCloseDialog}>Cancel</Button>
           <Button onClick={confirmDelete} variant="contained" color="error">
-            Delete
+            {tab === 0 ? "Delete " : "Delete "}
           </Button>
         </DialogActions>
       </Dialog>

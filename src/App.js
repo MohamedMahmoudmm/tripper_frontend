@@ -2,6 +2,7 @@ import "./App.css";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Toaster } from "react-hot-toast";
 import OnboardingPage from "./pages/onBoarding";
 import LoginPage from "./pages/auth";
 import HomePage from "./pages/home";
@@ -55,6 +56,41 @@ export default function App() {
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <BrowserRouter>
         <AppContent />
+
+        {/*  Toast  */}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            duration: 4000,
+            style: {
+              borderRadius: "12px",
+              fontWeight: 600,
+              padding: "14px 18px",
+              fontSize: "15px",
+              boxShadow: "0 4px 20px rgba(0,0,0,0.12)",
+            },
+            success: {
+              style: {
+                background: "#FF385C",
+                color: "#fff",
+              },
+              iconTheme: {
+                primary: "#fff",
+                secondary: "#FF385C",
+              },
+            },
+            error: {
+              style: {
+                background: "#222",
+                color: "#fff",
+              },
+              iconTheme: {
+                primary: "#fff",
+                secondary: "#222",
+              },
+            },
+          }}
+        />
       </BrowserRouter>
     </LocalizationProvider>
   );

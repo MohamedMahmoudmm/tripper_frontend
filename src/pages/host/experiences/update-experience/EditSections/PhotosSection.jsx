@@ -7,8 +7,6 @@ import {
   Grid,
   Button,
   IconButton,
-  Snackbar,
-  Alert,
   CircularProgress,
   Dialog,
   DialogTitle,
@@ -17,37 +15,26 @@ import {
   DialogActions,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { toast } from "react-hot-toast"; 
 import experienceService from "../../../../../services/experince.service";
 
 const PhotosSection = ({ experience, onUpdate }) => {
   const [images, setImages] = useState(experience.images || []);
   const [newImages, setNewImages] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     imageUrl: null,
   });
 
- 
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     setNewImages(files);
   };
 
-  
   const handleUpload = async () => {
     if (newImages.length === 0) {
-      return setSnackbar({
-        open: true,
-        message: "Please select images to upload.",
-        severity: "warning",
-      });
+      return toast.error("Please select images to upload.");
     }
 
     const formData = new FormData();
@@ -56,7 +43,6 @@ const PhotosSection = ({ experience, onUpdate }) => {
     try {
       setLoading(true);
 
-     
       const res = await experienceService.addExperienceImages(
         experience._id,
         formData
@@ -67,29 +53,19 @@ const PhotosSection = ({ experience, onUpdate }) => {
       onUpdate({ ...experience, images: updatedImages });
       setNewImages([]);
 
-      setSnackbar({
-        open: true,
-        message: "Images uploaded successfully!",
-        severity: "success",
-      });
+      toast.success("Images uploaded successfully!");
     } catch (err) {
       console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to upload images.",
-        severity: "error",
-      });
+      toast.error("Failed to upload images.");
     } finally {
       setLoading(false);
     }
   };
 
-  
   const confirmDeleteImage = (imageUrl) => {
     setDeleteDialog({ open: true, imageUrl });
   };
 
-   
   const handleDeleteImage = async () => {
     const imageUrl = deleteDialog.imageUrl;
     try {
@@ -97,7 +73,6 @@ const PhotosSection = ({ experience, onUpdate }) => {
 
       const updatedImages = images.filter((img) => img !== imageUrl);
 
-      
       const res = await experienceService.updateExperience(experience._id, {
         images: updatedImages,
       });
@@ -105,18 +80,10 @@ const PhotosSection = ({ experience, onUpdate }) => {
       setImages(res.images);
       onUpdate(res);
 
-      setSnackbar({
-        open: true,
-        message: "Image removed successfully!",
-        severity: "success",
-      });
+      toast.success("Image removed successfully!");
     } catch (err) {
       console.error(err);
-      setSnackbar({
-        open: true,
-        message: "Failed to delete image.",
-        severity: "error",
-      });
+      toast.error("Failed to delete image.");
     } finally {
       setLoading(false);
       setDeleteDialog({ open: false, imageUrl: null });
@@ -126,11 +93,11 @@ const PhotosSection = ({ experience, onUpdate }) => {
   return (
     <Card elevation={3} sx={{ borderRadius: 3 }}>
       <CardContent>
-        <Typography variant="h5" fontWeight="bold" gutterBottom>
+        <Typography variant="h5" fontWeight="bold" mb={2} gutterBottom>
           Experience Photos
         </Typography>
 
-        {/* existing images   */}
+        {/* existing images */}
         <Grid container spacing={2}>
           {images.length > 0 ? (
             images.map((img, index) => (
@@ -168,7 +135,7 @@ const PhotosSection = ({ experience, onUpdate }) => {
           )}
         </Grid>
 
-        {/* upload new images    */}
+        {/* upload new images */}
         <Box mt={4}>
           <Typography variant="h6" gutterBottom fontWeight="bold">
             Add New Photos
@@ -228,24 +195,9 @@ const PhotosSection = ({ experience, onUpdate }) => {
             </Grid>
           )}
         </Box>
-
-        {/*  Snackbar */}
-        <Snackbar
-          open={snackbar.open}
-          autoHideDuration={3000}
-          anchorOrigin={{ vertical: "top", horizontal: "right" }}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          <Alert
-            severity={snackbar.severity}
-            onClose={() => setSnackbar({ ...snackbar, open: false })}
-          >
-            {snackbar.message}
-          </Alert>
-        </Snackbar>
       </CardContent>
 
-      {/*  Dialog  */}
+      {/* Dialog */}
       <Dialog
         open={deleteDialog.open}
         onClose={() => setDeleteDialog({ open: false, imageUrl: null })}
