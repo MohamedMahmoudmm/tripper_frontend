@@ -74,8 +74,8 @@ const PhotosUploader = () => {
         variant="contained"
         component="label"
         sx={{
-          bgcolor: "#FF385C",
-          "&:hover": { bgcolor: "#e22d50" },
+          bgcolor: "#f27244",
+          "&:hover": { bgcolor: "#034959" },
           borderRadius: 3,
           textTransform: "none",
           fontWeight: 600,

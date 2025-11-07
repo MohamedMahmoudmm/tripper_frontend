@@ -15,7 +15,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
-
+import logo from "../../assets/navImage.png";
 const HostNavbar = () => {
   const navigate = useNavigate();
     const [lang, setLang] = useState("EN");
@@ -29,18 +29,19 @@ const HostNavbar = () => {
 
   const handleProfile = () => {
     handleMenuClose();
-    navigate("/host/profile");
+    navigate("/profile");
   };
 
   const handleLogout = () => {
     handleMenuClose();
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("plan");
+    navigate("/login");
     console.log("Logout clicked");
   };
 
-  const handleSwitch = () => {
-    handleMenuClose();
-    navigate("/home");
-  };
+  
 
   return (
     <AppBar
@@ -69,7 +70,7 @@ const HostNavbar = () => {
         {/* ✅ Left - Logo */}
         <Box
           component="img"
-          src="navImage.png"
+          src={logo}
           alt="Tripper logo with slogan"
           sx={{
             height: 40,
@@ -101,20 +102,7 @@ const HostNavbar = () => {
                     Login
                   </Button>
                 :<Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
-          {/* Switch to Guest */}
-          <Button
-            variant="text"
-            onClick={handleSwitch}
-            sx={{
-              textTransform: "none",
-              color: "black",
-              fontSize: 14,
-              fontWeight: 500,
-              "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
-            }}
-          >
-            Switch to Guest
-          </Button>
+          
 
           {/* Avatar */}
           <Avatar

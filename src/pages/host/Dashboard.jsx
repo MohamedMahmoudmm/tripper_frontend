@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Typography,
   Grid,
@@ -11,6 +11,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import hotelService from "../../services/hotels.service";
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -21,29 +22,12 @@ const Dashboard = () => {
     { label: "Total Earnings", value: "$3,450" },
   ];
 
-  const recentListings = [
-    {
-      id: 1,
-      title: "Modern Apartment",
-      price: 120,
-      image:
-        "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      id: 2,
-      title: "Luxury Villa",
-      price: 350,
-      image:
-        "https://images.unsplash.com/photo-1600585154209-3c41e5ef7d2b?auto=format&fit=crop&w=800&q=80",
-    },
-    {
-      id: 3,
-      title: "Cozy Cabin",
-      price: 150,
-      image:
-        "https://images.unsplash.com/photo-1600585154234-1e4b5d0b6b20?auto=format&fit=crop&w=800&q=80",
-    },
-  ];
+  const [recentListings, setRecentListings] = useState([]);
+  useEffect(() => {
+     hotelService.getHostHotels().then((data) => {
+       setRecentListings(data);
+     });
+  }, [])
 
   return (
     <Box
@@ -70,7 +54,7 @@ const Dashboard = () => {
         <Typography
           variant="h4"
           fontWeight="bold"
-          sx={{ mb: 3, textAlign: "center" }}
+          sx={{ mb: 3, textAlign: "center" , color: "#034959" }}
         >
           Dashboard
         </Typography>
@@ -95,7 +79,7 @@ const Dashboard = () => {
                   <Typography
                     variant="h4"
                     fontWeight="bold"
-                    color="primary.main"
+                    sx={{ mb: 1, color: "#034959" }}
                   >
                     {stat.value}
                   </Typography>
@@ -122,11 +106,11 @@ const Dashboard = () => {
               py: 1,
               fontWeight: 600,
               borderRadius: 3,
-              bgcolor: "#FF385C",
+              bgcolor: "#f27244",
               textTransform: "none",
-              "&:hover": { bgcolor: "#e22d50" },
+              "&:hover": { bgcolor: "#034959" },
             }}
-            onClick={() => navigate("/host/add")}
+            onClick={() => navigate("/host/listings")}
           >
             + Add New Listing
           </Button>
@@ -136,14 +120,14 @@ const Dashboard = () => {
         <Typography
           variant="h6"
           fontWeight="bold"
-          sx={{ mb: 2, textAlign: "left" }}
+          sx={{ mb: 2, textAlign: "left", color: "#034959" }}
         >
           Recent Listings
         </Typography>
 
         <Grid container spacing={3}>
           {recentListings.map((listing) => (
-            <Grid item xs={12} sm={6} md={4} key={listing.id}>
+            <Grid item xs={12} sm={6} md={4} key={listing._id}>
               <Card
                 sx={{
                   borderRadius: 3,
@@ -159,12 +143,12 @@ const Dashboard = () => {
                 <CardMedia
                   component="img"
                   height="180"
-                  image={listing.image}
-                  alt={listing.title}
+                  image={listing.images[0]}
+                  alt={listing.name}
                 />
                 <CardContent>
                   <Typography variant="subtitle1" fontWeight="bold">
-                    {listing.title}
+                    {listing.name}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     ${listing.price} / night

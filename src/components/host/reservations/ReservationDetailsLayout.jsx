@@ -60,9 +60,9 @@ const ReservationDetailsLayout = ({
           <Button
             onClick={() => navigate(-1)}
             sx={{
-              color: "#FF385C",
+              color: "#f27244",
               fontWeight: 600,
-              "&:hover": { bgcolor: "rgba(255,56,92,0.08)" },
+              "&:hover": { color: "#034959" },
             }}
           >
             Back
@@ -89,7 +89,7 @@ const ReservationDetailsLayout = ({
           }}
         >
           {/* Title */}
-          <Typography variant="h5" fontWeight="bold" mb={0.5}>
+          <Typography variant="h5" fontWeight="bold" mb={0.5} color="#034959">
             {title}
           </Typography>
 
@@ -126,7 +126,7 @@ const ReservationDetailsLayout = ({
             </Typography>
             <Typography
               fontWeight="bold"
-              color="#FF385C"
+              color="#034959"
               fontSize={{ xs: "1.2rem", sm: "1.4rem" }}
             >
               ${totalPrice}
@@ -140,13 +140,13 @@ const ReservationDetailsLayout = ({
               
               onClick={onViewClick}
               sx={{
-                backgroundColor: "#FF385C",
+                backgroundColor: "#f27244",
                 
                 fontWeight: "bold",
                 borderRadius: "12px",
                 px: { xs: 2, sm: 3 },
                 py: 1,
-                "&:hover": { backgroundColor: "#E31C5F" },
+                "&:hover": { backgroundColor: "#034959" },
               }}
             >
               {viewBtnLabel}

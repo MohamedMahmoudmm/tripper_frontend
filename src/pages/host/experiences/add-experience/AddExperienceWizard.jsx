@@ -187,11 +187,11 @@ const AddExperienceWizard = () => {
               position: "absolute",
               top: 20,
               left: 20,
-              color: "#FF385C",
+              color: "#f27244",
               fontWeight: 600,
               textTransform: "none",
               "&:hover": {
-                bgcolor: "rgba(255,56,92,0.08)",
+                color: "#034959",
               },
             }}
           >
@@ -202,7 +202,7 @@ const AddExperienceWizard = () => {
             fontWeight="bold"
             textAlign="center"
             mb={4}
-            color="#f27244"
+            color="#034959"
           >
             Add New Experience
           </Typography>

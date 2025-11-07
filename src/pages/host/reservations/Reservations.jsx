@@ -33,7 +33,7 @@ const Reservations = () => {
         <Typography
           variant={isMobile ? "h5" : "h4"}
           fontWeight="bold"
-          color="#FF385C"
+          color="#034959"
           textAlign="center"
           mt={2}
           mb={isMobile ? 2 : 4}
@@ -58,7 +58,7 @@ const Reservations = () => {
             scrollButtons={isMobile ? "auto" : false}
             textColor="inherit"
             TabIndicatorProps={{
-              style: { backgroundColor: "#FF385C", height: "3px" },
+              style: { backgroundColor: "#f27244", height: "3px" },
             }}
             sx={{
               backgroundColor: "#FFF8F8",
@@ -68,7 +68,7 @@ const Reservations = () => {
                 fontSize: isMobile ? "0.85rem" : "1rem",
                 minWidth: isMobile ? "auto" : 160,
               },
-              "& .Mui-selected": { color: "#FF385C" },
+              "& .Mui-selected": { color: "#f27244" },
             }}
           >
             <Tab label="🏨 Hotel Reservations" />

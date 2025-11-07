@@ -6,13 +6,13 @@ const SubmitSection = ({ onSubmit, loading }) => {
     <Button
       variant="contained"
       sx={{
-        bgcolor: "#FF385C",
+        bgcolor: "#f27244",
         borderRadius: 3,
         px: 4,
         py: 1.2,
         fontWeight: "bold",
         textTransform: "none",
-        "&:hover": { bgcolor: "#e22d50" },
+        "&:hover": { bgcolor: "#034959" },
       }}
       type="submit"
       onClick={onSubmit}

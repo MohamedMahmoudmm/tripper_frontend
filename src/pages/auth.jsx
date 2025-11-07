@@ -65,7 +65,7 @@ export default function LoginPage() {
         authService.saveAuthData(data.user, data.token);
         setSuccess(`Welcome back, ${data.user.email}`);
 
-        if (data.user.activeRole === "host") navigate("/host");
+        if (data.user.activeRole === "host") navigate("/host/dashboard");
         else navigate("/home");
       } else {
         // 🔹 Signup

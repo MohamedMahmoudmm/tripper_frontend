@@ -53,7 +53,9 @@ const AddHotel = () => {
       formData.append("address[city]", data.city || "Cairo");
       formData.append("address[street]", data.street || "Any Street");
 
-      formData.append("amenities", JSON.stringify(data.amenities || []));
+      data.amenities.forEach(item => {
+        formData.append("amenities[]", item);
+      });
       data.photos.forEach((file) => formData.append("images", file));
 
       await hotelService.addHotel(formData);
@@ -88,11 +90,11 @@ const AddHotel = () => {
               position: "absolute",
               top: 20,
               left: 20,
-              color: "#FF385C",
+              color: "#f27244",
               fontWeight: 600,
               textTransform: "none",
               "&:hover": {
-                bgcolor: "rgba(255,56,92,0.08)",
+                color: "#034959",
               },
             }}
           >
@@ -104,7 +106,7 @@ const AddHotel = () => {
             fontWeight="bold"
             gutterBottom
             textAlign="center"
-            color="primary"
+            color="#034959"
           >
             🏨 Add Hotel
           </Typography>

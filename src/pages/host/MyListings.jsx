@@ -97,7 +97,7 @@ const MyListings = () => {
           mb: 4,
         }}
       >
-        <Typography variant="h4" fontWeight="bold">
+        <Typography variant="h4" fontWeight="bold" sx={{ color: "#034959" }}>
           My Listings
         </Typography>
 
@@ -105,14 +105,14 @@ const MyListings = () => {
           variant="contained"
           onClick={handleAddListing}
           sx={{
-            bgcolor: "#FF385C",
+            bgcolor: "#f27244",
             borderRadius: 3,
             px: 3,
             py: 1,
             textTransform: "none",
             fontWeight: "bold",
             fontSize: "1rem",
-            "&:hover": { bgcolor: "#e22d50" },
+            "&:hover": { bgcolor: "#034959" },
           }}
         >
           {tab === 0 ? "+ Add Hotel" : "+ Add Experience"}
@@ -127,8 +127,8 @@ const MyListings = () => {
           borderBottom: "1px solid #eee",
           mb: 4,
           "& .MuiTab-root": { textTransform: "none", fontWeight: 600 },
-          "& .Mui-selected": { color: "#FF385C !important" },
-          "& .MuiTabs-indicator": { backgroundColor: "#FF385C" },
+          "& .Mui-selected": { color: "#f27244 !important" },
+          "& .MuiTabs-indicator": { backgroundColor: "#f27244" },
         }}
       >
         <Tab label="Hotels" />

@@ -12,7 +12,8 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate, useLocation } from "react-router-dom";
-
+import logo from "../../assets/navImage.png";
+import authService from "../../services/authservice";
 const HostNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -39,9 +40,41 @@ const HostNavbar = () => {
     console.log("Logout clicked");
   };
 
-  const handleSwitch = () => {
-    handleMenuClose();
-    navigate("/home");
+
+  const { user, token } = authService.getAuthData() || {};
+
+  const switchRole = async (role) => {
+    console.log("Selected role:", role);
+  
+    try {
+      if (role === "guest" && user.role.includes("host") ) {
+        // Switch from host → guest
+        await authService.swichRole({ newRole: "host" });
+  
+        const userString = localStorage.getItem("user");
+        if (userString) {
+          const user = JSON.parse(userString);
+          user.activeRole = "host"; 
+          localStorage.setItem("user", JSON.stringify(user));
+        }
+  
+        navigate("/host/listings");
+      } else if (role === "host" && user.role.includes("guest")) {
+        await authService.swichRole({ newRole: "guest" });
+        
+        const userString = localStorage.getItem("user");
+        if (userString) {
+          const user = JSON.parse(userString);
+          user.activeRole = "guest"; 
+          localStorage.setItem("user", JSON.stringify(user));
+        }
+        navigate("/home");
+      } else {
+        console.log("No role change needed.");
+      }
+    } catch (error) {
+      console.error("Error switching role:", error);
+    }
   };
 
   return (
@@ -71,7 +104,7 @@ const HostNavbar = () => {
         {/* ✅ Left - Logo */}
           <Box
                    component="img"
-                   src="navImage.png"
+                   src={logo}
                    alt="Tripper logo with slogan"
                    sx={{
                      height: 40,
@@ -112,7 +145,7 @@ const HostNavbar = () => {
           {/* Switch to Guest */}
           <Button
             variant="text"
-            onClick={handleSwitch}
+            onClick={() => switchRole("host")}
             sx={{
               textTransform: "none",
               color: "black",
