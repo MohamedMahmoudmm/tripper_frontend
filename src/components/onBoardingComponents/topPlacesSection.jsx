@@ -1,27 +1,35 @@
 import { Typography, Box, Grid, Card, CardMedia, CardContent, Button, Snackbar, Alert } from "@mui/material";
-import React, { useState } from "react";
+import React, { use, useEffect, useState } from "react";
+import axiosInstance from "../../axiousInstance/axoiusInstance";
 
 export default function TopPlacesSection() {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", type: "success" });
 
-  const topPlaces = [
-    {
-      img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
-      title: "Santorini, Greece",
-      location: "Greece, Europe",
-    },
-    {
-      img: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff",
-      title: "Bali, Indonesia",
-      location: "Indonesia, Asia",
-    },
-    {
-      img: "https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba",
-      title: "Swiss Alps, Switzerland",
-      location: "Switzerland, Europe",
-    },
-  ];
+   const [topPlaces, setData] =useState([]);
+  // [
+  //   {
+  //     img: "https://images.unsplash.com/photo-1506744038136-46273834b3fb",
+  //     title: "Santorini, Greece",
+  //     location: "Greece, Europe",
+  //   },
+  //   {
+  //     img: "https://images.unsplash.com/photo-1526772662000-3f88f10405ff",
+  //     title: "Bali, Indonesia",
+  //     location: "Indonesia, Asia",
+  //   },
+  //   {
+  //     img: "https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba",
+  //     title: "Swiss Alps, Switzerland",
+  //     location: "Switzerland, Europe",
+  //   },
+  // ];
 
+  useEffect(() => {
+    axiosInstance.get("/places").then((res) => {
+      console.log(res.data.data);
+      setData(res.data.data);
+    });
+  },[]);
   const handleAddToPlan = (place) => {
     const stored = JSON.parse(localStorage.getItem("plan")) || [];
     const exists = stored.some((item) => item.title === place.title);
@@ -87,16 +95,16 @@ export default function TopPlacesSection() {
               <CardMedia
                 component="img"
                 height="220"
-                image={place.img}
-                alt={place.title}
+                image={place.images[0]}
+                alt={place.name}
                 sx={{ objectFit: "cover" }}
               />
               <CardContent>
                 <Typography variant="h6" sx={{ fontWeight: 700, color: "#034959" }}>
-                  {place.title}
+                  {place.name}
                 </Typography>
                 <Typography variant="body2" color="#5E6282">
-                  {place.location}
+                  {place.address.city}, {place.address.country}
                 </Typography>
 
                 <Button

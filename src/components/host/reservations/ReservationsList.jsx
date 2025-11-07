@@ -59,7 +59,7 @@ const ReservationsList = ({
         <Typography
           variant={isSmallScreen ? "h5" : "h4"}
           fontWeight="bold"
-          color="#FF385C"
+          color="#034959"
           textAlign="center"
           mb={isSmallScreen ? 3 : 4}
         >

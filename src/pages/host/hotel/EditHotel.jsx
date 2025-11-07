@@ -138,11 +138,11 @@ const EditHotel = () => {
               position: "absolute",
               top: 20,
               left: 20,
-              color: "#FF385C",
+              color: "#f27244",
               fontWeight: 600,
               textTransform: "none",
               "&:hover": {
-                bgcolor: "rgba(255,56,92,0.08)",
+                color: "#034959",
               },
             }}
           >
@@ -154,7 +154,7 @@ const EditHotel = () => {
             fontWeight="bold"
             gutterBottom
             textAlign="center"
-            color="primary"
+            color="#034959"
           >
             ✏️ Edit Hotel
           </Typography>

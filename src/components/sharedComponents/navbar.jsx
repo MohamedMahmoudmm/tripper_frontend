@@ -21,7 +21,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate, useLocation } from "react-router-dom";
 import authService from "../../services/authservice";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
-
+import logo from "../../assets/navImage.png";
 const Navbar = () => {
   const [lang, setLang] = useState("EN");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -51,10 +51,24 @@ const switchRole = async (role) => {
     if (role === "guest" && user.role.includes("host") ) {
       // Switch from host → guest
       await authService.swichRole({ newRole: "host" });
+
+      const userString = localStorage.getItem("user");
+      if (userString) {
+        const user = JSON.parse(userString);
+        user.activeRole = "host"; 
+        localStorage.setItem("user", JSON.stringify(user));
+      }
+
       navigate("/host/listings");
     } else if (role === "host" && user.role.includes("guest")) {
-      // Switch from guest → host
       await authService.swichRole({ newRole: "guest" });
+      
+      const userString = localStorage.getItem("user");
+      if (userString) {
+        const user = JSON.parse(userString);
+        user.activeRole = "guest"; 
+        localStorage.setItem("user", JSON.stringify(user));
+      }
       navigate("/home");
     } else {
       console.log("No role change needed.");
@@ -109,7 +123,7 @@ const switchRole = async (role) => {
         <Toolbar sx={{ justifyContent: "space-between", py: 1 }}>
           <Box
             component="img"
-            src="/navImage.png"
+            src={logo}
             alt="Tripper Logo"
             sx={{ height: 40, cursor: "pointer" }}
             onClick={() => navigate("/home")}
@@ -156,7 +170,9 @@ const switchRole = async (role) => {
             </Select>
 
             {/* ✅ Switch To Host Button */}
-            {token && user?.activeRole === "guest" && !user.role.includes("host") ? (
+            { 
+            token &&
+           ( user?.activeRole === "guest" && !user.role.includes("host") ? (
               <Button
                 variant="text"
                 sx={{
@@ -178,16 +194,17 @@ const switchRole = async (role) => {
                   textTransform: "none",
                   "&:hover": { textDecoration: "underline" },
                 }}
-                onClick={() => switchRole(user.activeRole)}
+                onClick={() => switchRole(user?.activeRole)}
               >
-                 Switch to {user.activeRole === "host" ? "Guest" : "Host"}
+                 Switch to {user?.activeRole === "host" ? "Guest" : "Host"}
               </Button>
-            )}
+            ))
+            }
 
             {token ? (
               <IconButton
                 color="inherit"
-                onClick={() => navigate("/host/dashboard")}
+                onClick={() => navigate("/profile")}
               >
                 <AccountCircle sx={{ color: "#333" }} />
               </IconButton>

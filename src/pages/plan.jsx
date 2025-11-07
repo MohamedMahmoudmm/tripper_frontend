@@ -9,8 +9,8 @@ const PlanPage = () => {
     setPlans(savedPlans);
   }, []);
 
-  const handleRemove = (title) => {
-    const updated = plans.filter((p) => p.title !== title);
+  const handleRemove = (name) => {
+    const updated = plans.filter((p) => p.name !== name);
     setPlans(updated);
     localStorage.setItem("plan", JSON.stringify(updated));
   };
@@ -36,7 +36,7 @@ const PlanPage = () => {
       ) : (
         <Grid container spacing={4}>
           {plans.map((plan) => (
-            <Grid item xs={12} md={6} lg={4} key={plan.id}>
+            <Grid item xs={12} md={6} lg={4} key={plan._id}>
               <Card
                 sx={{
                   borderRadius: "16px",
@@ -46,10 +46,10 @@ const PlanPage = () => {
                   "&:hover": { transform: "translateY(-5px)" },
                 }}
               >
-                <CardMedia component="img" height="220" image={plan.img} alt={plan.title} />
+                <CardMedia component="img" height="220" image={plan.images?.[0]} alt={plan.name} />
                 <CardContent>
                   <Typography variant="h6" sx={{ fontWeight: 700, mb: 2, color: "#14183E" }}>
-                    {plan.title}
+                    {plan.name}
                   </Typography>
 
                   {plan.days.map((d, index) => (
@@ -69,7 +69,7 @@ const PlanPage = () => {
                       textTransform: "none",
                       fontWeight: 600,
                     }}
-                    onClick={() => handleRemove(plan.title)}
+                    onClick={() => handleRemove(plan.name)}
                   >
                     Remove
                   </Button>

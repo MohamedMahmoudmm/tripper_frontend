@@ -1,5 +1,5 @@
 import "./App.css";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Toaster } from "react-hot-toast";
@@ -18,10 +18,20 @@ import CityHotelsPage from "./pages/cityhotelPage";
 import CityExperiencePage from "./pages/cityExperincePage";
 import GuestProfile from "./pages/guestProfile";
 
+const ProtectedRoute = ({ children }) => {
+  const token = localStorage.getItem('token'); // or your specific token key
+  return token ? children : <Navigate to="/login" replace />;
+};
+const ProtectedHostRoute = ({ children }) => {
+  const userString = localStorage.getItem('user');
+    const user = userString ? JSON.parse(userString) : null;
+  return user.activeRole === "host" ? children : <Navigate to="/home" replace />;
+};
 function AppContent() {
   const location = useLocation();
   const hideNavbarRoutes = ["/", "/login"];
   const isHostRoute = location.pathname.startsWith("/host");
+
 
   return (
     <>
@@ -34,15 +44,15 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/home" element={<HomePage />} />
-        <Route path="/profile" element={<GuestProfile />} />
-        <Route path="/experiences" element={<ExperiencePage />} />
+        <Route path="/profile" element={<ProtectedRoute><GuestProfile /></ProtectedRoute>} />
+        <Route path="/experiences" element={<ExperiencePage /> } />
         <Route path="/favourites" element={<FavouritePage />} />
         <Route path="/places" element={<Places />} />
         <Route path="/:model/details/:id" element={<PlaceDetails />} />
-        <Route path="/chat" element={<ChatPage />} />
+        <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
         <Route path="/plan" element={<PlanPage />} />
 
-        <Route path="/host/*" element={<HostRoutes />} />
+        <Route path="/host/*" element={<ProtectedHostRoute><HostRoutes /></ProtectedHostRoute>} />
         <Route path="/city/:city" element={<CityHotelsPage />} />
         <Route path="/experience-city/:city" element={<CityExperiencePage />} />
 
