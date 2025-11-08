@@ -17,6 +17,7 @@ import Navbar from "./components/sharedComponents/navbar";
 import CityHotelsPage from "./pages/cityhotelPage";
 import CityExperiencePage from "./pages/cityExperincePage";
 import GuestProfile from "./pages/guestProfile";
+import PaymentPage from "./pages/paymentPage";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token'); // or your specific token key
@@ -55,6 +56,7 @@ function AppContent() {
         <Route path="/host/*" element={<ProtectedHostRoute><HostRoutes /></ProtectedHostRoute>} />
         <Route path="/city/:city" element={<CityHotelsPage />} />
         <Route path="/experience-city/:city" element={<CityExperiencePage />} />
+        <Route path="/payment" element={<PaymentPage />} />
 
       </Routes>
     </>
