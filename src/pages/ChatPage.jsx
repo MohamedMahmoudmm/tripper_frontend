@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Box, Drawer, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import ChatSidebar from "../components/chat/ChatSidebar";
 import ChatWindow from "../components/chat/ChatWindow";
+import axiosInstance from "../axiousInstance/axoiusInstance";
+import { useLocation } from "react-router-dom";
 
 const DUMMY = [
   {
@@ -38,13 +40,25 @@ const DUMMY = [
 ];
 
 const ChatPage = () => {
-  const [conversations] = useState(DUMMY);
-  const [activeId, setActiveId] = useState(conversations[0].id);
+  const [conversations, setContact] = useState([]);
+  const [activeId, setActiveId] = useState();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+const location = useLocation();
+const convId = location.state?.convid;
 
-  const activeConv = conversations.find((c) => c.id === activeId);
+  const user=JSON.parse(localStorage.getItem("user"));
+  const activeConv = conversations.find((c) => c._id === activeId);
+  useEffect(()=>{
+ axiosInstance.get("conversation/getConversation").then((res) => {
+      console.log(res.data);
+
+      setContact(res.data.data.conversations);
+    })
+    convId && setActiveId(convId);
+
+  },[])
 
   const handleSelect = (id) => {
     setActiveId(id);
@@ -69,10 +83,10 @@ const ChatPage = () => {
       {/* Chat window */}
       <Box sx={{ flex: 1 }}>
         <ChatWindow
-          conversation={activeConv}
+          conversation={activeId}
           onBack={isMobile ? () => setDrawerOpen(true) : undefined}
-          onSendMessage={(text, files, convId) => {
-            console.log("send", { text, files, convId });
+          onSendMessage={(text, convId) => {
+            console.log("send", { text, convId });
             // integrate with your API / websocket here
           }}
         />
