@@ -2,13 +2,30 @@ import { Avatar, Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BookingBox from "./bookingBox";
 import { useState } from "react";
+import axiosInstance from "../../axiousInstance/axoiusInstance";
 
 export default function DescriptonComponent({ place, model }) {
   const navigate = useNavigate();
 const [expanded, setExpanded] = useState(false);
+const [convid, setConvid] = useState(null);
+const myId=JSON.parse(localStorage.getItem("user"))._id
 
   const host = place.hostId
-
+function startConversation(id) {
+  axiosInstance
+    .post("conversation/startConversation", {
+      receiverid: [id],
+    })
+    .then((res) => {
+      const newConvId = res.data.data.conversation._id;
+      console.log("Conversation created:", newConvId);
+      setConvid(newConvId);
+      navigate("/chat", { state: { convid: newConvId } });
+    })
+    .catch((err) => {
+      console.error("Error starting conversation:", err);
+    });
+}
   return (
     <Box sx={{ display: "flex", gap: 4, mt: 5, alignItems: "flex-start" }}>
       <Box sx={{ flex: 1 }}>
@@ -51,7 +68,9 @@ const [expanded, setExpanded] = useState(false);
                   borderColor: "#034959",
                 },
               }}
-              onClick={() => navigate("/chat")}
+              onClick={()=>{
+                myId===host._id?navigate("/profile"):startConversation(host._id);
+              }}
             >
               Message host
             </Button>

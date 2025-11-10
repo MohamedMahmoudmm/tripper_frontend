@@ -3,15 +3,48 @@ import { Box, Typography, IconButton, Divider } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import MessageBubble from "./MessageBubble";
 import NewMessageInput from "./NewMessageInput";
+import axiosInstance from "../../axiousInstance/axoiusInstance";
+import {io} from "socket.io-client";
 
 
 const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
   const scrollRef = useRef(null);
-  const [messages, setMessages] = useState(conversation?.messages || []);
+  const [messages, setMessages] = useState([]);
+const myId = JSON.parse(localStorage.getItem("user"))._id;
+  const [reciver, setReciver] = useState({});
+  const [socket, setSocket] = useState(null);
+useEffect(() => {
+  const s = io("http://127.0.0.1:4000");
+
+  s.emit("user-online", myId);
+
+  s.on("receive-message", (message) => {
+    console.log("Received message:", message);
+    setMessages((prev) => [...prev, message]);
+  });
+
+  setSocket(s);
+
+  // cleanup when unmounting
+  return () => {
+    s.disconnect();
+  };
+}, [myId]);
 
   useEffect(() => {
-    setMessages(conversation?.messages || []);
-  }, [conversation]);
+    console.log("convers"+conversation);
+    
+ //get messages from selected conversation
+    conversation && axiosInstance.get(`message/getMessages/${conversation}`).then((res)=>{
+      console.log(res.data);
+      setMessages(res.data.data.messages);
+    })
+
+    conversation && axiosInstance.get(`conversation/getConversationById/${conversation}`).then((res)=>{
+      console.log(res.data);
+      setReciver(res.data.data.conversation.members[0]._id !== myId ? res.data.data.conversation.members[0] : res.data.data.conversation.members[1]);
+    })
+      }, [conversation]);
 
   useEffect(() => {
     // auto-scroll to bottom when messages change
@@ -21,16 +54,22 @@ const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
     }
   }, [messages, conversation]);
 
-  const handleSend = (text, files) => {
-    const newMsg = {
-      id: `tmp-${Date.now()}`,
-      text,
-      time: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-      fromMe: true,
-      status: "sent",
-    };
-    setMessages((m) => [...m, newMsg]);
-    onSendMessage && onSendMessage(text, files, conversation?.id);
+   const handleSend = (text) => {
+    if (text.trim() === "") return;
+    axiosInstance.post(`message/sendMessage`,{content:text,conversationid:conversation}).then((res)=>{
+      console.log(res.data);
+      setMessages([...messages, res.data.data.newMessage]);
+      onSendMessage && onSendMessage(text, conversation);
+    })
+    socket?.emit("send-message", { text: text, recipientId: reciver._id });
+
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      handleSend();
+    }
   };
 
   return (
@@ -43,7 +82,7 @@ const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
           </IconButton>
         )}
         <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#034959" }}>{conversation?.name}</Typography>
+          <Typography variant="subtitle1" sx={{ fontWeight: "bold", color: "#034959" }}>{reciver.name}</Typography>
           <Typography variant="caption" color="gray">Last active: {conversation?.lastSeen || "now"}</Typography>
         </Box>
       </Box>
@@ -60,7 +99,7 @@ const ChatWindow = ({ conversation, onBack, onSendMessage }) => {
         {messages.map((m, i) => {
           const prev = messages[i - 1];
           const showAvatar = !m.fromMe && (!prev || prev.fromMe);
-          return <MessageBubble key={m.id} message={m} showAvatar={showAvatar} />;
+          return <MessageBubble key={m._id?? m.tempKey} message={m} showAvatar={showAvatar} reciver={reciver} />;
         })}
 
         {/* typing indicator */}

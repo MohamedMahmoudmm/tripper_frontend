@@ -7,15 +7,13 @@ import InsertEmoticonIcon from "@mui/icons-material/InsertEmoticon";
 
 const NewMessageInput = ({ onSend, placeholder = "Write a message..." }) => {
   const [text, setText] = useState("");
-  const [files, setFiles] = useState([]);
   const inputRef = useRef(null);
 
   const handleSend = () => {
     const trimmed = text.trim();
-    if (!trimmed && files.length === 0) return;
-    onSend && onSend(trimmed, files);
+    if (!trimmed ) return;
+    onSend && onSend(trimmed);
     setText("");
-    setFiles([]);
     inputRef.current && inputRef.current.focus();
   };
 
@@ -26,11 +24,7 @@ const NewMessageInput = ({ onSend, placeholder = "Write a message..." }) => {
     }
   };
 
-  const handleFiles = (e) => {
-    const chosen = Array.from(e.target.files);
-    setFiles((prev) => [...prev, ...chosen].slice(0, 5)); // limit to 5 for UX
-    e.target.value = null;
-  };
+ 
 
   return (
     <Paper
@@ -48,10 +42,10 @@ const NewMessageInput = ({ onSend, placeholder = "Write a message..." }) => {
         borderRadius: 3,
       }}
     >
-      <IconButton component="label" size="small">
+      {/* <IconButton component="label" size="small">
         <AttachFileIcon />
         <input hidden type="file" multiple onChange={handleFiles} />
-      </IconButton>
+      </IconButton> */}
 
       <IconButton size="small" sx={{ ml: 0.5 }}>
         <InsertEmoticonIcon />
