@@ -32,10 +32,25 @@ const authService = {
     return { user, token };
   },
 
+
+  // User Profile 
   getCurrentUser: async () => {
     const res = await axiosInstance.get("/user/profile");
-    return res.data.user;
+    return res.data.data;
+  },
+
+  updateProfile: async (data) => {
+    const res = await axiosInstance.patch("/user/profile", data);
+    return res.data.data;
+  },
+
+  uploadProfileImage: async (file) => {
+    const formData = new FormData();
+    formData.append("image", file);
+    const res = await axiosInstance.patch("/user/profile/image", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data.data;
   },
 };
-
 export default authService;

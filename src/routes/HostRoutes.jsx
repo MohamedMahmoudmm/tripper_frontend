@@ -15,6 +15,7 @@ import AddExperienceWizard from "../pages/host/experiences/add-experience/AddExp
 import EditExperiencePage from "../pages/host/experiences/update-experience/EditExperiencePage";
 import HotelReservationDetails from "../pages/host/reservations/HotelReservationDetails";
 import ExperienceReservationDetails from "../pages/host/reservations/ExperienceReservationDetails";
+import ProfilePage from "../pages/ProfilePage";
 
 
 const HostRoutes = () => {
@@ -41,7 +42,11 @@ const HostRoutes = () => {
 
 
         {/*  profile */}
-        <Route path="/profile" element={<HostProfile />} />
+
+        <Route path="/profile" element={<ProfilePage />} />
+        
+        {/* <Route path="/profile" element={<HostProfile />} /> */}
+        
         <Route path="/edit-profile" element={<EditProfile />} />
 
 

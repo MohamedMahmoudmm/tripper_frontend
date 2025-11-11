@@ -24,7 +24,6 @@ const HostNavbar = () => {
     { text: "Dashboard", path: "/host/dashboard" },
     { text: "Your Listings", path: "/host/listings" },
     { text: "Bookings", path: "/host/reservations" },
-    { text: "Profile", path: "/host/profile" },
   ];
 
   const handleMenuOpen = (e) => setAnchorEl(e.currentTarget);
@@ -40,32 +39,31 @@ const HostNavbar = () => {
     console.log("Logout clicked");
   };
 
-
   const { user, token } = authService.getAuthData() || {};
 
   const switchRole = async (role) => {
     console.log("Selected role:", role);
-  
+
     try {
-      if (role === "guest" && user.role.includes("host") ) {
+      if (role === "guest" && user.role.includes("host")) {
         // Switch from host → guest
         await authService.swichRole({ newRole: "host" });
-  
+
         const userString = localStorage.getItem("user");
         if (userString) {
           const user = JSON.parse(userString);
-          user.activeRole = "host"; 
+          user.activeRole = "host";
           localStorage.setItem("user", JSON.stringify(user));
         }
-  
+
         navigate("/host/listings");
       } else if (role === "host" && user.role.includes("guest")) {
         await authService.swichRole({ newRole: "guest" });
-        
+
         const userString = localStorage.getItem("user");
         if (userString) {
           const user = JSON.parse(userString);
-          user.activeRole = "guest"; 
+          user.activeRole = "guest";
           localStorage.setItem("user", JSON.stringify(user));
         }
         navigate("/home");
@@ -101,18 +99,18 @@ const HostNavbar = () => {
           position: "relative",
         }}
       >
-        {/* ✅ Left - Logo */}
-          <Box
-                   component="img"
-                   src={logo}
-                   alt="Tripper logo with slogan"
-                   sx={{
-                     height: 40,
-                     width: 200,
-                     objectFit: "cover",
-                     mb: 1,
-                   }}
-                 />
+        {/*  Left - Logo */}
+        <Box
+          component="img"
+          src={logo}
+          alt="Tripper logo with slogan"
+          sx={{
+            height: 40,
+            width: 200,
+            objectFit: "cover",
+            mb: 1,
+          }}
+        />
 
         {/*  Center - Navigation (desktop only) */}
         <Box
@@ -128,10 +126,8 @@ const HostNavbar = () => {
               onClick={() => navigate(item.path)}
               sx={{
                 textTransform: "none",
-                fontWeight:
-                  location.pathname === item.path ? "bold" : 500,
-                color:
-                  location.pathname === item.path ? "#f27244" : "black",
+                fontWeight: location.pathname === item.path ? "bold" : 500,
+                color: location.pathname === item.path ? "#f27244" : "black",
                 "&:hover": { backgroundColor: "rgba(0,0,0,0.05)" },
               }}
             >
