@@ -16,7 +16,9 @@ import Places from "./pages/host/Places";
 import Navbar from "./components/sharedComponents/navbar";
 import CityHotelsPage from "./pages/cityhotelPage";
 import CityExperiencePage from "./pages/cityExperincePage";
-import GuestProfile from "./pages/guestProfile";
+// import GuestProfile from "./pages/guestProfile";
+
+import ProfilePage from "./pages/ProfilePage";
 import PaymentPage from "./pages/paymentPage";
 
 const ProtectedRoute = ({ children }) => {
@@ -45,7 +47,8 @@ function AppContent() {
         <Route path="/login" element={<LoginPage />} />
 
         <Route path="/home" element={<HomePage />} />
-        <Route path="/profile" element={<ProtectedRoute><GuestProfile /></ProtectedRoute>} />
+        {/* <Route path="/profile" element={<ProtectedRoute><GuestProfile /></ProtectedRoute>} /> */}
+        <Route path="/guest/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
         <Route path="/experiences" element={<ExperiencePage /> } />
         <Route path="/favourites" element={<FavouritePage />} />
         <Route path="/places" element={<Places />} />

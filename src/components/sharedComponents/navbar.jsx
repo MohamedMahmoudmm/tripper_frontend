@@ -204,7 +204,7 @@ const switchRole = async (role) => {
             {token ? (
               <IconButton
                 color="inherit"
-                onClick={() => navigate("/profile")}
+                onClick={() => navigate("/guest/profile")}
               >
                 <AccountCircle sx={{ color: "#333" }} />
               </IconButton>
