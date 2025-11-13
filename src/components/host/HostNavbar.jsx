@@ -11,6 +11,7 @@ import {
   Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
+import { Message } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/navImage.png";
 import authService from "../../services/authservice";
@@ -138,6 +139,7 @@ const HostNavbar = () => {
 
         {/*  Right - Switch + Avatar + Menu Icon */}
         <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+          <Message sx={{ color: "#f27244", fontSize: 28 }} onClick={() => navigate("/host/chat")} cursor="pointer"/>
           {/* Switch to Guest */}
           <Button
             variant="text"

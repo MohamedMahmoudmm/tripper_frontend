@@ -1,9 +1,11 @@
 import { Typography, Box, Grid, Card, CardMedia, CardContent, Button, Snackbar, Alert } from "@mui/material";
 import React, { use, useEffect, useState } from "react";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
+import { Navigate, useNavigate } from "react-router-dom";
 
 export default function TopPlacesSection() {
   const [snackbar, setSnackbar] = useState({ open: false, message: "", type: "success" });
+  const navigate = useNavigate();
 
    const [topPlaces, setData] =useState([]);
   // [
@@ -28,7 +30,7 @@ export default function TopPlacesSection() {
     axiosInstance.get("/places").then((res) => {
       console.log(res.data.data);
       setData(res.data.data);
-    });
+    }).catch((err) => console.log(err));
   },[]);
   const handleAddToPlan = (place) => {
     const stored = JSON.parse(localStorage.getItem("plan")) || [];
@@ -51,6 +53,13 @@ export default function TopPlacesSection() {
     } else {
       setSnackbar({ open: true, message: "This place is already in your plan.", type: "info" });
     }
+  };
+
+    const handleCardClick = (id) => {
+      console.log('place clicked');
+      
+ const model='places';
+    navigate(`/${model}/details/${id}`);
   };
 
   return (
@@ -83,6 +92,7 @@ export default function TopPlacesSection() {
         {topPlaces.map((place, index) => (
           <Grid item key={index} xs={12} sm={6} md={4}>
             <Card
+            onClick={() => handleCardClick(place._id)}
               sx={{
                 borderRadius: "20px",
                 boxShadow: "0 4px 15px rgba(0,0,0,0.1)",

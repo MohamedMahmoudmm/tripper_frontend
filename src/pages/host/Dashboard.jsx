@@ -25,7 +25,10 @@ const Dashboard = () => {
   const [recentListings, setRecentListings] = useState([]);
   useEffect(() => {
      hotelService.getHostHotels().then((data) => {
+       console.log(data);
        setRecentListings(data);
+     }).catch((err) => {
+       console.log(err);
      });
   }, [])
 

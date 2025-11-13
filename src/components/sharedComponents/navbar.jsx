@@ -22,6 +22,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import authService from "../../services/authservice";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 import logo from "../../assets/navImage.png";
+import { Message } from "@mui/icons-material";
 const Navbar = () => {
   const [lang, setLang] = useState("EN");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -153,6 +154,8 @@ const switchRole = async (role) => {
           </Box>
 
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                      <Message sx={{ color: "#f27244", fontSize: 27 }} onClick={() => navigate("/chat")} cursor="pointer"/>
+            
             <Select
               value={lang}
               onChange={(e) => setLang(e.target.value)}

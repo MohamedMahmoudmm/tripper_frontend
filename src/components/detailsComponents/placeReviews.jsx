@@ -13,6 +13,8 @@ import {
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 
 export default function PlaceReviews({ model, itemId }) {
+  console.log(model);
+  
   const [reviews, setReviews] = useState([]);
   const [newReview, setNewReview] = useState({
     comment: "",

@@ -16,6 +16,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/navImage.png";
+import { Message } from "@mui/icons-material";
 const HostNavbar = () => {
   const navigate = useNavigate();
     const [lang, setLang] = useState("EN");
@@ -102,6 +103,8 @@ const HostNavbar = () => {
                     Login
                   </Button>
                 :<Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+                            <Message sx={{ color: "#f27244", fontSize: 28 }} onClick={() => navigate("/chat")} cursor="pointer"/>
+                  
           
 
           {/* Avatar */}

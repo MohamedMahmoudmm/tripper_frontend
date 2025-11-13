@@ -10,8 +10,7 @@ import {
 } from "@mui/material";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 
-export default function BookingBox({ place,model }) {
-  
+export default function BookingBox({ place, model }) {
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
@@ -22,11 +21,6 @@ export default function BookingBox({ place,model }) {
 
   const pricePerNight = place.price;
 
-  console.log(model);
-  console.log(place._id);
-  
-  
-  // ✅ Get today's date in yyyy-mm-dd format
   const getTodayDate = () => {
     const today = new Date();
     const yyyy = today.getFullYear();
@@ -35,34 +29,32 @@ export default function BookingBox({ place,model }) {
     return `${yyyy}-${mm}-${dd}`;
   };
 
-  // Set default check-in to today
   useEffect(() => {
-    const today = getTodayDate();
-    setCheckIn(today);
-  }, []);
+    if (model.toLowerCase() === "hotel") {
+      setCheckIn(getTodayDate());
+    }
+  }, [model]);
 
-  // Recalculate total price whenever input changes
+  // ✅ Recalculate total price
   useEffect(() => {
-    if (checkIn && checkOut) {
+    if (checkIn && checkOut && model.toLowerCase() === "hotel") {
       const start = new Date(checkIn);
       const end = new Date(checkOut);
 
       if (end > start) {
         const diffDays = (end - start) / (1000 * 60 * 60 * 24);
         setNights(diffDays);
-        
         setTotalPrice(diffDays * guests * pricePerNight);
       } else {
         setNights(0);
         setTotalPrice(0);
       }
-    }
-    else if(model.toLowerCase()=="experiance"){
+    } else if (model.toLowerCase() === "experiance") {
       setTotalPrice(1 * guests * pricePerNight);
     }
-  }, [checkIn, checkOut, guests]);
+  }, [checkIn, checkOut, guests, model]);
 
-  // ✅ Reservation request
+  // ✅ Reserve function
   const handleReserve = async () => {
     try {
       setLoading(true);
@@ -74,24 +66,38 @@ export default function BookingBox({ place,model }) {
         guestsCount: guests,
       };
 
-      // Detect if it's a hotel or experience
-      if (model.toLowerCase() == "hotel") payload.hotelId = place._id;
-      else if (model.toLowerCase() == "experiance") payload.experienceId = place._id;
+      if (model.toLowerCase() === "hotel") payload.hotelId = place._id;
+      else if (model.toLowerCase() === "experiance") payload.experienceId = place._id;
 
       const res = await axiosInstance.post("/api/reservations", payload);
-
       setMessage("✅ Reservation successful!");
       console.log("Reservation created:", res.data);
     } catch (err) {
       console.error(err);
-      setMessage(
-        err.response?.data?.message || "❌ Failed to create reservation."
-      );
+      setMessage(err.response?.data?.message || "❌ Failed to create reservation.");
     } finally {
       setLoading(false);
     }
   };
 
+  // ✅ Format date nicely (optional)
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+    });
+  };
+// Filter upcoming dates (today or later)
+const upcomingDates = (place.dates || []).filter((d) => {
+  const date = new Date(d);
+  const today = new Date();
+  // Compare only the date part (not time)
+  date.setHours(0, 0, 0, 0);
+  today.setHours(0, 0, 0, 0);
+  return date >= today;
+});
   return (
     <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
       <Paper
@@ -105,19 +111,13 @@ export default function BookingBox({ place,model }) {
           top: 100,
         }}
       >
-        {/* Price Section */}
         <Typography variant="h6" fontWeight={700} sx={{ mb: 1, color: "#222" }}>
-          {/* ✅ Price */}
           {totalPrice.toLocaleString()} ج.م{" "}
-
-          {/* ✅ Hotel: show nights */}
           {model?.toLowerCase() === "hotel" && nights > 0 && (
             <Typography component="span" fontSize={15} color="text.secondary">
               for {nights} {nights === 1 ? "night" : "nights"}
             </Typography>
           )}
-
-          {/* ✅ Experience: show guests */}
           {model?.toLowerCase() === "experiance" && guests > 0 && (
             <Typography component="span" fontSize={15} color="text.secondary">
               for {guests} {guests === 1 ? "guest" : "guests"}
@@ -125,52 +125,77 @@ export default function BookingBox({ place,model }) {
           )}
         </Typography>
 
-        {/* Date & Guests Selection */}
         <Box sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-            <TextField
-              label={model.toLowerCase() == "hotel" ? "Check-in" : "Date"}
-              type="date"
-              value={checkIn}
-              onChange={(e) => setCheckIn(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ min: getTodayDate() }}
-              fullWidth
-            />
-            {
-              model.toLowerCase() == "hotel" && <TextField
-              label="Check-out"
-              type="date"
-              value={checkOut}
-              onChange={(e) => setCheckOut(e.target.value)}
-              InputLabelProps={{ shrink: true }}
-              inputProps={{ min: checkIn || getTodayDate() }}
-              fullWidth
-            />}
+            {/* ✅ HOTEL MODE: normal date pickers */}
+            {model.toLowerCase() === "hotel" && (
+              <>
+                <TextField
+                  label="Check-in"
+                  type="date"
+                  value={checkIn}
+                  onChange={(e) => setCheckIn(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{ min: getTodayDate() }}
+                  fullWidth
+                />
+                <TextField
+                  label="Check-out"
+                  type="date"
+                  value={checkOut}
+                  onChange={(e) => setCheckOut(e.target.value)}
+                  InputLabelProps={{ shrink: true }}
+                  inputProps={{ min: checkIn || getTodayDate() }}
+                  fullWidth
+                />
+              </>
+            )}
+
+            {/* ✅ EXPERIENCE MODE: select available dates */}
+            {model.toLowerCase() === "experiance" && (
+              <TextField
+                select
+                label="Available Dates"
+                value={checkIn}
+                onChange={(e) => setCheckIn(e.target.value)}
+                fullWidth
+              >
+                {upcomingDates.length > 0 ? (
+                  upcomingDates.map((date, idx) => (
+                    <MenuItem key={idx} value={date}>
+                      {formatDate(date)}
+                    </MenuItem>
+                  ))
+                ) : (
+                  <MenuItem disabled>No upcoming dates available</MenuItem>
+                )}
+              </TextField>
+            )}
+
           </Box>
 
-          {
-            model.toLowerCase() == "experiance" &&<TextField
-            select
-            label="Guests"
-            value={guests}
-            onChange={(e) => setGuests(Number(e.target.value))}
-            fullWidth
-            sx={{ mb: 3 }}
-          >
-            {[1, 2, 3, 4, 5].map((num) => (
-              <MenuItem key={num} value={num}>
-                {num} {num === 1 ? "guest" : "guests"}
-              </MenuItem>
-            ))}
-          </TextField>}
+          {model.toLowerCase() === "experiance" && (
+            <TextField
+              select
+              label="Guests"
+              value={guests}
+              onChange={(e) => setGuests(Number(e.target.value))}
+              fullWidth
+              sx={{ mb: 3 }}
+            >
+              {[1, 2, 3, 4, 5].map((num) => (
+                <MenuItem key={num} value={num}>
+                  {num} {num === 1 ? "guest" : "guests"}
+                </MenuItem>
+              ))}
+            </TextField>
+          )}
 
-          {/* Reserve Button */}
           <Button
             variant="contained"
             fullWidth
             onClick={handleReserve}
-            disabled={loading}
+            disabled={checkIn === ""  || loading}
             sx={{
               py: 1.3,
               borderRadius: 3,
