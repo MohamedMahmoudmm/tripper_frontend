@@ -29,7 +29,9 @@ function startConversation(id) {
   return (
     <Box sx={{ display: "flex", gap: 4, mt: 5, alignItems: "flex-start" }}>
       <Box sx={{ flex: 1 }}>
-        <Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
+        
+        {
+          model!=='Places' &&<Box sx={{ display: "flex", alignItems: "center", mb: 2 }}>
           <Avatar
             src={host.image}
             alt={host.name}
@@ -75,7 +77,7 @@ function startConversation(id) {
               Message host
             </Button>
           </Box>
-        </Box>
+        </Box>}
 
         <Box sx={{ mb: 3 }}>
           <Typography variant="h6" sx={{ fontWeight: 700, mb: 1 }}>
@@ -105,7 +107,8 @@ function startConversation(id) {
         </Box>
       </Box>
 
-      <BookingBox place={place} model={model} />
+      {
+        model!=='Places' &&<BookingBox place={place} model={model} />}
     </Box>
   );
 }

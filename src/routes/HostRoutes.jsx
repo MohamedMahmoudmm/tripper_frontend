@@ -16,6 +16,7 @@ import EditExperiencePage from "../pages/host/experiences/update-experience/Edit
 import HotelReservationDetails from "../pages/host/reservations/HotelReservationDetails";
 import ExperienceReservationDetails from "../pages/host/reservations/ExperienceReservationDetails";
 import ProfilePage from "../pages/ProfilePage";
+import ChatPage from "../pages/ChatPage";
 
 
 const HostRoutes = () => {
@@ -31,6 +32,8 @@ const HostRoutes = () => {
 
         <Route path="/add-hotel" element={<AddHotel />} />
         <Route path="/hotels/edit/:id" element={<EditHotel />} />
+          <Route path="/chat" element={<ChatPage />} />
+
 
         <Route path="/experiences/add" element={<AddExperienceWizard />} />
         <Route path="/experiences/update/:id" element={<EditExperiencePage />} />

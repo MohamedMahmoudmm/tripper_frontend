@@ -18,6 +18,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
+import { useNavigate } from "react-router-dom";
 
 const Places = () => {
   const [fav, setFav] = useState({});
@@ -28,6 +29,8 @@ const Places = () => {
   const toggleFav = (id) => setFav((p) => ({ ...p, [id]: !p[id] }));
 
   const [data, setData] = useState([]);
+    const navigate = useNavigate();
+
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -50,6 +53,10 @@ const Places = () => {
     });
   }, []);
 
+    const handleCardClick = (id) => {
+  const model = 'places';
+    navigate(`/${model}/details/${id}`);
+  };
   const handleMouseEnter = (id) => {
     if (!isMobile) {
       setHoveredCard(id);
@@ -157,6 +164,7 @@ const Places = () => {
               }}
               onMouseEnter={() => handleMouseEnter(a._id)}
               onMouseLeave={() => handleMouseLeave(a._id)}
+              onClick={() => handleCardClick(a._id)}
             >
               {/* Favorite Icon */}
               <IconButton

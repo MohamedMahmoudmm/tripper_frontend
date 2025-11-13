@@ -3,7 +3,7 @@ import axiosInstance from "../axiousInstance/axoiusInstance";
 export const hotelReservationsService = {
   //     get all hotel reservations
   getAll: async () => {
-    const res = await axiosInstance.get("/api/reservations");
+    const res = await axiosInstance.get("/api/reservations/host");
     return res.data.filter((r) => r.hotelId);
   },
 
@@ -26,7 +26,7 @@ export const hotelReservationsService = {
 export const experienceReservationsService = {
   // get all experience reservations    
   getAll: async () => {
-    const res = await axiosInstance.get("/api/reservations");
+    const res = await axiosInstance.get("/api/reservations/host");
     return res.data.filter((r) => r.experienceId);
   },
 
