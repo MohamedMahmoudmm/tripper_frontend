@@ -20,6 +20,7 @@ import SubmitSection from "../../../components/host/hotel/SubmitSection";
 import HostLayout from "../../../components/host/HostLayout";
 import hotelService from "../../../services/hotels.service";
 import { addHotelSchema } from "../validation/hotelSchema";
+import RoomsForm from "../../../components/host/hotel/RoomsForm";
 
 const AddHotel = () => {
   const methods = useForm({
@@ -34,6 +35,7 @@ const AddHotel = () => {
       amenities: [],
       starRating: 0,
       photos: [],
+      rooms: [],
     },
   });
 
@@ -57,7 +59,14 @@ const AddHotel = () => {
         formData.append("amenities[]", item);
       });
       data.photos.forEach((file) => formData.append("images", file));
-
+      if (data.rooms && data.rooms.length > 0) {
+        data.rooms.forEach((room, index) => {
+          formData.append(`rooms[${index}][name]`, room.name);
+          formData.append(`rooms[${index}][price]`, room.price);
+          formData.append(`rooms[${index}][quantity]`, room.quantity);
+          formData.append(`rooms[${index}][maxGuests]`, room.maxGuests);
+        });
+      }
       await hotelService.addHotel(formData);
 
       toast.success("Hotel added successfully! ");
@@ -121,6 +130,9 @@ const AddHotel = () => {
 
               <Paper sx={{ p: 3, mb: 3 }}>
                 <AmenitiesForm />
+              </Paper>
+              <Paper sx={{ p: 3, mb: 3 }}>
+                <RoomsForm />
               </Paper>
 
               <Paper sx={{ p: 3, mb: 3 }}>

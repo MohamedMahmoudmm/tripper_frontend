@@ -22,6 +22,7 @@ import PhotosUploader from "../../../components/host/hotel/PhotosUploader";
 import SubmitSection from "../../../components/host/hotel/SubmitSection";
 import HostLayout from "../../../components/host/HostLayout";
 import hotelService from "../../../services/hotels.service";
+import RoomsForm from "../../../components/host/hotel/RoomsForm";
 
 const EditHotel = () => {
   const { id } = useParams();
@@ -41,6 +42,7 @@ const EditHotel = () => {
       amenities: [],
       photos: [],
       oldPhotos: [],
+      rooms: [],
     },
   });
 
@@ -74,6 +76,7 @@ const EditHotel = () => {
           amenities: normalizedAmenities,
           oldPhotos: hotel.images || [],
           photos: [],
+          rooms: hotel.rooms || [], 
         });
       } catch {
         toast.error("Failed to load hotel data");
@@ -98,6 +101,7 @@ const EditHotel = () => {
           street: data.street,
         },
         amenities: data.amenities,
+        rooms: data.rooms
       };
 
       await hotelService.updateHotel(id, payload);
@@ -169,6 +173,9 @@ const EditHotel = () => {
 
               <Paper sx={{ p: 3, mb: 3 }}>
                 <AmenitiesForm />
+              </Paper>
+              <Paper sx={{ p: 3, mb: 3 }}>
+                <RoomsForm />
               </Paper>
 
               <Paper sx={{ p: 3, mb: 3 }}>
