@@ -18,8 +18,9 @@ export default function BookingBox({ place, model }) {
   const [totalPrice, setTotalPrice] = useState(place.price);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [selectedRoom, setSelectedRoom] = useState(null);
 
-  const pricePerNight = place.price;
+const pricePerNight = selectedRoom?.price || place.price;
 
   const getTodayDate = () => {
     const today = new Date();
@@ -34,6 +35,13 @@ export default function BookingBox({ place, model }) {
       setCheckIn(getTodayDate());
     }
   }, [model]);
+
+  useEffect(() => {
+  if (model.toLowerCase() === "hotel" && place.rooms?.length > 0) {
+    setSelectedRoom(place.rooms[0]); // first room
+    setTotalPrice(place.rooms[0].price);
+  }
+}, [place, model]);
 
   // ✅ Recalculate total price
   useEffect(() => {
@@ -66,7 +74,10 @@ export default function BookingBox({ place, model }) {
         guestsCount: guests,
       };
 
-      if (model.toLowerCase() === "hotel") payload.hotelId = place._id;
+      if (model.toLowerCase() === "hotel") {
+        payload.hotelId = place._id;
+        payload.roomId = selectedRoom?._id;   // ← VERY IMPORTANT
+      }
       else if (model.toLowerCase() === "experiance") payload.experienceId = place._id;
 
       const res = await axiosInstance.post("/api/reservations", payload);
@@ -124,6 +135,27 @@ const upcomingDates = (place.dates || []).filter((d) => {
             </Typography>
           )}
         </Typography>
+        {/* ROOM SELECTOR */}
+        {model.toLowerCase() === "hotel" && place.rooms?.length > 0 && (
+          <TextField
+            select
+            label="Room Type"
+            value={selectedRoom?._id || ""}
+            onChange={(e) => {
+              const room = place.rooms.find((r) => r._id === e.target.value);
+              setSelectedRoom(room);
+              setTotalPrice(nights * guests * room.price); // recalc
+            }}
+            fullWidth
+            sx={{ mb: 2 }}
+          >
+            {place.rooms.map((room) => (
+              <MenuItem key={room._id} value={room._id}>
+                {room.name} — {room.price} ج.م
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
 
         <Box sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
