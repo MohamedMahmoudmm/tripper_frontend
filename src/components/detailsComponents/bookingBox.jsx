@@ -8,9 +8,11 @@ import {
   MenuItem,
   CircularProgress,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 
 export default function BookingBox({ place, model }) {
+  const navigate = useNavigate();
   const [checkIn, setCheckIn] = useState("");
   const [checkOut, setCheckOut] = useState("");
   const [guests, setGuests] = useState(1);
@@ -20,7 +22,7 @@ export default function BookingBox({ place, model }) {
   const [message, setMessage] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
 
-const pricePerNight = selectedRoom?.price || place.price;
+  const pricePerNight = selectedRoom?.price || place.price;
 
   const getTodayDate = () => {
     const today = new Date();
@@ -37,13 +39,12 @@ const pricePerNight = selectedRoom?.price || place.price;
   }, [model]);
 
   useEffect(() => {
-  if (model.toLowerCase() === "hotel" && place.rooms?.length > 0) {
-    setSelectedRoom(place.rooms[0]); // first room
-    setTotalPrice(place.rooms[0].price);
-  }
-}, [place, model]);
+    if (model.toLowerCase() === "hotel" && place.rooms?.length > 0) {
+      setSelectedRoom(place.rooms[0]);
+      setTotalPrice(place.rooms[0].price);
+    }
+  }, [place, model]);
 
-  // ✅ Recalculate total price
   useEffect(() => {
     if (checkIn && checkOut && model.toLowerCase() === "hotel") {
       const start = new Date(checkIn);
@@ -60,9 +61,8 @@ const pricePerNight = selectedRoom?.price || place.price;
     } else if (model.toLowerCase() === "experiance") {
       setTotalPrice(1 * guests * pricePerNight);
     }
-  }, [checkIn, checkOut, guests, model]);
+  }, [checkIn, checkOut, guests, model, pricePerNight]);
 
-  // ✅ Reserve function
   const handleReserve = async () => {
     try {
       setLoading(true);
@@ -76,22 +76,30 @@ const pricePerNight = selectedRoom?.price || place.price;
 
       if (model.toLowerCase() === "hotel") {
         payload.hotelId = place._id;
-        payload.roomId = selectedRoom?._id;   // ← VERY IMPORTANT
+        payload.roomId = selectedRoom?._id;
+      } else if (model.toLowerCase() === "experiance") {
+        payload.experienceId = place._id;
       }
-      else if (model.toLowerCase() === "experiance") payload.experienceId = place._id;
 
+      // ✅ Create reservation only (NO payment yet)
       const res = await axiosInstance.post("/api/reservations", payload);
-      setMessage("✅ Reservation successful!");
       console.log("Reservation created:", res.data);
+      
+      // ✅ Navigate to payment page with reservation data
+      navigate("/payment", { 
+        state: { 
+          reservationId: res.data._id,
+          amount: res.data.totalPrice 
+        } 
+      });
+      
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.message || "❌ Failed to create reservation.");
-    } finally {
       setLoading(false);
     }
   };
 
-  // ✅ Format date nicely (optional)
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     return date.toLocaleDateString("en-US", {
@@ -100,15 +108,15 @@ const pricePerNight = selectedRoom?.price || place.price;
       day: "numeric",
     });
   };
-// Filter upcoming dates (today or later)
-const upcomingDates = (place.dates || []).filter((d) => {
-  const date = new Date(d);
-  const today = new Date();
-  // Compare only the date part (not time)
-  date.setHours(0, 0, 0, 0);
-  today.setHours(0, 0, 0, 0);
-  return date >= today;
-});
+
+  const upcomingDates = (place.dates || []).filter((d) => {
+    const date = new Date(d);
+    const today = new Date();
+    date.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    return date >= today;
+  });
+
   return (
     <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
       <Paper
@@ -135,7 +143,7 @@ const upcomingDates = (place.dates || []).filter((d) => {
             </Typography>
           )}
         </Typography>
-        {/* ROOM SELECTOR */}
+
         {model.toLowerCase() === "hotel" && place.rooms?.length > 0 && (
           <TextField
             select
@@ -144,7 +152,7 @@ const upcomingDates = (place.dates || []).filter((d) => {
             onChange={(e) => {
               const room = place.rooms.find((r) => r._id === e.target.value);
               setSelectedRoom(room);
-              setTotalPrice(nights * guests * room.price); // recalc
+              setTotalPrice(nights * guests * room.price);
             }}
             fullWidth
             sx={{ mb: 2 }}
@@ -159,7 +167,6 @@ const upcomingDates = (place.dates || []).filter((d) => {
 
         <Box sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
-            {/* ✅ HOTEL MODE: normal date pickers */}
             {model.toLowerCase() === "hotel" && (
               <>
                 <TextField
@@ -183,7 +190,6 @@ const upcomingDates = (place.dates || []).filter((d) => {
               </>
             )}
 
-            {/* ✅ EXPERIENCE MODE: select available dates */}
             {model.toLowerCase() === "experiance" && (
               <TextField
                 select
@@ -203,7 +209,6 @@ const upcomingDates = (place.dates || []).filter((d) => {
                 )}
               </TextField>
             )}
-
           </Box>
 
           {model.toLowerCase() === "experiance" && (
@@ -227,7 +232,7 @@ const upcomingDates = (place.dates || []).filter((d) => {
             variant="contained"
             fullWidth
             onClick={handleReserve}
-            disabled={checkIn === ""  || loading}
+            disabled={checkIn === "" || loading}
             sx={{
               py: 1.3,
               borderRadius: 3,
@@ -247,7 +252,7 @@ const upcomingDates = (place.dates || []).filter((d) => {
             color="text.secondary"
             sx={{ mt: 2 }}
           >
-            You won’t be charged yet
+            You won't be charged yet
           </Typography>
 
           {message && (
