@@ -37,3 +37,12 @@ export const experienceReservationsService = {
   },
 
 };
+
+
+export const userReservationsService = {
+  getAll: async () => {
+    const res = await axiosInstance.get("/api/reservations/my");
+    return res.data;
+  },
+};
+

@@ -13,6 +13,7 @@ import ExperiencePage from "./pages/experience";
 import PlanPage from "./pages/plan";
 import HostRoutes from "./routes/HostRoutes";
 import Places from "./pages/host/Places";
+import MyTrips from "./pages/MyTrips";
 import Navbar from "./components/sharedComponents/navbar";
 import CityHotelsPage from "./pages/cityhotelPage";
 import CityExperiencePage from "./pages/cityExperincePage";
@@ -52,6 +53,7 @@ function AppContent() {
         <Route path="/experiences" element={<ExperiencePage /> } />
         <Route path="/favourites" element={<FavouritePage />} />
         <Route path="/places" element={<Places />} />
+        <Route path="/my-trips" element={<MyTrips />} />
         <Route path="/:model/details/:id" element={<PlaceDetails />} />
         <Route path="/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
         <Route path="/plan" element={<PlanPage />} />
@@ -59,7 +61,10 @@ function AppContent() {
         <Route path="/host/*" element={<ProtectedHostRoute><HostRoutes /></ProtectedHostRoute>} />
         <Route path="/city/:city" element={<CityHotelsPage />} />
         <Route path="/experience-city/:city" element={<CityExperiencePage />} />
-        <Route path="/payment" element={<PaymentPage />} />
+   <Route path="/payment" element={<PaymentPage />} />
+      <Route path="/payment/:reservationId" element={<PaymentPage />} />
+
+   
 
       </Routes>
     </>
