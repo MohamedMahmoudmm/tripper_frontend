@@ -59,7 +59,10 @@ function AppContent() {
         <Route path="/host/*" element={<ProtectedHostRoute><HostRoutes /></ProtectedHostRoute>} />
         <Route path="/city/:city" element={<CityHotelsPage />} />
         <Route path="/experience-city/:city" element={<CityExperiencePage />} />
-        <Route path="/payment" element={<PaymentPage />} />
+   <Route path="/payment" element={<PaymentPage />} />
+      <Route path="/payment/:reservationId" element={<PaymentPage />} />
+
+   
 
       </Routes>
     </>

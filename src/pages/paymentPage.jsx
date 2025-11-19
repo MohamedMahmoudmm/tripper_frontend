@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements, CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
 import {
@@ -28,29 +29,26 @@ const stripePromise = loadStripe("pk_test_51RyskeFiZ2ZQ1Dto62nBPPrY60ibBapgprQ9l
 function PaymentForm() {
   const stripe = useStripe();
   const elements = useElements();
-  const [clientSecret, setClientSecret] = useState("");
+  const location = useLocation();
+  const navigate = useNavigate();
+  
+  const reservationId = location.state?.reservationId;
+  const reservationAmount = location.state?.amount;
+  
   const [isProcessing, setIsProcessing] = useState(false);
   const [paymentStatus, setPaymentStatus] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
   useEffect(() => {
-    axiosInstance
-      .post("/payment/create")
-      .then((res) => {
-        console.log(res);
-        return res.data;
-      })
-      .then((data) => setClientSecret(data.clientSecret))
-      .catch((error) => {
-        console.error("Error creating payment intent:", error);
-        setErrorMessage("Failed to initialize payment. Please try again.");
-      });
-  }, []);
+    if (!reservationId) {
+      setErrorMessage("No reservation found. Please create a reservation first.");
+    }
+  }, [reservationId]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!stripe || !elements) {
+    if (!stripe || !elements || !reservationId) {
       return;
     }
 
@@ -58,34 +56,50 @@ function PaymentForm() {
     setPaymentStatus("");
     setErrorMessage("");
 
-    const cardElement = elements.getElement(CardElement);
+    try {
+      // ✅ Create payment intent عند الضغط على Pay Now فقط
+      const paymentRes = await axiosInstance.post("/payment/create", { 
+        reservationId 
+      });
+      
+      const clientSecret = paymentRes.data.clientSecret;
+      const cardElement = elements.getElement(CardElement);
 
-    const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: { card: cardElement },
-    });
+      // ✅ Confirm payment with Stripe
+      const { error, paymentIntent } = await stripe.confirmCardPayment(clientSecret, {
+        payment_method: { card: cardElement },
+      });
 
-    if (error) {
-      console.log("Payment error:", error.message);
-      setErrorMessage(error.message);
+      if (error) {
+        console.log("Payment error:", error.message);
+        setErrorMessage(error.message);
+        setPaymentStatus("error");
+      } else if (paymentIntent.status === "succeeded") {
+        // ✅ Update payment status via webhook
+        await axiosInstance.post("/payment/webhook", {
+          type: "payment_intent.succeeded",
+          data: {
+            object: {
+              id: paymentIntent.id,
+            }
+          }
+        });
+        
+        console.log("Payment successful!");
+        setPaymentStatus("success");
+        
+        // Navigate to profile after 2 seconds
+        setTimeout(() => {
+          navigate("/guest/profile");
+        }, 2000);
+      }
+    } catch (err) {
+      console.error("Payment error:", err);
+      setErrorMessage(err.response?.data?.message || "Payment failed. Please try again.");
       setPaymentStatus("error");
-    } else if (paymentIntent.status === "succeeded") {
-        axiosInstance
-        .post("/payment/webhook", {
-  type: "payment_intent.succeeded",
-  data: {
-    object: {
-      id: paymentIntent.id,
+    } finally {
+      setIsProcessing(false);
     }
-  }
-})
-        .then((res) => {
-          console.log(res);
-        })
-      console.log("Payment successful!");
-      setPaymentStatus("success");
-    }
-    
-    setIsProcessing(false);
   };
 
   const cardElementOptions = {
@@ -112,7 +126,6 @@ function PaymentForm() {
           overflow: "hidden"
         }}
       >
-        {/* Header */}
         <Box
           sx={{
             background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
@@ -129,12 +142,16 @@ function PaymentForm() {
           <Typography variant="body1" sx={{ opacity: 0.9 }}>
             Enter your card details to complete your purchase
           </Typography>
+          {reservationAmount && (
+            <Typography variant="h5" sx={{ mt: 2, fontWeight: "bold" }}>
+              Amount: {reservationAmount} ج.م
+            </Typography>
+          )}
         </Box>
 
         <CardContent sx={{ p: 4 }}>
           <form onSubmit={handleSubmit}>
             <Stack spacing={3}>
-              {/* Card Element */}
               <Box>
                 <Typography variant="h6" gutterBottom fontWeight="medium">
                   Card Details
@@ -154,12 +171,11 @@ function PaymentForm() {
                 </Paper>
               </Box>
 
-              {/* Submit Button */}
               <Button
                 type="submit"
                 variant="contained"
                 size="large"
-                disabled={!stripe || isProcessing || !clientSecret}
+                disabled={!stripe || isProcessing || !reservationId}
                 fullWidth
                 sx={{
                   py: 1.5,
@@ -186,7 +202,6 @@ function PaymentForm() {
                 )}
               </Button>
 
-              {/* Error Message */}
               {errorMessage && (
                 <Alert 
                   severity="error" 
@@ -197,14 +212,13 @@ function PaymentForm() {
                 </Alert>
               )}
 
-              {/* Success Message */}
               {paymentStatus === "success" && (
                 <Alert 
                   severity="success" 
                   icon={<CheckCircle />}
                   sx={{ borderRadius: 1 }}
                 >
-                  Payment successful! Thank you for your purchase.
+                  Payment successful! Redirecting to your profile...
                 </Alert>
               )}
             </Stack>
@@ -212,7 +226,6 @@ function PaymentForm() {
 
           <Divider sx={{ my: 3 }} />
 
-          {/* Security Features */}
           <Stack spacing={2}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Lock color="success" />
@@ -228,7 +241,6 @@ function PaymentForm() {
               </Typography>
             </Box>
 
-            {/* Accepted Cards */}
             <Box sx={{ mt: 2 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
                 We accept:
