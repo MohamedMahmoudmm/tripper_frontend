@@ -43,6 +43,7 @@ const Navbar = () => {
     { label: "Experiences", path: "/experiences" },
     { label: "Favourites", path: "/favourites" },
     { label: "Places", path: "/places" },
+    { label: "My Trips", path: "/my-trips" },
   ];
 const switchRole = async (role) => {
   console.log("Selected role:", role);
