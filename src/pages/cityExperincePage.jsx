@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, Grid } from "@mui/material";
+import { Box, Typography, Grid, Pagination } from "@mui/material";
 import experienceService from "../services/experince.service";
 import HomeCard from "../components/sharedComponents/HomeCard";
 
@@ -8,6 +8,11 @@ export default function CityExperiencePage() {
   const { city } = useParams();
   const [experiences, setExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  // Pagination states
+  const [page, setPage] = useState(1);
+  const limit = 6; // عدد العناصر في الصفحة
+
 
   useEffect(() => {
     const fetchCityExperiences = async () => {
@@ -41,6 +46,11 @@ export default function CityExperiencePage() {
   if (loading)
     return <p style={{ textAlign: "center" }}>Loading experiences...</p>;
 
+  // ----- Frontend pagination logic -----
+  const totalPages = Math.ceil(experiences.length / limit);
+  const start = (page - 1) * limit;
+  const paginatedExperiences = experiences.slice(start, start + limit);
+
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
@@ -48,12 +58,22 @@ export default function CityExperiencePage() {
       </Typography>
 
       <Grid container spacing={3}>
-        {experiences.map((exp, index) => (
+        {paginatedExperiences.map((exp, index) => (
           <Grid item xs={12} sm={6} md={3} key={index}>
             <HomeCard {...exp} />
           </Grid>
         ))}
       </Grid>
+
+        {/* Pagination Component */}
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+              <Pagination
+                count={totalPages}
+                page={page}
+                onChange={(e, value) => setPage(value)}
+                color="primary"
+              />
+            </Box>
     </Box>
   );
 }
