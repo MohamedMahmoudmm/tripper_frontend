@@ -109,7 +109,7 @@ const Places = () => {
     <Box
       sx={{
         width: "100%",
-        height: { xs: 170, sm: 190, md: 210 }, // أكبر شوية
+        height: { xs: 170, sm: 190, md: 210 }, 
         minHeight: { xs: 170, sm: 190, md: 210 },
         maxHeight: { xs: 170, sm: 190, md: 210 },
         backgroundImage: `url(${place.images?.[0] || ""})`,

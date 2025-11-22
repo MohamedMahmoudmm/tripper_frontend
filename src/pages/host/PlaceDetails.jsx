@@ -2,7 +2,6 @@ import React from "react";
 import { Box, Typography, Card, CardMedia, CardContent } from "@mui/material";
 
 const PlaceDetails = () => {
-  // 🔹 نقرأ البيانات اللي اتخزنت في localStorage
   const place = JSON.parse(localStorage.getItem("selectedPlace"));
 
   if (!place) {
