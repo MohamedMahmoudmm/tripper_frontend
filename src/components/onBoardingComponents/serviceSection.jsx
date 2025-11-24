@@ -30,16 +30,21 @@ export default function ServicesSection() {
       >
        
 
-        <Typography
-          variant="h4"
-          sx={{
-            fontWeight: 800,
-            color: "#f27244",
-            mb: 2,
-          }}
-        >
-          We Offer Best Services
-        </Typography>
+      <Box sx={{ textAlign: "center", mb: { xs: 3, sm: 4 }, width: "100%" }}>
+  <Typography
+    component="h3"
+    sx={{
+      fontWeight: 800,
+      color: "#f27244",
+      fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+      lineHeight: 1.2,
+      display: "block", 
+      textAlign: "center",
+    }}
+  >
+    We Offer Best Services
+  </Typography>
+</Box>
 
         <Typography
           variant="body2"

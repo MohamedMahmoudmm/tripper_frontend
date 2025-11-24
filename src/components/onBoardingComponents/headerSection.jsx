@@ -50,20 +50,23 @@ export default function HeaderSection() {
         
                 <Stack direction="row" spacing={3}>
                   <Button
-                    variant="contained"
-                    size="large"
-                    sx={{
-                      backgroundColor: "#f27244",
-                      borderRadius: "25px",
-                      px: 4,
-                      textTransform: "none",
-                      fontWeight: 600,
-                      "&:hover": { backgroundColor: "#034959" },
-                    }}
-                    onClick={() => navigate("/home")}
-                  >
-                    Explore Now
-                  </Button>
+  variant="contained"
+  size="large"
+  sx={{
+    backgroundColor: "#f27244",
+    borderRadius: "25px",
+    px: { xs: 3, sm: 4, md: 5 }, // متجاوب
+    py: { xs: 1, sm: 1.5 }, // متجاوب
+    fontSize: { xs: "0.9rem", sm: "1rem", md: "1.1rem" }, // متجاوب
+    textTransform: "none",
+    fontWeight: 600,
+    minWidth: { xs: "140px", sm: "160px" }, // متجاوب
+    "&:hover": { backgroundColor: "#034959" },
+  }}
+  onClick={() => navigate("/home")}
+>
+  Explore Now
+</Button>
                 </Stack>
               </Box>
               <Box

@@ -7,13 +7,22 @@ import FooterComponent from "../components/onBoardingComponents/footer";
 
 
 export default function OnboardingPage() {
-    return (
-        <Box>
-            <AuthNavBar></AuthNavBar>
-            <HeaderSection></HeaderSection>
-            <ServicesSection></ServicesSection>
-            <TopPlacesSection></TopPlacesSection>
-            <FooterComponent></FooterComponent>
-        </Box>
-    );
+  return (
+    <Box>
+      <AuthNavBar />
+      
+      <Box sx={{ position: "relative", overflow: "hidden" }}>
+        <HeaderSection />
+      </Box>
+
+      <Box sx={{ position: "relative" }}>
+        <ServicesSection />
+      </Box>
+
+      <TopPlacesSection />
+      <FooterComponent />
+    </Box>
+  );
 }
+
+
