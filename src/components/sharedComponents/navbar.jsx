@@ -39,7 +39,7 @@ const Navbar = () => {
   const handleMenuClose = () => setAnchorEl(null);
 
   const navLinks = [
-    { label: "Homes", path: "/home" },
+    { label: "Home", path: "/home" },
     { label: "Experiences", path: "/experiences" },
     { label: "Favourites", path: "/favourites" },
     { label: "Places", path: "/places" },
