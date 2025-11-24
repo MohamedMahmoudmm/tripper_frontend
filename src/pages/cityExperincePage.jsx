@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, Grid, Pagination, TextField } from "@mui/material";
+import { Box, Typography, Grid} from "@mui/material";
 import experienceService from "../services/experince.service";
 import HomeCard from "../components/sharedComponents/HomeCard";
+import SearchBar from "../components/sharedComponents/SearchBar";
+import PaginationBar from "../components/sharedComponents/Pagination";
 
 export default function CityExperiencePage() {
   const { city } = useParams();
@@ -64,36 +66,17 @@ export default function CityExperiencePage() {
         All Experiences in {city.charAt(0).toUpperCase() + city.slice(1)}
       </Typography>
 
-     
-{/* 🔍 Improved Search Bar */}
-<Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
-  <TextField
-    variant="outlined"
-    placeholder="Search experiences..."
-    value={search}
-    onChange={(e) => {
-      setSearch(e.target.value);
-      setPage(1);
-    }}
-    InputProps={{
-      startAdornment: (
-        <i className="bi bi-search" style={{ marginRight: 8, opacity: 0.7 }}></i>
-      ),
-      sx: {
-        borderRadius: "50px",
-        backgroundColor: "#fff",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-        "& fieldset": {
-          borderRadius: "50px",
-        },
-      },
-    }}
-    sx={{
-      width: "100%",
-      maxWidth: 350, // 🤏 Not full width
-    }}
-  />
-</Box>
+         {/* search bar */}
+
+<SearchBar
+  value={search}
+  onChange={(e) => {
+    setSearch(e.target.value);
+    setPage(1);
+  }}
+  placeholder="Search hotels..."
+/>
+
 
 
       <Grid container spacing={3}>
@@ -105,14 +88,12 @@ export default function CityExperiencePage() {
       </Grid>
 
       {/* Pagination Component */}
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-        <Pagination
-          count={totalPages}
-          page={page}
-          onChange={(e, value) => setPage(value)}
-          color="primary"
-        />
-      </Box>
+<PaginationBar
+  page={page}
+  totalPages={totalPages}
+  onChange={(value) => setPage(value)}
+/>
+
     </Box>
   );
 }
