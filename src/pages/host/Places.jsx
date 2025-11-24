@@ -172,7 +172,7 @@ const Places = () => {
                   {place.description}
                 </Typography>
 
-                <Box mt="auto">
+                {/* <Box mt="auto">
                   <Button
                     size="small"
                     variant="contained"
@@ -184,7 +184,7 @@ const Places = () => {
                   >
                     Add
                   </Button>
-                </Box>
+                </Box> */}
               </CardContent>
             </Card>
           </Grid>

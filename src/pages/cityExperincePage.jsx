@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-import { Box, Typography, Grid, Pagination } from "@mui/material";
+import { Box, Typography, Grid, Pagination, TextField } from "@mui/material";
 import experienceService from "../services/experince.service";
 import HomeCard from "../components/sharedComponents/HomeCard";
 
@@ -11,8 +11,10 @@ export default function CityExperiencePage() {
 
   // Pagination states
   const [page, setPage] = useState(1);
-  const limit = 6; // عدد العناصر في الصفحة
+  const limit = 6;
 
+  // Search state
+  const [search, setSearch] = useState("");
 
   useEffect(() => {
     const fetchCityExperiences = async () => {
@@ -46,16 +48,53 @@ export default function CityExperiencePage() {
   if (loading)
     return <p style={{ textAlign: "center" }}>Loading experiences...</p>;
 
-  // ----- Frontend pagination logic -----
-  const totalPages = Math.ceil(experiences.length / limit);
+  // ----- Search filtering BEFORE pagination -----
+  const filtered = experiences.filter((exp) =>
+    exp.title.toLowerCase().includes(search.toLowerCase())
+  );
+
+  // ----- Pagination logic -----
+  const totalPages = Math.ceil(filtered.length / limit);
   const start = (page - 1) * limit;
-  const paginatedExperiences = experiences.slice(start, start + limit);
+  const paginatedExperiences = filtered.slice(start, start + limit);
 
   return (
     <Box sx={{ p: 4 }}>
       <Typography variant="h5" fontWeight="bold" sx={{ mb: 3 }}>
         All Experiences in {city.charAt(0).toUpperCase() + city.slice(1)}
       </Typography>
+
+     
+{/* 🔍 Improved Search Bar */}
+<Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
+  <TextField
+    variant="outlined"
+    placeholder="Search experiences..."
+    value={search}
+    onChange={(e) => {
+      setSearch(e.target.value);
+      setPage(1);
+    }}
+    InputProps={{
+      startAdornment: (
+        <i className="bi bi-search" style={{ marginRight: 8, opacity: 0.7 }}></i>
+      ),
+      sx: {
+        borderRadius: "50px",
+        backgroundColor: "#fff",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        "& fieldset": {
+          borderRadius: "50px",
+        },
+      },
+    }}
+    sx={{
+      width: "100%",
+      maxWidth: 350, // 🤏 Not full width
+    }}
+  />
+</Box>
+
 
       <Grid container spacing={3}>
         {paginatedExperiences.map((exp, index) => (
@@ -65,15 +104,15 @@ export default function CityExperiencePage() {
         ))}
       </Grid>
 
-        {/* Pagination Component */}
-            <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-              <Pagination
-                count={totalPages}
-                page={page}
-                onChange={(e, value) => setPage(value)}
-                color="primary"
-              />
-            </Box>
+      {/* Pagination Component */}
+      <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(e, value) => setPage(value)}
+          color="primary"
+        />
+      </Box>
     </Box>
   );
 }
