@@ -47,11 +47,11 @@ const ChatSidebar = ({ conversations = [], onSelectConversation, activeId }) => 
                     src={
                       Array.isArray(c.members) && c.members.length === 2
                         ? c.members[0]._id === myId
-                          ? c.members[1].avatar
-                            ? `http://127.0.0.1:4000${c.members[1].avatar}`
+                          ? c.members[1].image
+                            ? `${c.members[1].image}`
                             : "https://www.freeiconspng.com/thumbs/profile-icon-png/profile-icon-9.png"
-                          : c.members[0].avatar
-                            ? `http://127.0.0.1:4000${c.members[0].avatar}`
+                          : c.members[0].image
+                            ? `${c.members[0].image}`
                             : "https://www.freeiconspng.com/thumbs/profile-icon-png/profile-icon-9.png"
                         : "https://www.freeiconspng.com/thumbs/profile-icon-png/profile-icon-9.png"
                     }

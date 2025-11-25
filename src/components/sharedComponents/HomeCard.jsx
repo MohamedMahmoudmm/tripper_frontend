@@ -80,19 +80,7 @@ const HomeCard = ({ image, title, price, rating,model, id }) => {
           }}
         />
 
-        <Chip
-          label="Guest favorite"
-          size="small"
-          sx={{
-            position: "absolute",
-            top: 12,
-            left: 12,
-            backgroundColor: "rgba(255,255,255,0.9)",
-            fontWeight: 600,
-            fontSize: "12px",
-            color: "#333",
-          }}
-        />
+       
 
         {/* Favourite Icon */}
         <IconButton
