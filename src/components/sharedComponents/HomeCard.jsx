@@ -16,6 +16,7 @@ import favoriteService from "../../services/favorite.service";
 
 const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // ✅ Check if this card is already in favourites
@@ -77,12 +78,8 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
     }
   };
 
-  // ✅ Navigate to details page with data
+  // ✅ Navigate to details page
   const handleCardClick = () => {
-    localStorage.setItem(
-      "selectedPlace",
-      JSON.stringify({ image, title, price, rating })
-    );
     navigate(`/${model}/details/${id}`);
   };
 
@@ -133,6 +130,7 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
         {/* Favourite Icon */}
         <IconButton
           onClick={toggleFavorite}
+          disabled={loading}
           sx={{
             position: "absolute",
             top: 8,
