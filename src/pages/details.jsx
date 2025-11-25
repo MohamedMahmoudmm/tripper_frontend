@@ -12,30 +12,35 @@ import WhatYoullDo from "../components/detailsComponents/experienceActivity";
 export default function PlaceDetails() {
   const [place, setPlace] = useState(null);
   const { model, id } = useParams();
-  const [canReview, setCanReview] = useState(true);
+const [canReview, setCanReview] = useState(false);
 
-  useEffect(() => {
-    if (id) {
-      axiosInstance.get(`/${model}/${id}`).then((res) => {
-       console.log('place'+res.data);
-       
-        model === "places" ? setPlace(res.data.data):setPlace(res.data);
-        model!=='Places' && axiosInstance.get(`/api/reservations/${model==='hotel'?'hotel':'experience'}/${id}`).then((res) => {
-          console.log('reserv');
-          
-          if (res.data.length > 0) {
-            setCanReview(true);
-          }
-          else {
-            setCanReview(false);
-          }
-        })
-      }).catch((err) => {
-        console.log(err);
+useEffect(() => {
+  if (!id) return;
+
+  axiosInstance.get(`/${model}/${id}`)
+    .then(async (res) => {
       
-      });
-    }
-  }, [id, model]);
+      model === "places" ? setPlace(res.data.data) : setPlace(res.data);
+
+      // ⭐ لو المكان من نوع "places" — خلي الريفيو دايمًا متاح
+      if (model === "places") {
+        setCanReview(true);
+        return;
+      }
+
+      // ⭐ باقي الموديلات (hotel / experience)
+      const type = model === "hotel" ? "hotel" : "experience";
+      const reservationsRes = await axiosInstance.get(`/api/reservations/${type}/${id}`);
+
+      setCanReview(reservationsRes.data.length > 0);
+
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+
+}, [id, model]);
+
 
   if (!place) return null;
 
@@ -54,7 +59,7 @@ export default function PlaceDetails() {
       }
 
       {
-        !canReview && <PlaceReviews model={model==='places'?'Place':formatModel(model)} itemId={id} />}
+         <PlaceReviews canReview={canReview} model={model==='places'?'Place':formatModel(model)} itemId={id} />}
 
       <FooterComponent />
     </Box>

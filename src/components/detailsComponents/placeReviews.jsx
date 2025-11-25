@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 
-export default function PlaceReviews({ model, itemId }) {
+export default function PlaceReviews({ model, itemId, canReview }) {
   console.log(model);
   
   const [reviews, setReviews] = useState([]);
@@ -115,7 +115,9 @@ const handleAddReview = async () => {
 
   return (
     <Box sx={{ textAlign: "center", py: 6, backgroundColor: "#f9f9f9" }}>
-      <Box sx={{ maxWidth: 600, margin: "0 auto", mb: 6, p: 3, background: "#fff", borderRadius: 4 }}>
+      {
+        
+        canReview && <Box sx={{ maxWidth: 600, margin: "0 auto", mb: 6, p: 3, background: "#fff", borderRadius: 4 }}>
         <Typography variant="h6" sx={{ mb: 2 }}>
           Add Your Review
         </Typography>
@@ -139,7 +141,7 @@ const handleAddReview = async () => {
             Submit
           </Button>
         </Box>
-      </Box>
+      </Box>}
 
       <Typography variant="h4" sx={{ mb: 4 }}>
         What Our Guests Say

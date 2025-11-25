@@ -92,7 +92,8 @@ function startConversation(id) {
 }}>
             {place.description}
           </Typography>
-          <Typography
+          {
+            <Typography
   onClick={() => setExpanded(!expanded)}
   sx={{
     color: "#034959",
@@ -103,7 +104,7 @@ function startConversation(id) {
   }}
 >
   {expanded ? "See less" : "See more"}
-</Typography>
+</Typography>}
         </Box>
       </Box>
 
