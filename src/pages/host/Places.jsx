@@ -1,3 +1,5 @@
+
+
 import React, { useEffect, useState } from "react";
 import {
   Box,
@@ -6,7 +8,6 @@ import {
   Card,
   CardContent,
   Rating,
-  Button,
   Grid,
   useTheme,
   useMediaQuery,
@@ -15,20 +16,19 @@ import {
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
+import favoriteService from "../../services/favorite.service";
 import { useNavigate } from "react-router-dom";
 
 const Places = () => {
-  const [fav, setFav] = useState({});
+  const [favorites, setFavorites] = useState({});
   const [data, setData] = useState([]);
+  const [loading, setLoading] = useState({});
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const navigate = useNavigate();
 
-  const toggleFav = (id) => {
-    setFav((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
-
+  // ✅ Fetch places
   useEffect(() => {
     axiosInstance.get("/places").then((res) => {
       setData(res.data.data);
@@ -36,6 +36,57 @@ const Places = () => {
       console.error("Failed to fetch places:", err);
     });
   }, []);
+
+  // ✅ Check favorites for all places
+  useEffect(() => {
+    const checkAllFavorites = async () => {
+      const token = localStorage.getItem("token");
+      if (!token || data.length === 0) return;
+
+      const favStatus = {};
+      for (const place of data) {
+        try {
+          const result = await favoriteService.checkFavorite(place._id, "Place");
+          favStatus[place._id] = result.isFavorite;
+        } catch (error) {
+          console.error(`Error checking favorite for ${place._id}:`, error);
+        }
+      }
+      setFavorites(favStatus);
+    };
+
+    checkAllFavorites();
+  }, [data]);
+
+  // ✅ Toggle favorite
+  const toggleFav = async (e, placeId) => {
+    e.stopPropagation();
+
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to add favorites");
+      return;
+    }
+
+    if (loading[placeId]) return;
+
+    setLoading(prev => ({ ...prev, [placeId]: true }));
+
+    try {
+      if (favorites[placeId]) {
+        await favoriteService.removeFavorite(placeId, "Place");
+        setFavorites(prev => ({ ...prev, [placeId]: false }));
+      } else {
+        await favoriteService.addFavorite(placeId, "Place");
+        setFavorites(prev => ({ ...prev, [placeId]: true }));
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      alert(error.message || "Error updating favorites");
+    } finally {
+      setLoading(prev => ({ ...prev, [placeId]: false }));
+    }
+  };
 
   const handleCardClick = (id) => {
     navigate(`/places/details/${id}`);
@@ -52,74 +103,69 @@ const Places = () => {
         Top Attractions in Egypt
       </Typography>
 
-      {/* Cards Grid */}
       <Grid container spacing={{ xs: 2, sm: 2, md: 2.5 }}>
         {data.map((place) => (
           <Grid
-  item
-  xs={12}
-  sm={6}
-  md={4}
-  lg={4}   // 3 كروت في الصف
-  key={place._id}
-  sx={{ display: "flex", width: "30%", flexGrow: 0 }}
->
-  <Card
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      height: "100%",
-      flexGrow: 1,
-      borderRadius: 2,
-      boxShadow: 2,
-      position: "relative",
-      transition: "0.25s",
-      cursor: "pointer",
-      "&:hover": {
-        boxShadow: 4,
-        transform: "translateY(-4px)",
-      },
-    }}
-    onClick={() => handleCardClick(place._id)}
-  >
+            item
+            xs={12}
+            sm={6}
+            md={4}
+            lg={4}
+            key={place._id}
+            sx={{ display: "flex", width: "30%", flexGrow: 0 }}
+          >
+            <Card
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                height: "100%",
+                flexGrow: 1,
+                borderRadius: 2,
+                boxShadow: 2,
+                position: "relative",
+                transition: "0.25s",
+                cursor: "pointer",
+                "&:hover": {
+                  boxShadow: 4,
+                  transform: "translateY(-4px)",
+                },
+              }}
+              onClick={() => handleCardClick(place._id)}
+            >
+              {/* Favorite Button */}
+              <IconButton
+                onClick={(e) => toggleFav(e, place._id)}
+                disabled={loading[place._id]}
+                sx={{
+                  position: "absolute",
+                  top: 8,
+                  right: 8,
+                  zIndex: 2,
+                  bgcolor: "rgba(255,255,255,0.9)",
+                  "&:hover": { bgcolor: "rgba(255,255,255,1)" },
+                }}
+              >
+                {favorites[place._id] ? (
+                  <FavoriteIcon color="error" />
+                ) : (
+                  <FavoriteBorderIcon />
+                )}
+              </IconButton>
 
-    {/* Favorite Button */}
-    <IconButton
-      onClick={(e) => {
-        e.stopPropagation();
-        toggleFav(place._id);
-      }}
-      sx={{
-        position: "absolute",
-        top: 8,
-        right: 8,
-        zIndex: 2,
-        bgcolor: "rgba(255,255,255,0.9)",
-        "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-      }}
-    >
-      {fav[place._id] ? (
-        <FavoriteIcon color="error" />
-      ) : (
-        <FavoriteBorderIcon />
-      )}
-    </IconButton>
-
-    {/* FIXED IMAGE AREA – تمنع أي تمدد نهائي */}
-    <Box
-      sx={{
-        width: "100%",
-        height: { xs: 170, sm: 190, md: 210 }, 
-        minHeight: { xs: 170, sm: 190, md: 210 },
-        maxHeight: { xs: 170, sm: 190, md: 210 },
-        backgroundImage: `url(${place.images?.[0] || ""})`,
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundRepeat: "no-repeat",
-        bgcolor: place.images?.[0] ? "transparent" : "grey.200",
-      }}
-    />
-
+              {/* Image */}
+              <Box
+                sx={{
+                  width: "100%",
+                  height: { xs: 170, sm: 190, md: 210 }, 
+                  minHeight: { xs: 170, sm: 190, md: 210 },
+                  maxHeight: { xs: 170, sm: 190, md: 210 },
+                  backgroundImage: `url(${place.images?.[0] || ""})`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                  bgcolor: place.images?.[0] ? "transparent" : "grey.200",
+                }}
+              />
 
               {/* Content */}
               <CardContent
@@ -130,7 +176,6 @@ const Places = () => {
                   p: 2,
                 }}
               >
-                {/* FIXED TITLE HEIGHT */}
                 <Typography
                   fontWeight="bold"
                   fontSize={{ xs: "0.9rem", sm: "1rem" }}
@@ -156,7 +201,6 @@ const Places = () => {
                   </Typography>
                 </Box>
 
-                {/* FIXED DESCRIPTION HEIGHT */}
                 <Typography
                   variant="body2"
                   sx={{
@@ -171,20 +215,6 @@ const Places = () => {
                 >
                   {place.description}
                 </Typography>
-
-                {/* <Box mt="auto">
-                  <Button
-                    size="small"
-                    variant="contained"
-                    sx={{
-                      bgcolor: "#f27244",
-                      "&:hover": { bgcolor: "#034959" },
-                      textTransform: "capitalize",
-                    }}
-                  >
-                    Add
-                  </Button>
-                </Box> */}
               </CardContent>
             </Card>
           </Grid>

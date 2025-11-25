@@ -13,7 +13,8 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import StarIcon from "@mui/icons-material/Star";
 import { useNavigate } from "react-router-dom";
 import favoriteService from "../../services/favorite.service";
-const HomeCard = ({ image, title, price, rating, model, id }) => {
+
+const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -25,7 +26,6 @@ const HomeCard = ({ image, title, price, rating, model, id }) => {
         const token = localStorage.getItem("token");
         if (!token || !id || !model) return;
 
-        // تحويل model name للـ schema name
         const itemType = model === "experiance" ? "Experiance" : 
                         model === "hotel" ? "Hotel" : 
                         model === "place" ? "Place" : model;
@@ -54,7 +54,6 @@ const HomeCard = ({ image, title, price, rating, model, id }) => {
     setLoading(true);
 
     try {
-      // تحويل model name للـ schema name
       const itemType = model === "experiance" ? "Experiance" : 
                       model === "hotel" ? "Hotel" : 
                       model === "place" ? "Place" : model;
@@ -62,6 +61,11 @@ const HomeCard = ({ image, title, price, rating, model, id }) => {
       if (isFavorite) {
         await favoriteService.removeFavorite(id, itemType);
         setIsFavorite(false);
+        
+        // ✅ إذا كان هناك callback للحذف، نفذه (لحذف الكارد من الصفحة)
+        if (onRemove) {
+          onRemove(id);
+        }
       } else {
         await favoriteService.addFavorite(id, itemType);
         setIsFavorite(true);

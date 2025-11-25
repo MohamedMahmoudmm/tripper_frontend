@@ -1,19 +1,19 @@
 
-import React, { useEffect, useState } from "react";
+
+
+import React, { useEffect, useState, useCallback } from "react";
 import { Box, Typography, Grid, Button, Container, CircularProgress } from "@mui/material";
 import HomeCard from "../components/sharedComponents/HomeCard";
 import { useNavigate } from "react-router-dom";
 import FooterComponent from "../components/onBoardingComponents/footer";
 import favoriteService from "../services/favorite.service";
-import { useCallback } from "react";
 
 export default function FavouritePage() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-
- const fetchFavorites = useCallback(async () => {
+  const fetchFavorites = useCallback(async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
@@ -38,7 +38,12 @@ export default function FavouritePage() {
     fetchFavorites();
   }, [fetchFavorites]);
 
-
+  // ✅ دالة لحذف الكارد من القائمة
+  const handleRemoveFavorite = (itemId) => {
+    setFavorites((prevFavorites) => 
+      prevFavorites.filter((item) => item.id !== itemId)
+    );
+  };
 
   if (loading) {
     return (
@@ -103,7 +108,10 @@ export default function FavouritePage() {
                 }}
               >
                 <Box sx={{ width: "100%", maxWidth: 320 }}>
-                  <HomeCard {...item} />
+                  <HomeCard 
+                    {...item} 
+                    onRemove={handleRemoveFavorite}
+                  />
                 </Box>
               </Grid>
             ))}
@@ -114,11 +122,4 @@ export default function FavouritePage() {
       <FooterComponent />
     </Box>
   );
-};
-
-
-
-
-
-
-
+}

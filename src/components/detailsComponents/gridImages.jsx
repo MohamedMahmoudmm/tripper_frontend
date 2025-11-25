@@ -1,9 +1,56 @@
 import { Box, IconButton, Typography, CardMedia } from "@mui/material";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import { useState, useEffect } from "react";
+import favoriteService from "../../services/favorite.service";
 
-export default function GridImages({ images, title }) {
-  // الصورة الأساسية
+export default function GridImages({ images, title, itemId, itemType }) {
+  const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
 
+  // ✅ Check if item is in favorites
+  useEffect(() => {
+    const checkIfFavorite = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token || !itemId || !itemType) return;
+
+        const result = await favoriteService.checkFavorite(itemId, itemType);
+        setIsFavorite(result.isFavorite);
+      } catch (error) {
+        console.error("Error checking favorite:", error);
+      }
+    };
+
+    checkIfFavorite();
+  }, [itemId, itemType]);
+
+  // ✅ Toggle favourite
+  const toggleFavorite = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to add favorites");
+      return;
+    }
+
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      if (isFavorite) {
+        await favoriteService.removeFavorite(itemId, itemType);
+        setIsFavorite(false);
+      } else {
+        await favoriteService.addFavorite(itemId, itemType);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      alert(error.message || "Error updating favorites");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <Box>
@@ -15,6 +62,8 @@ export default function GridImages({ images, title }) {
           {title}
         </Typography>
         <IconButton
+          onClick={toggleFavorite}
+          disabled={loading}
           sx={{
             border: "1px solid #ccc",
             borderRadius: "50%",
@@ -22,7 +71,11 @@ export default function GridImages({ images, title }) {
             "&:hover": { backgroundColor: "#f5f5f5" },
           }}
         >
-          <FavoriteBorderIcon sx={{color:"#f27244"}}/>
+          {isFavorite ? (
+            <FavoriteIcon sx={{ color: "#f27244" }} />
+          ) : (
+            <FavoriteBorderIcon sx={{ color: "#f27244" }} />
+          )}
         </IconButton>
       </Box>
 
