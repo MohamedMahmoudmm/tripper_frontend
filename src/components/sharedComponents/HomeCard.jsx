@@ -12,41 +12,70 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import StarIcon from "@mui/icons-material/Star";
 import { useNavigate } from "react-router-dom";
-
-const HomeCard = ({ image, title, price, rating,model, id }) => {
+import favoriteService from "../../services/favorite.service";
+const HomeCard = ({ image, title, price, rating, model, id }) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // ✅ Check if this card is already in favourites
   useEffect(() => {
-    const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-    const exists = favorites.some((item) => item.title === title);
-    setIsFavorite(exists);
-  }, [title]);
+    const checkIfFavorite = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token || !id || !model) return;
 
-  // ✅ Toggle favourite state and update localStorage
-  const toggleFavorite = (e) => {
-    e.stopPropagation(); // مهم عشان ما يدخلش صفحة التفاصيل لما ندوس على القلب
+        // تحويل model name للـ schema name
+        const itemType = model === "experiance" ? "Experiance" : 
+                        model === "hotel" ? "Hotel" : 
+                        model === "place" ? "Place" : model;
 
-    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        const result = await favoriteService.checkFavorite(id, itemType);
+        setIsFavorite(result.isFavorite);
+      } catch (error) {
+        console.error("Error checking favorite:", error);
+      }
+    };
 
-    if (isFavorite) {
-      favorites = favorites.filter((item) => item.title !== title);
-      setIsFavorite(false);
-    } else {
-      favorites.push({ image, title, price, rating });
-      setIsFavorite(true);
+    checkIfFavorite();
+  }, [id, model]);
+
+  // ✅ Toggle favourite state
+  const toggleFavorite = async (e) => {
+    e.stopPropagation();
+    
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Please login to add favorites");
+      return;
     }
 
-    localStorage.setItem("favorites", JSON.stringify(favorites));
+    if (loading) return;
+    setLoading(true);
+
+    try {
+      // تحويل model name للـ schema name
+      const itemType = model === "experiance" ? "Experiance" : 
+                      model === "hotel" ? "Hotel" : 
+                      model === "place" ? "Place" : model;
+
+      if (isFavorite) {
+        await favoriteService.removeFavorite(id, itemType);
+        setIsFavorite(false);
+      } else {
+        await favoriteService.addFavorite(id, itemType);
+        setIsFavorite(true);
+      }
+    } catch (error) {
+      console.error("Error toggling favorite:", error);
+      alert(error.message || "Error updating favorites");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // ✅ Navigate to details page with data
+  // ✅ Navigate to details page
   const handleCardClick = () => {
-    localStorage.setItem(
-      "selectedPlace",
-      JSON.stringify({ image, title, price, rating })
-    );
     navigate(`/${model}/details/${id}`);
   };
 
@@ -97,6 +126,7 @@ const HomeCard = ({ image, title, price, rating,model, id }) => {
         {/* Favourite Icon */}
         <IconButton
           onClick={toggleFavorite}
+          disabled={loading}
           sx={{
             position: "absolute",
             top: 8,
