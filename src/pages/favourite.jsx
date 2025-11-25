@@ -1,17 +1,63 @@
-import React, { useEffect, useState } from "react";
-import { Box, Typography, Grid, Button, Container } from "@mui/material";
+
+
+
+import React, { useEffect, useState, useCallback } from "react";
+import { Box, Typography, Grid, Button, Container, CircularProgress } from "@mui/material";
 import HomeCard from "../components/sharedComponents/HomeCard";
 import { useNavigate } from "react-router-dom";
 import FooterComponent from "../components/onBoardingComponents/footer";
+import favoriteService from "../services/favorite.service";
 
 export default function FavouritePage() {
   const [favorites, setFavorites] = useState([]);
   const navigate = useNavigate();
 
+  const fetchFavorites = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await favoriteService.getUserFavorites();
+      setFavorites(response.favorites || []);
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      if (error.message === "Invalid token" || error.message === "No token provided") {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
+
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("favorites")) || [];
-    setFavorites(stored);
-  }, []);
+    fetchFavorites();
+  }, [fetchFavorites]);
+
+  // ✅ دالة لحذف الكارد من القائمة
+  const handleRemoveFavorite = (itemId) => {
+    setFavorites((prevFavorites) => 
+      prevFavorites.filter((item) => item.id !== itemId)
+    );
+  };
+
+  if (loading) {
+    return (
+      <Box 
+        sx={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center", 
+          minHeight: "100vh" 
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
@@ -61,7 +107,10 @@ export default function FavouritePage() {
                 }}
               >
                 <Box sx={{ width: "100%", maxWidth: 320 }}>
-                  <HomeCard {...item} />
+                  <HomeCard 
+                    {...item} 
+                    onRemove={handleRemoveFavorite}
+                  />
                 </Box>
               </Grid>
             ))}

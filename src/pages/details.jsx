@@ -44,10 +44,12 @@ export default function PlaceDetails() {
   
   return (
     <Box sx={{ p: 4, backgroundColor: "#fafafa", minHeight: "100vh" }}>
-      <GridImages
-        images={place.images}
-        title={place.name + ", " + place.address.city}
-      />
+<GridImages 
+  images={place.images} 
+  title={place.name}
+  itemId={place._id}
+  itemType="Place"
+/>
       <DescriptonComponent place={place} model={formatModel(model)} />
       {
         model === "hotel" ? <PlaceOffers amenities={place.amenities} />:model === "experiance" ? <WhatYoullDo activities={place.activities} />:null
