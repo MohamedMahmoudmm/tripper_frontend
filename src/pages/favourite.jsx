@@ -1,17 +1,59 @@
+
 import React, { useEffect, useState } from "react";
-import { Box, Typography, Grid, Button, Container } from "@mui/material";
+import { Box, Typography, Grid, Button, Container, CircularProgress } from "@mui/material";
 import HomeCard from "../components/sharedComponents/HomeCard";
 import { useNavigate } from "react-router-dom";
 import FooterComponent from "../components/onBoardingComponents/footer";
+import favoriteService from "../services/favorite.service";
+import { useCallback } from "react";
 
 export default function FavouritePage() {
   const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
+
+ const fetchFavorites = useCallback(async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setLoading(false);
+        return;
+      }
+
+      const response = await favoriteService.getUserFavorites();
+      setFavorites(response.favorites || []);
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      if (error.message === "Invalid token" || error.message === "No token provided") {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    } finally {
+      setLoading(false);
+    }
+  }, [navigate]);
+
   useEffect(() => {
-    const stored = JSON.parse(localStorage.getItem("favorites")) || [];
-    setFavorites(stored);
-  }, []);
+    fetchFavorites();
+  }, [fetchFavorites]);
+
+
+
+  if (loading) {
+    return (
+      <Box 
+        sx={{ 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center", 
+          minHeight: "100vh" 
+        }}
+      >
+        <CircularProgress />
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ backgroundColor: "#fafafa", minHeight: "100vh" }}>
@@ -47,14 +89,14 @@ export default function FavouritePage() {
             justifyContent="center"
             alignItems="stretch"
           >
-            {favorites.map((item, index) => (
+            {favorites.map((item) => (
               <Grid
                 item
                 xs={12}
                 sm={6}
                 md={4}
                 lg={3}
-                key={index}
+                key={item.favoriteId}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
@@ -72,4 +114,11 @@ export default function FavouritePage() {
       <FooterComponent />
     </Box>
   );
-}
+};
+
+
+
+
+
+
+
