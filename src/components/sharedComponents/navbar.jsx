@@ -39,10 +39,11 @@ const Navbar = () => {
   const handleMenuClose = () => setAnchorEl(null);
 
   const navLinks = [
-    { label: "Homes", path: "/home" },
+    { label: "Home", path: "/home" },
     { label: "Experiences", path: "/experiences" },
     { label: "Favourites", path: "/favourites" },
     { label: "Places", path: "/places" },
+    { label: "My Trips", path: "/my-trips" },
   ];
 const switchRole = async (role) => {
   console.log("Selected role:", role);
@@ -50,6 +51,7 @@ const switchRole = async (role) => {
 
   try {
     if (role === "guest" && user.role.includes("host") ) {
+      // Switch from host → guest
       await authService.swichRole({ newRole: "host" });
 
       const userString = localStorage.getItem("user");
@@ -225,24 +227,7 @@ const switchRole = async (role) => {
                 Login
               </Button>
             )}
-            {
-            token && (
-  <Button
-    variant="text"
-    sx={{
-      color: "#f27244",
-      fontWeight: 600,
-      textTransform: "none",
-      "&:hover": { textDecoration: "underline" },
-    }}
-    onClick={() => {
-      authService.logout();
-      navigate("/login");   
-    }}
-  >
-    Logout
-  </Button>
-)}
+
             <IconButton
               sx={{ display: { xs: "flex", md: "none" } }}
               onClick={handleMenuOpen}
