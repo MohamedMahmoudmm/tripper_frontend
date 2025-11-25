@@ -10,7 +10,6 @@ import favoriteService from "../services/favorite.service";
 
 export default function FavouritePage() {
   const [favorites, setFavorites] = useState([]);
-  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const fetchFavorites = useCallback(async () => {
@@ -94,14 +93,14 @@ export default function FavouritePage() {
             justifyContent="center"
             alignItems="stretch"
           >
-            {favorites.map((item) => (
+            {favorites.map((item, index) => (
               <Grid
                 item
                 xs={12}
                 sm={6}
                 md={4}
                 lg={3}
-                key={item.favoriteId}
+                key={index}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
