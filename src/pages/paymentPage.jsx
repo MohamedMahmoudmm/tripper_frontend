@@ -75,7 +75,6 @@ function PaymentForm() {
         setErrorMessage(error.message);
         setPaymentStatus("error");
       } else if (paymentIntent.status === "succeeded") {
-        // ✅ Update payment status via webhook
         await axiosInstance.post("/payment/webhook", {
           type: "payment_intent.succeeded",
           data: {
@@ -88,10 +87,9 @@ function PaymentForm() {
         console.log("Payment successful!");
         setPaymentStatus("success");
         
-        // Navigate to profile after 2 seconds
         setTimeout(() => {
-          navigate("/guest/profile");
-        }, 2000);
+    navigate("/my-trips");  
+  }, 2000)
       }
     } catch (err) {
       console.error("Payment error:", err);
