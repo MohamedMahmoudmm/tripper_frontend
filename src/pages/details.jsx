@@ -51,15 +51,16 @@ useEffect(() => {
     <Box sx={{ p: 4, backgroundColor: "#fafafa", minHeight: "100vh" }}>
       <GridImages
         images={place.images}
-        title={place.name + ", " + place.address.city}
-      />
+        title={place.name}
+        location = {place.address}
+        />
       <DescriptonComponent place={place} model={formatModel(model)} />
       {
         model === "hotel" ? <PlaceOffers amenities={place.amenities} />:model === "experiance" ? <WhatYoullDo activities={place.activities} />:null
       }
 
       {
-         <PlaceReviews canReview={canReview} model={model==='places'?'Place':formatModel(model)} itemId={id} />}
+        <PlaceReviews canReview={canReview} model={model==='places'?'Place':formatModel(model)} itemId={id} />}
 
       <FooterComponent />
     </Box>
