@@ -49,16 +49,9 @@ const HomePage = () => {
             id: hotel._id,
             model: "hotel",
           });
-
           return acc;
         }, {});
 
-        const allPrices = allHotels.map((h) => Number(h.price) || 0);
-        const maxP = Math.max(...allPrices);
-        const minP = Math.min(...allPrices);
-
-        setMaxPrice(maxP);
-        setPriceRange([minP, maxP]);
         setCityHotels(groupedByCity);
       } catch (err) {
         console.error("Error loading hotels:", err);
@@ -139,7 +132,6 @@ const HomePage = () => {
         </Box>
       </Box>
 
-      {/* FILTERED HOTELS */}
       {Object.keys(cityHotels)
         .filter((city) => selectedCity === "All" || city === selectedCity)
         .map((city) => {
