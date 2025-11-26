@@ -43,7 +43,7 @@ const formatChatTime = (timestamp) => {
       }}
     >
       {senderid !== myId && showAvatar && (
-        <Avatar  src={reciver.avatar ? `http://127.0.0.1:4000${reciver.avatar}` : "https://www.freeiconspng.com/thumbs/profile-icon-png/profile-icon-9.png"}
+        <Avatar  src={reciver.avatar ? `${reciver.image}` : "https://www.freeiconspng.com/thumbs/profile-icon-png/profile-icon-9.png"}
  sx={{ width: 36, height: 36 }} />
       )}
 
@@ -80,7 +80,7 @@ const formatChatTime = (timestamp) => {
       </Box>
 
       {senderid === myId && showAvatar && (
-        <Avatar src={!myAvater?`http://127.0.0.1:4000${myAvater}`:"https://www.freeiconspng.com/thumbs/profile-icon-png/profile-icon-9.png"}
+        <Avatar src={!myAvater?`${myAvater}`:"https://www.freeiconspng.com/thumbs/profile-icon-png/profile-icon-9.png"}
  sx={{ width: 36, height: 36, opacity: 0 }} />
        
       )}

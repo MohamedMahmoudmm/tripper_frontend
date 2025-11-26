@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Box, Typography, Grid, Button, Container } from "@mui/material";
+import React, { useEffect, useState, useCallback } from "react";
+import { Box, Typography, Grid, Button, Container, CircularProgress } from "@mui/material";
 import HomeCard from "../components/sharedComponents/HomeCard";
 import { useNavigate } from "react-router-dom";
 import FooterComponent from "../components/onBoardingComponents/footer";
 
 export default function FavouritePage() {
   const [favorites, setFavorites] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -47,14 +48,14 @@ export default function FavouritePage() {
             justifyContent="center"
             alignItems="stretch"
           >
-            {favorites.map((item, index) => (
+            {favorites.map((item) => (
               <Grid
                 item
                 xs={12}
                 sm={6}
                 md={4}
                 lg={3}
-                key={index}
+                key={item.favoriteId}
                 sx={{
                   display: "flex",
                   justifyContent: "center",
