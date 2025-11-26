@@ -117,7 +117,7 @@ export default function TopPlacesSection() {
                   {place.address.city}, {place.address.country}
                 </Typography>
 
-                <Button
+                {/* <Button
                   variant="contained"
                   sx={{
                     mt: 2,
@@ -130,7 +130,7 @@ export default function TopPlacesSection() {
                   onClick={() => handleAddToPlan(place)}
                 >
                   Add to Plan
-                </Button>
+                </Button> */}
               </CardContent>
             </Card>
           </Grid>
