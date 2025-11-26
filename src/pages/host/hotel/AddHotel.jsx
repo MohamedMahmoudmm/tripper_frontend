@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Container,
   Paper,
@@ -6,6 +6,8 @@ import {
   Divider,
   Box,
   Button,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { ArrowBackIosNew } from "@mui/icons-material";
 import { useForm, FormProvider } from "react-hook-form";
@@ -26,9 +28,10 @@ const AddHotel = () => {
   const methods = useForm({
     resolver: yupResolver(addHotelSchema),
     defaultValues: {
+      type: "hotel",
       title: "",
       description: "",
-      price: "",
+      price: null, 
       country: "",
       city: "",
       street: "",
@@ -41,25 +44,38 @@ const AddHotel = () => {
 
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [tab, setTab] = useState(0);
+
+  const tabToType = ["hotel", "villa", "apartment"];
+  const tabTitles = ["🏨 Add Hotel", "🏡 Add Villa", "🏢 Add Apartment"];
+
+  useEffect(() => {
+    methods.setValue("type", tabToType[tab], { shouldValidate: true, shouldDirty: true });
+  }, [tab, methods]);
 
   const onSubmit = async (data) => {
     try {
       setLoading(true);
       const formData = new FormData();
 
+      formData.append("type", data.type);
       formData.append("name", data.title);
       formData.append("description", data.description);
-      formData.append("price", Number(data.price));
+
+    
+      formData.append("price", data.type === "hotel" ? 0 : Number(data.price ?? 0));
 
       formData.append("address[country]", data.country || "Egypt");
       formData.append("address[city]", data.city || "Cairo");
       formData.append("address[street]", data.street || "Any Street");
 
-      data.amenities.forEach(item => {
+      (data.amenities || []).forEach((item) => {
         formData.append("amenities[]", item);
       });
-      data.photos.forEach((file) => formData.append("images", file));
-      if (data.rooms && data.rooms.length > 0) {
+
+      (data.photos || []).forEach((file) => formData.append("images", file));
+
+      if (data.type === "hotel" && data.rooms?.length > 0) {
         data.rooms.forEach((room, index) => {
           formData.append(`rooms[${index}][name]`, room.name);
           formData.append(`rooms[${index}][price]`, room.price);
@@ -67,15 +83,16 @@ const AddHotel = () => {
           formData.append(`rooms[${index}][maxGuests]`, room.maxGuests);
         });
       }
+
       await hotelService.addHotel(formData);
 
-      toast.success("Hotel added successfully! ");
+      toast.success(`${data.type} added successfully!`);
 
-      methods.reset();
+      methods.reset(); 
       setTimeout(() => navigate("/host/listings"), 1200);
     } catch (err) {
-      console.error("Add hotel error:", err.response?.data || err);
-      toast.error(err.response?.data?.message || "Failed to add hotel ");
+      console.error("Add property error:", err.response?.data || err);
+      toast.error(err.response?.data?.message || "Failed to add listing");
     } finally {
       setLoading(false);
     }
@@ -110,6 +127,7 @@ const AddHotel = () => {
             Back
           </Button>
 
+          {/* Dynamic Title */}
           <Typography
             variant="h4"
             fontWeight="bold"
@@ -117,30 +135,44 @@ const AddHotel = () => {
             textAlign="center"
             color="#034959"
           >
-            🏨 Add Hotel
+            {tabTitles[tab]}
           </Typography>
+
+          {/* Tabs */}
+          <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 3 }}>
+            <Tabs value={tab} onChange={(e, v) => setTab(v)} centered>
+              <Tab label="Hotel" />
+              <Tab label="Villa" />
+              <Tab label="Apartment" />
+            </Tabs>
+          </Box>
 
           <Divider sx={{ mb: 4 }} />
 
           <FormProvider {...methods}>
             <Box component="form" onSubmit={methods.handleSubmit(onSubmit)} noValidate>
               <Paper sx={{ p: 3, mb: 3 }}>
-                <ListingDetailsForm type="hotel" />
+                <ListingDetailsForm />
               </Paper>
 
               <Paper sx={{ p: 3, mb: 3 }}>
                 <AmenitiesForm />
               </Paper>
-              <Paper sx={{ p: 3, mb: 3 }}>
-                <RoomsForm />
-              </Paper>
+
+              {/* Only show rooms for Hotels */}
+              {methods.watch("type") === "hotel" && (
+                <Paper sx={{ p: 3, mb: 3 }}>
+                  <RoomsForm />
+                </Paper>
+              )}
 
               <Paper sx={{ p: 3, mb: 3 }}>
                 <PhotosUploader />
               </Paper>
 
               <Box textAlign="center">
-                <SubmitSection onSubmit={methods.handleSubmit(onSubmit)} loading={loading} />
+                
+                <SubmitSection loading={loading} />
               </Box>
             </Box>
           </FormProvider>

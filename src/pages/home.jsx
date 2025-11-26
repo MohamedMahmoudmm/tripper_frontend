@@ -19,6 +19,34 @@ const HomePage = () => {
   const [maxPrice, setMaxPrice] = useState(5000);
 
   useEffect(() => {
+    // const fetchHotelsByCity = async () => {
+    //   try {
+    //     const allHotels = await hotelService.getAllHotels();
+
+    //     const groupedByCity = allHotels.reduce((acc, hotel) => {
+    //       let city = hotel.address?.city || "Other";
+    //       city = city.trim().toLowerCase();
+    //       const cityDisplay = city.charAt(0).toUpperCase() + city.slice(1);
+
+    //       if (!acc[cityDisplay]) acc[cityDisplay] = [];
+    //       acc[cityDisplay].push({
+    //         image: hotel.images?.[0] || "https://via.placeholder.com/150",
+    //         title: hotel.name,
+    //         rating: hotel.starRating || 4.5,
+    //         price: `${hotel.price} ج.م / night`,
+    //         id: hotel._id,
+    //         model: "hotel",
+    //       });
+    //       return acc;
+    //     }, {});
+
+    //     setCityHotels(groupedByCity);
+    //   } catch (err) {
+    //     console.error("Error loading hotels:", err);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
     const fetchHotelsByCity = async () => {
       try {
         const allHotels = await hotelService.getAllHotels();
@@ -29,11 +57,23 @@ const HomePage = () => {
           const cityDisplay = city.charAt(0).toUpperCase() + city.slice(1);
 
           if (!acc[cityDisplay]) acc[cityDisplay] = [];
+
+          let displayPrice = hotel.price;
+          if (hotel.rooms && hotel.rooms.length > 0) {
+            const roomPrices = hotel.rooms.map((r) => r.price);
+            displayPrice = Math.min(...roomPrices);
+          }
+
+          const priceText =
+            hotel.rooms && hotel.rooms.length > 0
+              ? `From ${displayPrice} ج.م / night`
+              : `${displayPrice} ج.م / night`;
+
           acc[cityDisplay].push({
             image: hotel.images?.[0] || "https://via.placeholder.com/150",
             title: hotel.name,
             rating: hotel.starRating || 4.5,
-            price: Number(hotel.price),
+            price: priceText,
             id: hotel._id,
             model: "hotel",
           });

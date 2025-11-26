@@ -1,12 +1,17 @@
 import React from "react";
 import { TextField, Grid } from "@mui/material";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, Controller } from "react-hook-form";
 
-const ListingDetailsForm = ({ type }) => {
+const ListingDetailsForm = () => {
   const {
     register,
+    watch,
+    control,
     formState: { errors },
   } = useFormContext();
+
+  const type = watch("type");
+  const rooms = watch("rooms") || []; 
 
   return (
     <Grid container spacing={2}>
@@ -14,94 +19,61 @@ const ListingDetailsForm = ({ type }) => {
       <Grid item xs={12}>
         <TextField
           label="Title"
-          {...register("title", { required: "Title is required" })}
+          {...register("title")}
           fullWidth
-          required
           error={!!errors.title}
           helperText={errors.title?.message}
         />
       </Grid>
 
-      {/* Price */}
-      <Grid item xs={12} sm={6}>
-        <TextField
-          label="Price"
-          type="number"
-          {...register("price", {
-            required: "Price is required",
-            valueAsNumber: true,
-            min: { value: 0, message: "Price must be a positive number" },
-          })}
-          fullWidth
-          required
-          error={!!errors.price}
-          helperText={errors.price?.message}
-          inputProps={{ min: 0 }}
-          onInput={(e) => {
-            if (e.target.value < 0) e.target.value = 0;
-          }}
-        />
-      </Grid>
+      {/* Price  */}
+      {type !== "hotel" && rooms.length === 0 && (
+        <Grid item xs={12} sm={6}>
+          <Controller
+            name="price"
+            control={control}
+            defaultValue={null}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Price"
+                type="number"
+                fullWidth
+                error={!!errors.price}
+                helperText={errors.price?.message}
+                onChange={(e) =>
+                  field.onChange(e.target.value === "" ? null : Number(e.target.value))
+                }
+                value={field.value ?? ""}
+              />
+            )}
+          />
+        </Grid>
+      )}
 
       {/* Country */}
       <Grid item xs={12} sm={6}>
-        <TextField
-          label="Country"
-          {...register("country", { required: "Country is required" })}
-          fullWidth
-          required
-          error={!!errors.country}
-          helperText={errors.country?.message}
-        />
+        <TextField label="Country" {...register("country")} fullWidth />
       </Grid>
 
       {/* City */}
       <Grid item xs={12} sm={6}>
-        <TextField
-          label="City"
-          {...register("city", { required: "City is required" })}
-          fullWidth
-          required
-          error={!!errors.city}
-          helperText={errors.city?.message}
-        />
+        <TextField label="City" {...register("city")} fullWidth />
       </Grid>
 
       {/* Street */}
       <Grid item xs={12} sm={6}>
-        <TextField
-          label="Street"
-          {...register("street", { required: "Street is required" })}
-          fullWidth
-          required
-          error={!!errors.street}
-          helperText={errors.street?.message}
-        />
+        <TextField label="Street" {...register("street")} fullWidth />
       </Grid>
 
       {/* Description */}
       <Grid item xs={12}>
         <TextField
           label="Description"
-          {...register("description", {
-            required: "Description is required",
-            minLength: {
-              value: 10,
-              message: "Description must be at least 10 characters long",
-            },
-          })}
+          {...register("description")}
           multiline
           minRows={4}
           fullWidth
-          required
-          variant="outlined"
-          sx={{
-            "& .MuiInputBase-root": { padding: "10px" },
-            "& textarea": {
-              overflow: "hidden !important",
-              resize: "none",
-            },
-          }}
           error={!!errors.description}
           helperText={errors.description?.message}
         />
@@ -109,5 +81,4 @@ const ListingDetailsForm = ({ type }) => {
     </Grid>
   );
 };
-
 export default ListingDetailsForm;

@@ -13,6 +13,17 @@ import {
 import { Edit, Delete } from "@mui/icons-material";
 
 const ListingCard = ({ listing, onEdit, onDelete }) => {
+  
+  const displayPrice =
+    listing.rooms && listing.rooms.length > 0
+      ? Math.min(...listing.rooms.map((r) => r.price)) 
+      : listing.price;
+
+  const priceText =
+    listing.rooms && listing.rooms.length > 0
+      ? `from $${displayPrice} / night`
+      : `$${displayPrice} / night`;
+
   return (
     <Grid item xs={12} sm={6} md={4}>
       <Card
@@ -31,7 +42,7 @@ const ListingCard = ({ listing, onEdit, onDelete }) => {
         <Box sx={{ position: "relative" }}>
           <CardMedia
             component="img"
-            image={listing.images?.[0]}
+            image={listing.images?.[0] || "/placeholder.jpg"}
             alt={listing.name}
             sx={{ height: 220, objectFit: "cover" }}
           />
@@ -49,7 +60,7 @@ const ListingCard = ({ listing, onEdit, onDelete }) => {
               fontWeight: 500,
             }}
           >
-            ${listing.price} / night
+            {priceText}
           </Box>
         </Box>
 
