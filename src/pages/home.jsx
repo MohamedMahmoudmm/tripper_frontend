@@ -69,14 +69,16 @@ const HomePage = () => {
               ? `From ${displayPrice} ج.م / night`
               : `${displayPrice} ج.م / night`;
 
-          acc[cityDisplay].push({
-            image: hotel.images?.[0] || "https://via.placeholder.com/150",
-            title: hotel.name,
-            rating: hotel.starRating || 4.5,
-            price: priceText,
-            id: hotel._id,
-            model: "hotel",
-          });
+        acc[cityDisplay].push({
+  image: hotel.images?.[0] || "https://via.placeholder.com/150",
+  title: hotel.name,
+  rating: hotel.starRating || 4.5,
+  price: priceText,        // للعرض فقط
+  numericPrice: displayPrice,  // للفلترة
+  id: hotel._id,
+  model: "hotel",
+});
+
 
           return acc;
         }, {});
@@ -155,8 +157,9 @@ const HomePage = () => {
         .filter((city) => selectedCity === "All" || city === selectedCity)
         .map((city) => {
           const filteredHotels = cityHotels[city].filter((hotel) => {
-            return hotel.price >= priceRange[0] && hotel.price <= priceRange[1];
-          });
+  return hotel.numericPrice >= priceRange[0] && hotel.numericPrice <= priceRange[1];
+});
+
 
           if (filteredHotels.length === 0) return null;
 
@@ -174,3 +177,5 @@ const HomePage = () => {
 };
 
 export default HomePage;
+
+
