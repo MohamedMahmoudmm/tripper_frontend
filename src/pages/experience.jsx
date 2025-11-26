@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import PopularHomesCarousel from "../components/sharedComponents/PopularHomesCarousel";
 import experienceService from "../services/experince.service";
 import PriceFilter from "../components/sharedComponents/PriceFilter";
+import SearchBar from "../components/sharedComponents/SearchBar";
 import {
   Box,
   FormControl,
@@ -15,6 +16,7 @@ export default function ExperiencePage() {
   const [cityExperiences, setCityExperiences] = useState({});
   const [loading, setLoading] = useState(true);
   const [selectedCity, setSelectedCity] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [priceRange, setPriceRange] = useState([0, 0]);
   const [maxPrice, setMaxPrice] = useState(5000);
@@ -69,60 +71,83 @@ export default function ExperiencePage() {
 
   return (
     <Box sx={{ pb: 6 }}>
-      
-      {/* Filters */}
+      {/* FILTERS SECTION */}
       <Box
         sx={{
-          display: "flex",
-          justifyContent: "center",
           mt: 3,
           mb: 4,
-          gap:4,
-          flexWrap: "wrap",
+          px: { xs: 2, md: 0 },
         }}
       >
-        {/* City Filter */}
-        <FormControl
+        {/* Search Bar - Full Width */}
+        <Box sx={{ mb: 3 }}>
+          <SearchBar
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search experiences by name..."
+          />
+        </Box>
+
+        {/* City Select and Price Filter - Side by Side */}
+        <Box
           sx={{
-            width: "250px",
-            backgroundColor: "white",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-            borderRadius: "8px",
-            mb: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 3,
+            flexDirection: { xs: "column", md: "row" },
           }}
         >
-          <InputLabel id="city-select-label">Select City</InputLabel>
-          <Select
-            labelId="city-select-label"
-            value={selectedCity}
-            label="Select City"
-            onChange={(e) => setSelectedCity(e.target.value)}
-            sx={{ borderRadius: "8px" }}
-          >
-            {cities.map((city, index) => (
-              <MenuItem key={index} value={city}>
-                {city}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          {/* City Dropdown - Left side, Takes 40% on desktop */}
+          <Box sx={{ flex: { xs: "1", md: "0 0 40%" } }}>
+            <FormControl
+              fullWidth
+              sx={{
+                backgroundColor: "white",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
+                borderRadius: "8px",
+              }}
+            >
+              <InputLabel id="city-select-label">Select City</InputLabel>
+              <Select
+                labelId="city-select-label"
+                value={selectedCity}
+                label="Select City"
+                onChange={(e) => setSelectedCity(e.target.value)}
+              >
+                {cities.map((city, index) => (
+                  <MenuItem key={index} value={city}>
+                    {city}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </Box>
 
-        {/* Price Filter Component */}
-        <PriceFilter
-          value={priceRange}
-          maxPrice={maxPrice}
-          onChange={(newRange) => setPriceRange(newRange)}
-        />
+          {/* Price Filter - Right side, Takes 40% on desktop */}
+          <Box sx={{ flex: { xs: "1", md: "0 0 40%" } }}>
+            <PriceFilter
+              value={priceRange}
+              maxPrice={maxPrice}
+              onChange={(newRange) => setPriceRange(newRange)}
+            />
+          </Box>
+        </Box>
       </Box>
 
       {/* Filtered Experiences */}
       {Object.keys(cityExperiences)
         .filter((city) => selectedCity === "All" || city === selectedCity)
         .map((city) => {
-          const filtered = cityExperiences[city].filter(
-            (exp) =>
-              exp.price >= priceRange[0] && exp.price <= priceRange[1]
-          );
+          const filtered = cityExperiences[city].filter((exp) => {
+            const matchesPrice =
+              exp.price >= priceRange[0] && exp.price <= priceRange[1];
+
+            const matchesSearch = exp.title
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase());
+
+            return matchesPrice && matchesSearch;
+          });
 
           if (filtered.length === 0) return null;
 
