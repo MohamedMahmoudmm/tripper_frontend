@@ -231,6 +231,24 @@ const switchRole = async (role) => {
                 Login
               </Button>
             )}
+                        {
+            token && (
+  <Button
+    variant="text"
+    sx={{
+      color: "#f27244",
+      fontWeight: 600,
+      textTransform: "none",
+      "&:hover": { textDecoration: "underline" },
+    }}
+    onClick={() => {
+      authService.logout();
+      navigate("/login");   
+    }}
+  >
+    Logout
+  </Button>
+)}
 
             <IconButton
               sx={{ display: { xs: "flex", md: "none" } }}

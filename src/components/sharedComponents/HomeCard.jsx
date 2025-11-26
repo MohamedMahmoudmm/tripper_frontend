@@ -15,6 +15,7 @@ import { useNavigate } from "react-router-dom";
 
 const HomeCard = ({ image, title, price, rating,model, id }) => {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   // ✅ Check if this card is already in favourites
@@ -41,12 +42,8 @@ const HomeCard = ({ image, title, price, rating,model, id }) => {
     localStorage.setItem("favorites", JSON.stringify(favorites));
   };
 
-  // ✅ Navigate to details page with data
+  // ✅ Navigate to details page
   const handleCardClick = () => {
-    localStorage.setItem(
-      "selectedPlace",
-      JSON.stringify({ image, title, price, rating })
-    );
     navigate(`/${model}/details/${id}`);
   };
 
@@ -85,6 +82,7 @@ const HomeCard = ({ image, title, price, rating,model, id }) => {
         {/* Favourite Icon */}
         <IconButton
           onClick={toggleFavorite}
+          disabled={loading}
           sx={{
             position: "absolute",
             top: 8,
