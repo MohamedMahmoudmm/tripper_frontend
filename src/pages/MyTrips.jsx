@@ -9,10 +9,24 @@ import {
   Typography,
   Skeleton,
 } from "@mui/material";
+import { Payment as PaymentIcon } from "@mui/icons-material";
+import { Chip, Button } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function MyTrips() {
   const [reservations, setReservations] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const navigate = useNavigate();
+
+    const handlePayNow = (reservation) => {
+    navigate("/payment", {
+      state: {
+        reservationId: reservation._id,
+        amount: reservation.totalPrice,
+      },
+    });
+  };
 
   useEffect(() => {
     const fetchReservations = async () => {
@@ -48,6 +62,21 @@ export default function MyTrips() {
         })
       : null;
 
+
+          const getStatusColor = () => {
+      if (res.paymentStatus === "succeeded") return "success";
+      if (res.status === "confirmed" && res.paymentStatus === "unpaid") return "warning";
+      if (res.status === "pending") return "info";
+      if (res.status === "cancelled") return "error";
+      return "default";
+    };
+
+    const getStatusText = () => {
+      if (res.paymentStatus === "succeeded") return "Paid";
+      if (res.status === "confirmed" && res.paymentStatus === "unpaid") return "Awaiting Payment";
+      return res.status;
+    };
+
     return (
       <Card
         sx={{
@@ -60,23 +89,19 @@ export default function MyTrips() {
         }}
       >
         {/* Status badge */}
-        <Box
+         <Chip
+          label={getStatusText()}
+          color={getStatusColor()}
+          size="small"
           sx={{
             position: "absolute",
             top: 10,
             left: 10,
-            background: "white",
-            px: 1.5,
-            py: 0.5,
-            borderRadius: 2,
-            fontSize: "12px",
             fontWeight: "bold",
             textTransform: "capitalize",
+            zIndex: 1,
           }}
-        >
-          {res.status}
-        </Box>
-
+        />
         <CardMedia component="img" height="200" image={img} alt={title} sx={{ objectFit: "cover" }} />
 
         <CardContent>
@@ -95,6 +120,26 @@ export default function MyTrips() {
           <Typography variant="body1" mt={1} fontWeight="bold">
             ${price} total
           </Typography>
+          
+             {/* إضافة زرار Pay Now */}
+          {res.status === "confirmed" && res.paymentStatus === "unpaid" && (
+            <Button
+              variant="contained"
+              fullWidth
+              startIcon={<PaymentIcon />}
+              onClick={() => handlePayNow(res)}
+              sx={{
+                mt: 2,
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                fontWeight: "bold",
+                "&:hover": {
+                  background: "linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)",
+                },
+              }}
+            >
+              Pay Now
+            </Button>
+          )}
         </CardContent>
       </Card>
     );
