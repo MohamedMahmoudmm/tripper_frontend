@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, CircularProgress } from "@mui/material";
 
-const SubmitSection = ({ onSubmit, loading }) => {
+const SubmitSection = ({ loading }) => {
   return (
     <Button
       variant="contained"
@@ -14,8 +14,7 @@ const SubmitSection = ({ onSubmit, loading }) => {
         textTransform: "none",
         "&:hover": { bgcolor: "#034959" },
       }}
-      type="submit"
-      onClick={onSubmit}
+      type="submit"                // <-- keep only submit
       disabled={loading}
     >
       {loading ? (
@@ -26,7 +25,7 @@ const SubmitSection = ({ onSubmit, loading }) => {
           }}
         />
       ) : (
-        "Save Hotel"
+        "Save"
       )}
     </Button>
   );

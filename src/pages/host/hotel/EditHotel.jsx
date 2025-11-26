@@ -12,23 +12,23 @@ import { ArrowBackIosNew } from "@mui/icons-material";
 import { useForm, FormProvider } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
-
 import toast from "react-hot-toast";
-import { editHotelSchema } from "../validation/hotelSchema";
 
+import { editHotelSchema } from "../validation/hotelSchema";
 import ListingDetailsForm from "../../../components/host/hotel/ListingDetailsForm";
 import AmenitiesForm from "../../../components/host/hotel/AmenitiesForm";
 import PhotosUploader from "../../../components/host/hotel/PhotosUploader";
+import RoomsForm from "../../../components/host/hotel/RoomsForm";
 import SubmitSection from "../../../components/host/hotel/SubmitSection";
 import HostLayout from "../../../components/host/HostLayout";
 import hotelService from "../../../services/hotels.service";
-import RoomsForm from "../../../components/host/hotel/RoomsForm";
 
 const EditHotel = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [saving, setSaving] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [hasRooms, setHasRooms] = useState(false);
 
   const methods = useForm({
     resolver: yupResolver(editHotelSchema),
@@ -46,12 +46,16 @@ const EditHotel = () => {
     },
   });
 
-
   useEffect(() => {
     const fetchHotel = async () => {
       try {
         const hotel = await hotelService.getHotelById(id);
 
+        
+        const roomsExist = hotel.rooms && hotel.rooms.length > 0;
+        setHasRooms(roomsExist);
+
+        // normalize amenities
         let normalizedAmenities = [];
         (hotel.amenities || []).forEach((a) => {
           if (typeof a === "string") {
@@ -69,14 +73,14 @@ const EditHotel = () => {
         methods.reset({
           title: hotel.name,
           description: hotel.description || "",
-          price: hotel.price || "",
+          price: roomsExist ? null : hotel.price || null,
           country: hotel.address?.country || "",
           city: hotel.address?.city || "",
           street: hotel.address?.street || "",
           amenities: normalizedAmenities,
           oldPhotos: hotel.images || [],
           photos: [],
-          rooms: hotel.rooms || [], 
+          rooms: roomsExist ? hotel.rooms : [],
         });
       } catch {
         toast.error("Failed to load hotel data");
@@ -91,21 +95,23 @@ const EditHotel = () => {
   const onSubmit = async (data) => {
     try {
       setSaving(true);
+
+      const roomsExist = data.rooms && data.rooms.length > 0;
+
       const payload = {
         name: data.title,
         description: data.description,
-        price: Number(data.price),
+        price: roomsExist ? 0 : Number(data.price),
         address: {
           country: data.country,
           city: data.city,
           street: data.street,
         },
         amenities: data.amenities,
-        rooms: data.rooms
+        rooms: roomsExist ? data.rooms : [],
       };
 
       await hotelService.updateHotel(id, payload);
-
       toast.success("Hotel updated successfully!");
       setTimeout(() => navigate("/host/listings"), 1200);
     } catch (err) {
@@ -118,7 +124,12 @@ const EditHotel = () => {
   if (loading)
     return (
       <HostLayout>
-        <Box display="flex" justifyContent="center" alignItems="center" minHeight="70vh">
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          minHeight="70vh"
+        >
           <CircularProgress />
         </Box>
       </HostLayout>
@@ -126,14 +137,10 @@ const EditHotel = () => {
 
   return (
     <HostLayout>
-      <Container maxWidth="md" >
+      <Container maxWidth="md">
         <Paper
           elevation={3}
-          sx={{
-            p: { xs: 2, sm: 4 },
-            borderRadius: 4,
-            position: "relative",
-          }}
+          sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4, position: "relative" }}
         >
           <Button
             startIcon={<ArrowBackIosNew />}
@@ -145,9 +152,7 @@ const EditHotel = () => {
               color: "#f27244",
               fontWeight: 600,
               textTransform: "none",
-              "&:hover": {
-                color: "#034959",
-              },
+              "&:hover": { color: "#034959" },
             }}
           >
             Back
@@ -166,24 +171,31 @@ const EditHotel = () => {
           <Divider sx={{ mb: 4 }} />
 
           <FormProvider {...methods}>
-            <Box component="form" onSubmit={methods.handleSubmit(onSubmit)} noValidate>
+            <Box
+              component="form"
+              onSubmit={methods.handleSubmit(onSubmit)}
+              noValidate
+            >
               <Paper sx={{ p: 3, mb: 3 }}>
-                <ListingDetailsForm type="hotel" />
+                <ListingDetailsForm />
               </Paper>
 
               <Paper sx={{ p: 3, mb: 3 }}>
                 <AmenitiesForm />
               </Paper>
-              <Paper sx={{ p: 3, mb: 3 }}>
-                <RoomsForm />
-              </Paper>
+
+              {methods.watch("rooms")?.length > 0 && (
+                <Paper sx={{ p: 3, mb: 3 }}>
+                  <RoomsForm showRooms={true} />
+                </Paper>
+              )}
 
               <Paper sx={{ p: 3, mb: 3 }}>
                 <PhotosUploader />
               </Paper>
 
               <Box textAlign="center">
-                <SubmitSection onSubmit={methods.handleSubmit(onSubmit)} loading={saving}  />
+                <SubmitSection loading={saving} />
               </Box>
             </Box>
           </FormProvider>
