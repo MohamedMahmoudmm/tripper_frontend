@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
+import { set } from "react-hook-form";
 
 export default function BookingBox({ place, model }) {
   const navigate = useNavigate();
@@ -21,8 +22,9 @@ export default function BookingBox({ place, model }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [selectedRoom, setSelectedRoom] = useState(null);
-
+  const [roomCount, setRoomCount] = useState(1);
   const pricePerNight = selectedRoom?.price || place.price;
+const [availableRooms, setAvailableRooms] = useState(null);
 
   const getTodayDate = () => {
     const today = new Date();
@@ -53,7 +55,7 @@ export default function BookingBox({ place, model }) {
       if (end > start) {
         const diffDays = (end - start) / (1000 * 60 * 60 * 24);
         setNights(diffDays);
-        setTotalPrice(diffDays * guests * pricePerNight);
+setTotalPrice(diffDays * pricePerNight * roomCount);
       } else {
         setNights(0);
         setTotalPrice(0);
@@ -62,6 +64,23 @@ export default function BookingBox({ place, model }) {
       setTotalPrice(1 * guests * pricePerNight);
     }
   }, [checkIn, checkOut, guests, model, pricePerNight]);
+const fetchAvailability = async (date) => {
+  if (!selectedRoom?._id) return;
+
+  try {
+    const res = await axiosInstance.get("/api/reservations/availability", {
+      params: {
+        hotelId: place._id,
+        roomId: selectedRoom._id,
+        date
+      }
+    });
+
+    setAvailableRooms(res.data.available);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   const handleReserve = async () => {
     try {
@@ -77,6 +96,7 @@ export default function BookingBox({ place, model }) {
       if (model.toLowerCase() === "hotel") {
         payload.hotelId = place._id;
         payload.roomId = selectedRoom?._id;
+        payload.roomCount = roomCount;
       } else if (model.toLowerCase() === "experiance") {
         payload.experienceId = place._id;
       }
@@ -84,14 +104,15 @@ export default function BookingBox({ place, model }) {
       // ✅ Create reservation only (NO payment yet)
       const res = await axiosInstance.post("/api/reservations", payload);
       console.log("Reservation created:", res.data);
-      
+      setLoading(false);
+      setMessage("✅ Reservation created successfully.");
       // ✅ Navigate to payment page with reservation data
-      navigate("/payment", { 
-        state: { 
-          reservationId: res.data._id,
-          amount: res.data.totalPrice 
-        } 
-      });
+      // navigate("/payment", { 
+      //   state: { 
+      //     reservationId: res.data._id,
+      //     amount: res.data.totalPrice 
+      //   } 
+      // });
       
     } catch (err) {
       console.error(err);
@@ -164,6 +185,26 @@ export default function BookingBox({ place, model }) {
             ))}
           </TextField>
         )}
+{model.toLowerCase() === "hotel" && place.rooms?.length > 0 && (
+  <TextField
+    select
+    label="Rooms Count"
+    value={roomCount}
+    onChange={(e) => {
+      const value = Number(e.target.value);
+      setRoomCount(value);
+      setTotalPrice(nights * guests * pricePerNight * value);
+    }}
+    fullWidth
+    sx={{ mb: 2 }}
+  >
+    {[1, 2, 3, 4, 5].map((num) => (
+      <MenuItem key={num} value={num}>
+        {num} {num === 1 ? "room" : "rooms"}
+      </MenuItem>
+    ))}
+  </TextField>
+)}
 
         <Box sx={{ mt: 2 }}>
           <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
@@ -173,8 +214,10 @@ export default function BookingBox({ place, model }) {
                   label="Check-in"
                   type="date"
                   value={checkIn}
-                  onChange={(e) => setCheckIn(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
+                  onChange={(e) => {
+                    setCheckIn(e.target.value);
+                    fetchAvailability(e.target.value);
+                  }} InputLabelProps={{ shrink: true }}
                   inputProps={{ min: getTodayDate() }}
                   fullWidth
                 />
@@ -210,6 +253,14 @@ export default function BookingBox({ place, model }) {
               </TextField>
             )}
           </Box>
+          {/* {availableRooms !== null && (
+  <Typography sx={{ mt: 1, color: availableRooms > 0 ? "green" : "red" }}>
+    {availableRooms > 0
+      ? `Available rooms: ${availableRooms}`
+      : "No rooms available on this date"}
+  </Typography>
+)} */}
+
 
           {model.toLowerCase() === "experiance" && (
             <TextField

@@ -130,6 +130,7 @@ export default function PlaceDetails() {
         title={place.name}
         itemId={place._id}
         itemType={getItemType(model)}
+        location = {place.address}
       />
       <DescriptonComponent place={place} model={formatModel(model)} />
       {model === "hotel" ? (
@@ -190,6 +191,8 @@ export default function PlaceDetails() {
           )}
         </Box>
       )}
+      {
+        <PlaceReviews canReview={canReview} model={model==='places'?'Place':formatModel(model)} itemId={id} />}
 
       <FooterComponent />
     </Box>

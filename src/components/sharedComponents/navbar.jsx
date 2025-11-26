@@ -84,6 +84,10 @@ const switchRole = async (role) => {
     navigate(path);
     handleMenuClose();
   };
+  const checkUserRoleOndatabase = async() => {
+    
+    
+  };
 
   // 🔹 رفع البطاقة
   const handleUpload = async () => {
