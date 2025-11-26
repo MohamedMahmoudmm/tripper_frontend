@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import BookingBox from "./bookingBox";
 import { useState } from "react";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
+import AirbnbDatePicker from "./availableCalinder";
 
 export default function DescriptonComponent({ place, model }) {
   const navigate = useNavigate();
@@ -10,6 +11,11 @@ const [expanded, setExpanded] = useState(false);
 const [convid, setConvid] = useState(null);
 const myId=JSON.parse(localStorage.getItem("user"))._id
 
+const availableDates = [
+    { start: new Date(2025, 11, 1), end: new Date(2025, 11, 15) },
+    { start: new Date(2025, 11, 20), end: new Date(2026, 0, 5) },
+    { start: new Date(2026, 0, 10), end: new Date(2026, 0, 20) }
+  ];
   const host = place.hostId
 function startConversation(id) {
   axiosInstance
@@ -106,6 +112,10 @@ function startConversation(id) {
   {expanded ? "See less" : "See more"}
 </Typography>}
         </Box>
+        {
+          model==='Hotel' &&<Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+      <AirbnbDatePicker availableDates={availableDates} />
+    </Box>}
       </Box>
 
       {

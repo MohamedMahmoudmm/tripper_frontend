@@ -32,7 +32,7 @@ export default function PlaceDetails() {
           // Fetch related items from the same city
           fetchRelatedItems(placeData.address?.city, model, id);
 
-          model !== "Places" &&
+          model.toLocaleLowerCase() !== "places" &&
             axiosInstance
               .get(
                 `/api/reservations/${model === "hotel" ? "hotel" : "experience"}/${id}`
@@ -139,12 +139,7 @@ export default function PlaceDetails() {
         <WhatYoullDo activities={place.activities} />
       ) : null}
 
-      {!canReview && (
-        <PlaceReviews
-          model={model === "places" ? "Place" : formatModel(model)}
-          itemId={id}
-        />
-      )}
+      
 
       {/* Related Items Carousels */}
       {!loading && (
