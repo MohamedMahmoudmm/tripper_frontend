@@ -26,6 +26,11 @@ const HotelReservationsList = () => {
     fetchReservations();
   };
 
+  const handleReject = async (res) => {
+    await hotelReservationsService.reject(res._id);
+    fetchReservations();
+  };
+
   const calculateNights = (checkIn, checkOut) => {
     const inDate = new Date(checkIn);
     const outDate = new Date(checkOut);
@@ -39,6 +44,7 @@ const HotelReservationsList = () => {
       reservations={reservations}
       loading={loading}
       onAccept={handleAccept}
+      onReject={handleReject}
       detailsBasePath="/host/reservations"
       fields={[
         { key: "guest", label: "Guest", render: (r) => r.guestId?.name },
@@ -59,6 +65,8 @@ const HotelReservationsList = () => {
           render: (r) => calculateNights(r.checkIn, r.checkOut),
         },
         { key: "totalPrice", label: "Total($)" },
+        { key: "paymentStatus", label: "Payment", render: r => r.paymentStatus }
+
       ]}
     />
   );

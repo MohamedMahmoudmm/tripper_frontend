@@ -20,7 +20,17 @@ export const hotelReservationsService = {
     });
     return res.data;
   },
+
+  // Reject reservation
+  reject: async (id) => {
+  const res = await axiosInstance.patch(`/api/reservations/${id}/status`, {
+    status: "cancelled",
+  });
+  return res.data;
+},
+
 };
+
 
 
 export const experienceReservationsService = {
