@@ -26,12 +26,18 @@ const ExperienceReservationsList = () => {
     fetchReservations();
   };
 
+  const handleReject = async (res) => {
+      await hotelReservationsService.reject(res._id);
+      fetchReservations();
+    };
+
   return (
     <ReservationsList
       title="Experience Reservations"
       reservations={reservations}
       loading={loading}
       onAccept={handleAccept}
+      onReject={handleReject}
       detailsBasePath="/host/reservations/experience"
       fields={[
         { key: "guest", label: "Guest", render: (r) => r.guestId?.name },
