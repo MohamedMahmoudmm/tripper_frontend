@@ -23,6 +23,7 @@ import authService from "../../services/authservice";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 import logo from "../../assets/navImage.png";
 import { Message } from "@mui/icons-material";
+import toast from "react-hot-toast";
 const Navbar = () => {
   const [lang, setLang] = useState("EN");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -50,33 +51,33 @@ const switchRole = async (role) => {
   console.log("Current user role:", user.role);
 
   try {
-    if (role === "guest" && user.role.includes("host") ) {
-      // Switch from host → guest
-      await authService.swichRole({ newRole: "host" });
-
-      const userString = localStorage.getItem("user");
-      if (userString) {
-        const user = JSON.parse(userString);
-        user.activeRole = "host"; 
-        localStorage.setItem("user", JSON.stringify(user));
-      }
-
-      navigate("/host/listings");
-    } else if (role === "host" && user.role.includes("guest")) {
-      await authService.swichRole({ newRole: "guest" });
+    if (role === "guest" && user.role.includes("host")) {
+      // Switch from guest → host
+      const response = await authService.swichRole({ newRole: "host" });
       
-      const userString = localStorage.getItem("user");
-      if (userString) {
-        const user = JSON.parse(userString);
-        user.activeRole = "guest"; 
-        localStorage.setItem("user", JSON.stringify(user));
-      }
+      // ✅ Token and user already saved in authService.swichRole
+      
+      // Update local user state
+      const updatedUser = authService.getAuthData().user;
+      
+      navigate("/host/listings");
+      window.location.reload(); // Refresh to apply new token
+      
+    } else if (role === "host" && user.role.includes("guest")) {
+      // Switch from host → guest
+      const response = await authService.swichRole({ newRole: "guest" });
+      
+      // ✅ Token and user already saved
+      
       navigate("/home");
+      window.location.reload(); // Refresh to apply new token
+      
     } else {
       console.log("No role change needed.");
     }
   } catch (error) {
     console.error("Error switching role:", error);
+    toast.error("Failed to switch role");
   }
 };
 

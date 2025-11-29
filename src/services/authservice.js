@@ -11,10 +11,17 @@ const authService = {
     return res.data;
   },
 
-  swichRole: async (data) => {
-    const res = await axiosInstance.patch("/user/switch-role", data);
-    return res.data;
-  },
+ swichRole: async (data) => {
+  const res = await axiosInstance.patch("/user/switch-role", data);
+  
+  // ✅ Save new token and user data
+  if (res.data.token) {
+    localStorage.setItem("token", res.data.token);
+    localStorage.setItem("user", JSON.stringify(res.data.user));
+  }
+  
+  return res.data;
+},
 
   logout: () => {
     localStorage.removeItem("token");
