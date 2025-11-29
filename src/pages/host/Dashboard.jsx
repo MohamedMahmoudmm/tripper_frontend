@@ -1,36 +1,32 @@
 import React, { useEffect, useState } from "react";
 import {
+  Box,
   Typography,
   Grid,
   Card,
-  CardContent,
   CardMedia,
-  Box,
-  Button,
+  CardContent,
   Paper,
   Divider,
+  Button,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import hotelService from "../../services/hotels.service";
 
 const Dashboard = () => {
   const navigate = useNavigate();
-
-  const hostStats = [
-    { label: "Your Listings", value: 6 },
-    { label: "Reservations", value: 12 },
-    { label: "Total Earnings", value: "$3,450" },
-  ];
-
   const [recentListings, setRecentListings] = useState([]);
+
   useEffect(() => {
-     hotelService.getHostHotels().then((data) => {
-       console.log(data);
-       setRecentListings(data);
-     }).catch((err) => {
-       console.log(err);
-     });
-  }, [])
+    hotelService
+      .getHostHotels()
+      .then((data) => {
+        setRecentListings(data);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }, []);
 
   return (
     <Box
@@ -40,13 +36,14 @@ const Dashboard = () => {
         alignItems: "flex-start",
         minHeight: "100vh",
         p: 2,
+        bgcolor: "#f5f5f5",
       }}
     >
       <Paper
         elevation={3}
         sx={{
           width: "100%",
-          maxWidth: 1100,
+          maxWidth: 1200,
           p: { xs: 3, md: 5 },
           borderRadius: 4,
           boxShadow: "0 6px 20px rgba(0,0,0,0.06)",
@@ -57,51 +54,15 @@ const Dashboard = () => {
         <Typography
           variant="h4"
           fontWeight="bold"
-          sx={{ mb: 3, textAlign: "center" , color: "#034959" }}
+          sx={{ mb: 3, textAlign: "center", color: "#034959" }}
         >
           Dashboard
         </Typography>
 
         <Divider sx={{ mb: 4 }} />
 
-        {/* Stats Section */}
-        <Grid container spacing={3} sx={{ mb: 4 }}>
-          {hostStats.map((stat) => (
-            <Grid item xs={12} sm={4} key={stat.label}>
-              <Card
-                sx={{
-                  py: 2,
-                  borderRadius: 3,
-                  textAlign: "center",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)",
-                  "&:hover": { boxShadow: "0 4px 12px rgba(0,0,0,0.1)" },
-                  transition: "0.3s",
-                }}
-              >
-                <CardContent>
-                  <Typography
-                    variant="h4"
-                    fontWeight="bold"
-                    sx={{ mb: 1, color: "#034959" }}
-                  >
-                    {stat.value}
-                  </Typography>
-                  <Typography variant="body1" color="text.secondary">
-                    {stat.label}
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-
-        {/* Action Button */}
-        <Box
-          sx={{
-            mb: 5,
-            textAlign: "center",
-          }}
-        >
+        {/* Add New Listing Button */}
+        <Box sx={{ mb: 5, textAlign: "center" }}>
           <Button
             variant="contained"
             sx={{
@@ -129,37 +90,70 @@ const Dashboard = () => {
         </Typography>
 
         <Grid container spacing={3}>
-          {recentListings.map((listing) => (
-            <Grid item xs={12} sm={6} md={4} key={listing._id}>
-              <Card
-                sx={{
-                  borderRadius: 3,
-                  overflow: "hidden",
-                  boxShadow: "0 3px 10px rgba(0,0,0,0.07)",
-                  transition: "0.3s",
-                  "&:hover": {
-                    transform: "translateY(-5px)",
-                    boxShadow: "0 6px 16px rgba(0,0,0,0.12)",
-                  },
-                }}
-              >
-                <CardMedia
-                  component="img"
-                  height="180"
-                  image={listing.images[0]}
-                  alt={listing.name}
-                />
-                <CardContent>
-                  <Typography variant="subtitle1" fontWeight="bold">
-                    {listing.name}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    ${listing.price} / night
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
+          {recentListings.map((listing) => {
+            const displayPrice =
+              listing.rooms && listing.rooms.length > 0
+                ? Math.min(...listing.rooms.map((r) => r.price))
+                : listing.price;
+
+            const priceText =
+              listing.rooms && listing.rooms.length > 0
+                ? `from $${displayPrice} / night`
+                : `$${displayPrice} / night`;
+
+            return (
+              <Grid item xs={12} sm={6} md={4} key={listing._id}>
+                <Card
+                  sx={{
+                    borderRadius: 4,
+                    overflow: "hidden",
+                    boxShadow: "0px 2px 10px rgba(0,0,0,0.1)",
+                    transition: "0.3s ease",
+                    backgroundColor: "#fff",
+                    "&:hover": {
+                      boxShadow: "0px 6px 20px rgba(0,0,0,0.15)",
+                      transform: "translateY(-5px)",
+                    },
+                  }}
+                >
+                  <Box sx={{ position: "relative" }}>
+                    <CardMedia
+                      component="img"
+                      image={listing.images?.[0] || "/placeholder.jpg"}
+                      alt={listing.name}
+                      sx={{ height: 220, objectFit: "cover" }}
+                    />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: 10,
+                        left: 10,
+                        backgroundColor: "rgba(0,0,0,0.6)",
+                        color: "#fff",
+                        borderRadius: 2,
+                        px: 1.2,
+                        py: 0.3,
+                        fontSize: "0.9rem",
+                        fontWeight: 500,
+                      }}
+                    >
+                      {priceText}
+                    </Box>
+                  </Box>
+                  <CardContent sx={{ px: 2.5, py: 2 }}>
+                    <Typography
+                      variant="h6"
+                      fontWeight="bold"
+                      noWrap
+                      gutterBottom
+                    >
+                      {listing.name}
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            );
+          })}
         </Grid>
       </Paper>
     </Box>
