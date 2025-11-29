@@ -1,14 +1,32 @@
 import { Avatar, Box, Typography, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import BookingBox from "./bookingBox";
-import { useState } from "react";
+import ExpBookingBox from "./experBookingBox.jsx";
+import { useEffect, useState } from "react";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
+import AirbnbDatePicker from "./availableCalinder";
 
 export default function DescriptonComponent({ place, model }) {
   const navigate = useNavigate();
 const [expanded, setExpanded] = useState(false);
 const [convid, setConvid] = useState(null);
 const myId=JSON.parse(localStorage.getItem("user"))._id
+const [availableDates, setAvailableDates] = useState([]);
+useEffect(() => {
+ model.toLowerCase() === "hotel" && axiosInstance
+    .get("/api/reservations/availableDates", {
+      params: {
+        hotelId: place._id,
+        
+      },
+    }).then((res) => {
+      console.log("test log");
+      
+      console.log(res.data);
+      
+      setAvailableDates(res.data);
+  })
+}, [place]);
 
   const host = place.hostId
 function startConversation(id) {
@@ -106,10 +124,14 @@ function startConversation(id) {
   {expanded ? "See less" : "See more"}
 </Typography>}
         </Box>
+        {
+          model==='Hotel' &&<Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
+      <AirbnbDatePicker availableDates={availableDates} />
+    </Box>}
       </Box>
 
       {
-        model!=='Places' &&<BookingBox place={place} model={model} />}
+        model.toLowerCase()==='hotel' ?<BookingBox place={place} model={model} />:model.toLowerCase()==='experiance' && <ExpBookingBox place={place} model={model} />}
     </Box>
   );
 }
