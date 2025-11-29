@@ -10,7 +10,7 @@ export default function DescriptonComponent({ place, model }) {
   const navigate = useNavigate();
 const [expanded, setExpanded] = useState(false);
 const [convid, setConvid] = useState(null);
-const myId=JSON.parse(localStorage.getItem("user"))._id
+const myId=JSON.parse(localStorage.getItem("user"))?._id ||null;
 const [availableDates, setAvailableDates] = useState([]);
 useEffect(() => {
  model.toLowerCase() === "hotel" && axiosInstance
@@ -89,7 +89,8 @@ function startConversation(id) {
                 },
               }}
               onClick={()=>{
-                myId===host._id?navigate("/profile"):startConversation(host._id);
+
+                myId===host._id?navigate("/guest/profile"):startConversation(host._id);
               }}
             >
               Message host
