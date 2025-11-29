@@ -180,3 +180,5 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
 };
 
 export default PopularHomesCarousel;
+
+

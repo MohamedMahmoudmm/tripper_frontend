@@ -1,70 +1,74 @@
-# Getting Started with Create React App
+# Tripper Frontend
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+This repository contains the frontend for the Tripper application (React). The README below describes the main folders and important files to help contributors navigate the project.
 
-## Available Scripts
+## Quick Start
 
-In the project directory, you can run:
+- Install dependencies:
 
-### `npm start`
+```
+npm install
+```
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+- Run in development:
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+```
+npm start
+```
 
-### `npm test`
+## Project Structure
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+Root files:
+- `package.json`: project metadata and npm scripts.
+- `public/`: static public assets (entry `index.html`, manifest, robots).
+- `src/`: application source code (React).
 
-### `npm run build`
+Top-level `src/` layout (important files):
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+```
+src/
+  App.js, App.css, index.js
+  assets/
+  components/
+  pages/
+  routes/
+  services/
+  setupTests.js, reportWebVitals.js
+```
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+Description of major directories
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+- `src/assets/`: static images, icons and helper modules (e.g., `axiousInstance/axoiusInstance.js`).
 
-### `npm run eject`
+- `src/components/`:
+  - `chat/`: chat UI components (`ChatSidebar.jsx`, `ChatWindow.jsx`, `MessageBubble.jsx`, `NewMessageInput.jsx`).
+  - `detailsComponents/`: components used on details pages (booking box, descriptions, reviews, galleries).
+  - `host/`: components and subfolders for the host experience (listing forms, host layout, hotel-specific forms under `hotel/`, reservation components under `reservations/`).
+  - `onBoardingComponents/`: UI for onboarding (header, footer, service sections, top places).
+  - `sharedComponents/`: reusable components across the app (`HomeCard.jsx`, `navbar.jsx`, `Pagination.jsx`, etc.).
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+- `src/pages/`:
+  - Route-backed pages for the app: `home.jsx`, `details.jsx`, `auth.jsx`, `profile` pages, `ChatPage.jsx`, etc.
+  - `host/` subfolder: pages for host dashboard, listing creation/editing, reservations and validation schemas (`experienceSchema.js`, `hotelSchema.js`).
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+- `src/routes/`: application route definitions, e.g. `HostRoutes.jsx`.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+- `src/services/`: API and business logic wrappers used across the app (`authservice.js`, `hotels.service.js`, `review.service.js`, `reservationsService.js`, etc.).
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Notes & Conventions
 
-## Learn More
+- Files with `.jsx` are React components.
+- The project uses a convention of grouping component families into folders (e.g., `host/`, `chat/`) to keep related UI together.
+- Form logic and validation for host flows are placed under `pages/host/validation`.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+## Contributing
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+- Follow existing patterns for components and folder organization.
+- Run `npm test` to run tests (if present) and `npm start` for development.
 
-### Code Splitting
+If you'd like, I can also:
+- Add a short CONTRIBUTING.md with code style and PR guidelines.
+- Generate a visual tree file or update package scripts.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+---
+Generated automatically to describe the current workspace layout.

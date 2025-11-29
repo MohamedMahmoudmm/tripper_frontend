@@ -28,7 +28,8 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
 
         const itemType = model === "experiance" ? "Experiance" : 
                         model === "hotel" ? "Hotel" : 
-                        model === "place" ? "Place" : model;
+                        model === "place" ? "Place" : 
+                        model === "places" ? "Place" : model;
 
         const result = await favoriteService.checkFavorite(id, itemType);
         setIsFavorite(result.isFavorite);
@@ -56,7 +57,8 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
     try {
       const itemType = model === "experiance" ? "Experiance" : 
                       model === "hotel" ? "Hotel" : 
-                      model === "place" ? "Place" : model;
+                      model === "place" ? "Place" : 
+                      model === "places" ? "Place" : model;
 
       if (isFavorite) {
         await favoriteService.removeFavorite(id, itemType);
@@ -88,6 +90,9 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
       onClick={handleCardClick}
       sx={{
         width: "100%",
+        height: "340px", // ✅ FIXED HEIGHT
+        display: "flex",
+        flexDirection: "column",
         borderRadius: "16px",
         overflow: "hidden",
         boxShadow: "0 2px 10px rgba(0,0,0,0.08)",
@@ -100,7 +105,7 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
       }}
     >
       {/* Image Section */}
-      <Box sx={{ position: "relative" }}>
+      <Box sx={{ position: "relative", flexShrink: 0 }}>
         <CardMedia
           component="img"
           height="200"
@@ -147,42 +152,65 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
         </IconButton>
       </Box>
 
-      {/* Text Section */}
-      <CardContent sx={{ p: 2 }}>
+      {/* Text Section - FIXED HEIGHT */}
+      <CardContent 
+        sx={{ 
+          p: 2,
+          flexGrow: 1,
+          display: "flex",
+          flexDirection: "column",
+          minHeight: 0, // ✅ مهم للـ overflow
+        }}
+      >
+        {/* Title - 2 lines max */}
         <Typography
           fontWeight="bold"
           sx={{
             mb: 0.5,
-            whiteSpace: "nowrap",
+            fontSize: "1rem",
+            display: "-webkit-box",
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: "vertical",
             overflow: "hidden",
             textOverflow: "ellipsis",
-            fontSize: "1rem",
+            minHeight: "48px",
+            maxHeight: "48px",
           }}
         >
           {title}
         </Typography>
 
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            mt: 0.5,
+        {/* Price/Description - 1 line max */}
+        <Typography 
+          variant="body2" 
+          sx={{ 
+            color: "gray", 
+            fontSize: "0.85rem",
+            mb: 0.5,
+            whiteSpace: "nowrap",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
           }}
         >
-          <Typography variant="body2" sx={{ color: "gray", fontSize: "0.9rem" }}>
-            {price}
-          </Typography>
+          {price}
+        </Typography>
 
-          <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-            <StarIcon sx={{ color: "#FFB400", fontSize: 18 }} />
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 600, color: "#222", fontSize: "0.9rem" }}
-            >
-              {rating}
-            </Typography>
-          </Box>
+        {/* Rating - Always at bottom */}
+        <Box 
+          sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            gap: 0.5,
+            mt: "auto", // ✅ Push to bottom
+          }}
+        >
+          <StarIcon sx={{ color: "#FFB400", fontSize: 18 }} />
+          <Typography
+            variant="body2"
+            sx={{ fontWeight: 600, color: "#222", fontSize: "0.9rem" }}
+          >
+            {rating || "N/A"}
+          </Typography>
         </Box>
       </CardContent>
     </Card>
