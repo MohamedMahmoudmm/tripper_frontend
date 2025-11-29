@@ -154,8 +154,8 @@ const Places = () => {
             flexDirection: { xs: "column", sm: "row" },
             justifyContent: "center",
             alignItems: { xs: "stretch", sm: "center" },
-            gap: 2,
-            mb: 4,
+            gap: 4,
+            mb: 5,
           }}
         >
           {/* Search Bar */}
