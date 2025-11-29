@@ -43,10 +43,23 @@ const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) =
   const [hoveredDate, setHoveredDate] = useState(null);
 
   const isDateAvailable = (date) => {
-    if (availableDates.length === 0) return true; // If no restrictions, all dates available
-    return availableDates.some(range => 
-      isWithinInterval(date, { start: new Date(range.start), end: new Date(range.end) })
-    );
+    // Normalize the date to start of day for accurate comparison
+    const checkDate = startOfDay(date);
+    
+    // If loading or no data yet, disable all dates
+    if (availableDates.length === 0) return false;
+    
+    // Check if date falls within any available range
+    return availableDates.some(range => {
+      const rangeStart = startOfDay(range.start);
+      const rangeEnd = startOfDay(range.end);
+      
+      // Date must be >= start and <= end (inclusive on both sides)
+      return (
+        (isAfter(checkDate, rangeStart) || isSameDay(checkDate, rangeStart)) &&
+        (isBefore(checkDate, rangeEnd) || isSameDay(checkDate, rangeEnd))
+      );
+    });
   };
 
   const isDateSelected = (date) => {
@@ -81,15 +94,21 @@ const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) =
   };
 
   const handleDateClick = (date) => {
-    if (!isDateAvailable(date)) return;
+    const normalizedDate = startOfDay(date);
+    
+    if (!isDateAvailable(normalizedDate)) return;
 
     if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
-      onDateSelect({ start: date, end: null });
+      // First click or restart selection
+      onDateSelect({ start: normalizedDate, end: null });
     } else {
-      if (isBefore(date, selectedRange.start)) {
-        onDateSelect({ start: date, end: selectedRange.start });
+      // Second click - set end date
+      if (isBefore(normalizedDate, selectedRange.start)) {
+        // If clicked date is before start, swap them
+        onDateSelect({ start: normalizedDate, end: selectedRange.start });
       } else {
-        onDateSelect({ start: selectedRange.start, end: date });
+        // Normal case: clicked date is after start
+        onDateSelect({ start: selectedRange.start, end: normalizedDate });
       }
     }
   };
@@ -300,7 +319,7 @@ const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) =
   );
 };
 
-// Main Booking Component (simplified for demo)
+// Main Booking Component
 export default function BookingBox({ place, model }) {
   const [open, setOpen] = useState(false);
   const [activeStep, setActiveStep] = useState(0);
@@ -311,47 +330,48 @@ export default function BookingBox({ place, model }) {
   const [roomCount, setRoomCount] = useState(1);
   const [guests, setGuests] = useState(1);
   const [selectedRange, setSelectedRange] = useState({ start: null, end: null });
-const [availableDates, setAvailableDates] = useState([]);
+  const [availableDates, setAvailableDates] = useState([]);
 
   const [bookingForSelf, setBookingForSelf] = useState(true);
   const [guestName, setGuestName] = useState("");
   const [guestEmail, setGuestEmail] = useState("");
   const [guestPhone, setGuestPhone] = useState("");
 
-  // Demo data
-  
-
   const steps = ["Place & Room Details", "Guest Information", "Confirmation"];
-// Replace the fetchRoomAvailability function with this:
-const fetchAvailableDates = async (hotelId, roomId = null) => {
-  try {
-    const params = new URLSearchParams({ hotelId });
-    if (roomId) params.append('roomId', roomId);
-    
-    const res = await axiosInstance.get(`/api/reservations/availableDates?${params}`);
-    
-    // The API returns an array of ranges: [{ start, end }, ...]
-    // Convert date strings to Date objects
-    const ranges = res.data.map(range => ({
-      start: new Date(range.start),
-      end: new Date(range.end)
-    }));
-    
-    return ranges;
-  } catch (err) {
-    console.error("Error fetching available dates:", err);
-    return [];
-  }
-};
- useEffect(() => {
-  if (open && selectedRoom) {
-    const loadDates = async () => {
-      const ranges = await fetchAvailableDates(place._id, selectedRoom._id);
-      setAvailableDates(ranges);
-    };
-    loadDates();
-  }
-}, [open, selectedRoom]);
+
+  // Fetch available dates from API
+  const fetchAvailableDates = async (hotelId, roomId = null) => {
+    try {
+      const params = new URLSearchParams({ hotelId });
+      if (roomId) params.append('roomId', roomId);
+      
+      const res = await axiosInstance.get(`/api/reservations/availableDates?${params}`);
+      
+      // The API returns an array of ranges: [{ start, end }, ...]
+      // Convert date strings to Date objects and normalize times
+      const ranges = res.data.map(range => ({
+        start: startOfDay(new Date(range.start)),
+        end: startOfDay(new Date(range.end))
+      }));
+      
+      return ranges;
+    } catch (err) {
+      console.error("Error fetching available dates:", err);
+      return [];
+    }
+  };
+
+  useEffect(() => {
+    if (open && place?._id) {
+      const loadDates = async () => {
+        setAvailableDates([]); // Clear old data
+        const roomIdToFetch = selectedRoom?._id || null;
+        const ranges = await fetchAvailableDates(place._id, roomIdToFetch);
+        setAvailableDates(ranges);
+      };
+      loadDates();
+    }
+  }, [open, place?._id, selectedRoom?._id]);
 
   const handleDateSelect = (range) => {
     setSelectedRange(range);
@@ -363,7 +383,7 @@ const fetchAvailableDates = async (hotelId, roomId = null) => {
         setMessage("Please select check-in and check-out dates");
         return;
       }
-      if (!selectedRoom&place.rooms.length > 0) {
+      if (!selectedRoom && place.rooms && place.rooms.length > 0) {
         setMessage("Please select a room");
         return;
       }
@@ -382,20 +402,20 @@ const fetchAvailableDates = async (hotelId, roomId = null) => {
     setMessage("");
   };
 
- const handleReserve = async () => {
-
+  const handleReserve = async () => {
     try {  
-        if (!bookingForSelf) {
-    if (!guestName || !guestPhone) {
-      setMessage("Please fill all guest details before confirming.");
-      return;
-    }
-  }
+      if (!bookingForSelf) {
+        if (!guestName || !guestPhone) {
+          setMessage("Please fill all guest details before confirming.");
+          return;
+        }
+      }
+      
       setLoading(true);
       setMessage("");
 
-  const checkIn = selectedRange.start;
-const checkOut = selectedRange.end;
+      const checkIn = selectedRange.start;
+      const checkOut = selectedRange.end;
 
       let payload = {
         guestsCount: guests,
@@ -538,89 +558,104 @@ const checkOut = selectedRange.end;
             {activeStep === 0 && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
-                  {place.name}- {place.address.city}, {place.address.country}
+                  {place.name} - {place.address.city}, {place.address.country}
                 </Typography>
-                {place.rooms.length<=0&&<Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: "blue" }}>
-                  {place.price}$ For One Night
-                </Typography>}
-                {/* Room Selection */}
-                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-                  Available Rooms
-                </Typography>
+                {place.rooms.length <= 0 && (
+                  <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: "blue" }}>
+                    {place.price}$ For One Night
+                  </Typography>
+                )}
                 
-                {place.rooms.map((room) => (
-                  <Card
-                    key={room._id}
-                    sx={{
-                      mb: 2,
-                      cursor: "pointer",
-                      border: selectedRoom?._id === room._id ? "2px solid #f27244" : "1px solid #e0e0e0",
-                      transition: "all 0.3s",
-                      "&:hover": {
-                        boxShadow: 3,
-                      }
-                    }}
-                    onClick={() => {
-                      setSelectedRoom(room);
-                      setAvailableDates([]);  // Clear old dates to avoid confusion
-                      setSelectedRange({ start: null, end: null });
-                    }}                  >
-                    <CardContent>
-                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                        <Box sx={{ flex: 1 }}>
-                          <Typography variant="h6" fontWeight={600}>
-                            {room.name}
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                            {room.description}
-                          </Typography>
-                          <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
-                            {room.price} ج.م <Typography component="span" variant="body2">/ night</Typography>
-                          </Typography>
-                        </Box>
-                        <Radio checked={selectedRoom?._id === room._id} />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                ))}
+                {/* Room Selection */}
+                {place.rooms && place.rooms.length > 0 && (
+                  <>
+                    <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                      Available Rooms
+                    </Typography>
+                    
+                    {place.rooms.map((room) => (
+                      <Card
+                        key={room._id}
+                        sx={{
+                          mb: 2,
+                          cursor: "pointer",
+                          border: selectedRoom?._id === room._id ? "2px solid #f27244" : "1px solid #e0e0e0",
+                          transition: "all 0.3s",
+                          "&:hover": {
+                            boxShadow: 3,
+                          }
+                        }}
+                        onClick={() => {
+                          setSelectedRoom(room);
+                          setSelectedRange({ start: null, end: null });
+                        }}
+                      >
+                        <CardContent>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="h6" fontWeight={600}>
+                                {room.name}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                {room.description}
+                              </Typography>
+                              <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
+                                {room.price} ج.م <Typography component="span" variant="body2">/ night</Typography>
+                              </Typography>
+                            </Box>
+                            <Radio checked={selectedRoom?._id === room._id} />
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
 
-                <Grid container spacing={2} sx={{ mt: 2, mb: 3 }}>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      select
-                      label="Number of Rooms"
-                      value={roomCount}
-                      onChange={(e) => setRoomCount(Number(e.target.value))}
-                      fullWidth
-                    >
-                      {[1, 2, 3, 4, 5].map((num) => (
-                        <MenuItem key={num} value={num}>
-                          {num} {num === 1 ? "room" : "rooms"}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                  <Grid item xs={12} sm={6}>
-                    <TextField
-                      select
-                      label="Number of Guests"
-                      value={guests}
-                      onChange={(e) => setGuests(Number(e.target.value))}
-                      fullWidth
-                    >
-                      {[1, 2, 3, 4, 5, 6].map((num) => (
-                        <MenuItem key={num} value={num}>
-                          {num} {num === 1 ? "guest" : "guests"}
-                        </MenuItem>
-                      ))}
-                    </TextField>
-                  </Grid>
-                </Grid>
+                    <Grid container spacing={2} sx={{ mt: 2, mb: 3 }}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          select
+                          label="Number of Rooms"
+                          value={roomCount}
+                          onChange={(e) => setRoomCount(Number(e.target.value))}
+                          fullWidth
+                        >
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <MenuItem key={num} value={num}>
+                              {num} {num === 1 ? "room" : "rooms"}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          select
+                          label="Number of Guests"
+                          value={guests}
+                          onChange={(e) => setGuests(Number(e.target.value))}
+                          fullWidth
+                        >
+                          {[1, 2, 3, 4, 5, 6].map((num) => (
+                            <MenuItem key={num} value={num}>
+                              {num} {num === 1 ? "guest" : "guests"}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
+                    </Grid>
+                  </>
+                )}
 
                 {/* Date Selection with Calendar */}
                 <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
                   Select Your Dates
                 </Typography>
+                
+                {availableDates.length === 0 && (
+                  <Paper sx={{ p: 2, mb: 2, backgroundColor: "#fff3e0" }}>
+                    <Typography variant="body2" color="text.secondary">
+                      Loading available dates...
+                    </Typography>
+                  </Paper>
+                )}
                 
                 <Paper sx={{ p: 2, mb: 2, backgroundColor: "#f5f5f5" }}>
                   <Typography variant="body2" color="text.secondary" gutterBottom>
@@ -640,7 +675,6 @@ const checkOut = selectedRange.end;
                   onDateSelect={handleDateSelect}
                   selectedRange={selectedRange}
                 />
-
 
                 {/* Show total when dates are selected */}
                 {selectedRange.start && selectedRange.end && (

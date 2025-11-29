@@ -25,6 +25,8 @@ useEffect(() => {
       console.log(res.data);
       
       setAvailableDates(res.data);
+    }).catch(err => {
+      console.error("Failed to fetch available dates:", err);
   })
 }, [place]);
 

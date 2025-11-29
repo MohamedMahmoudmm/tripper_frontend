@@ -17,6 +17,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { useNavigate } from "react-router-dom";
 import logo from "../../assets/navImage.png";
 import { Message } from "@mui/icons-material";
+import { AccountCircle } from "@mui/icons-material";
 const HostNavbar = () => {
   const navigate = useNavigate();
     const [lang, setLang] = useState("EN");
@@ -30,7 +31,7 @@ const HostNavbar = () => {
 
   const handleProfile = () => {
     handleMenuClose();
-    navigate("/profile");
+    navigate("/guest/profile");
   };
 
   const handleLogout = () => {
@@ -107,20 +108,14 @@ const HostNavbar = () => {
                   
           
 
-          {/* Avatar */}
-          <Avatar
-            src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80"
-            alt="profile"
-            sx={{
-              width: 36,
-              height: 36,
-              cursor: "pointer",
-              border: "1px solid #ddd",
-              "&:hover": { transform: "scale(1.05)" },
-              transition: "0.3s",
-            }}
-            onClick={handleProfile}
-          />
+       
+
+             <IconButton
+                          color="inherit"
+                          onClick={handleProfile}
+                        >
+                          <AccountCircle sx={{ color: "#333" }} />
+                        </IconButton>
 
           {/* Menu Icon */}
           <IconButton

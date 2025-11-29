@@ -15,6 +15,7 @@ import { Message } from "@mui/icons-material";
 import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/navImage.png";
 import authService from "../../services/authservice";
+import { AccountCircle } from "@mui/icons-material";
 const HostNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -156,19 +157,12 @@ const HostNavbar = () => {
           </Button>
 
           {/* Avatar */}
-          <Avatar
-            src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=200&q=80"
-            alt="profile"
-            sx={{
-              width: 36,
-              height: 36,
-              cursor: "pointer",
-              border: "1px solid #ddd",
-              "&:hover": { transform: "scale(1.05)" },
-              transition: "0.3s",
-            }}
-            onClick={handleProfile}
-          />
+        <IconButton
+                color="inherit"
+                onClick={() => navigate("/guest/profile")}
+              >
+                <AccountCircle sx={{ color: "#333" }} />
+              </IconButton>
 
           {/* Menu Icon */}
           <IconButton
@@ -201,7 +195,10 @@ const HostNavbar = () => {
           >
             <MenuItem onClick={handleProfile}>Profile</MenuItem>
             <Divider />
-            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            <MenuItem   onClick={() => {
+                  authService.logout();
+                  navigate("/login");   
+                }}>Logout</MenuItem>
           </Menu>
         </Box>
       </Toolbar>
