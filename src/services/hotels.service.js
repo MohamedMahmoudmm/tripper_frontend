@@ -37,6 +37,15 @@ const hotelService = {
     const res = await axiosInstance.put(`/hotel/${id}`, data);
     return res.data;
   },
+  
+  updateHotelImages: async (id, formData) => {
+    const res = await axiosInstance.patch(`/hotel/${id}/images`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  }
 
 };
 
