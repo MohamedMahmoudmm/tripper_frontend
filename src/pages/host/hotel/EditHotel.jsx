@@ -29,6 +29,7 @@ const EditHotel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasRooms, setHasRooms] = useState(false);
+  const [originalPhotos, setOriginalPhotos] = useState([]);
 
   const methods = useForm({
     resolver: yupResolver(editHotelSchema),
@@ -54,6 +55,7 @@ const EditHotel = () => {
         
         const roomsExist = hotel.rooms && hotel.rooms.length > 0;
         setHasRooms(roomsExist);
+        setOriginalPhotos(hotel.images || []);
 
         // normalize amenities
         let normalizedAmenities = [];
@@ -109,9 +111,19 @@ const EditHotel = () => {
         },
         amenities: data.amenities,
         rooms: roomsExist ? data.rooms : [],
+        images: data.oldPhotos,
       };
 
       await hotelService.updateHotel(id, payload);
+      
+    if (data.photos && data.photos.length > 0) {
+      const formData = new FormData();
+      data.photos.forEach((file) => {
+        formData.append("images", file);
+      });
+      
+      await hotelService.updateHotelImages(id, formData);
+    }
       toast.success("Hotel updated successfully!");
       setTimeout(() => navigate("/host/listings"), 1200);
     } catch (err) {
