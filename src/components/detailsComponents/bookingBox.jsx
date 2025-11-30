@@ -591,6 +591,8 @@ export default function BookingBox({ place, model }) {
                         }}
                         onClick={() => {
                           setSelectedRoom(room);
+                          //console.log(selectedRoom);
+                          
                           setSelectedRange({ start: null, end: null });
                         }}
                       >
@@ -614,7 +616,8 @@ export default function BookingBox({ place, model }) {
                     ))}
 
                     <Grid container spacing={2} sx={{ mt: 2, mb: 3 }}>
-                      <Grid item xs={12} sm={6}>
+                      {
+                        <Grid item xs={12} sm={6}>
                         <TextField
                           select
                           label="Number of Rooms"
@@ -627,8 +630,8 @@ export default function BookingBox({ place, model }) {
                               {num} {num === 1 ? "room" : "rooms"}
                             </MenuItem>
                           ))}
-                        </TextField>
-                      </Grid>
+                          </TextField>
+                        </Grid>}
                       <Grid item xs={12} sm={6}>
                         <TextField
                           select
@@ -637,13 +640,17 @@ export default function BookingBox({ place, model }) {
                           onChange={(e) => setGuests(Number(e.target.value))}
                           fullWidth
                         >
-                          {[1, 2, 3, 4, 5, 6].map((num) => (
-                            <MenuItem key={num} value={num}>
-                              {num} {num === 1 ? "guest" : "guests"}
-                            </MenuItem>
-                          ))}
+                          {selectedRoom &&
+                            Array.from({ length: selectedRoom.maxGuests }, (_, i) => i + 1).map(
+                              (num) => (
+                                <MenuItem key={num} value={num}>
+                                  {num} {num === 1 ? "guest" : "guests"}
+                                </MenuItem>
+                              )
+                            )}
                         </TextField>
                       </Grid>
+
                     </Grid>
                   </>
                 )}
@@ -652,7 +659,7 @@ export default function BookingBox({ place, model }) {
                 <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
                   Select Your Dates
                 </Typography>
-                
+
                 {availableDates.length === 0 && (
                   <Paper sx={{ p: 2, mb: 2, backgroundColor: "#fff3e0" }}>
                     <Typography variant="body2" color="text.secondary">
