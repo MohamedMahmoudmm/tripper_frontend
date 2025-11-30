@@ -3,10 +3,12 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import { useState, useEffect } from "react";
 import favoriteService from "../../services/favorite.service";
+import { useNavigate   } from "react-router-dom";
 
 export default function GridImages({ images, title, itemId, itemType }) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
   // ✅ Check if item is in favorites
   useEffect(() => {
@@ -29,7 +31,7 @@ export default function GridImages({ images, title, itemId, itemType }) {
   const toggleFavorite = async () => {
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login to add favorites");
+      navigate("/login");
       return;
     }
 
@@ -62,7 +64,7 @@ export default function GridImages({ images, title, itemId, itemType }) {
           {title}
         </Typography>
         <IconButton
-          onClick={toggleFavorite}
+          onClick={toggleFavorite}  
           disabled={loading}
           sx={{
             border: "1px solid #ccc",

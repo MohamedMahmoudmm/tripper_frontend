@@ -46,7 +46,7 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
     
     const token = localStorage.getItem("token");
     if (!token) {
-      alert("Please login to add favorites");
+      navigate("/login");
       return;
     }
 

@@ -32,7 +32,9 @@ export default function PlaceDetails() {
           // Fetch related items from the same city
           fetchRelatedItems(placeData.address?.city, model, id);
 
-          model.toLocaleLowerCase() !== "places" &&
+          if(JSON.parse(localStorage.getItem("user"))){
+
+               model.toLocaleLowerCase() !== "places" &&
             axiosInstance
               .get(
                 `/api/reservations/${model === "hotel" ? "hotel" : "experience"}/${id}`
@@ -46,6 +48,10 @@ export default function PlaceDetails() {
                   setCanReview(false);
                 }
               });
+          }   
+          else{
+            setCanReview(false);
+          }    
         })
         .catch((err) => {
           console.log(err);

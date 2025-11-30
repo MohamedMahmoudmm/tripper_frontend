@@ -83,6 +83,10 @@ const fetchAvailability = async (date) => {
 };
 
   const handleReserve = async () => {
+    if (JSON.parse(localStorage.getItem("user")) === null) {
+      setMessage("Please login to make a reservation.");
+      return;
+    }
     try {
       setLoading(true);
       setMessage("");

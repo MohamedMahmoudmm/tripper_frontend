@@ -91,7 +91,10 @@ function startConversation(id) {
                 },
               }}
               onClick={()=>{
-
+                if(myId == null){
+                  navigate("/login");
+                  return;
+                }
                 myId===host._id?navigate("/guest/profile"):startConversation(host._id);
               }}
             >
@@ -107,7 +110,7 @@ function startConversation(id) {
           <Typography color="text.secondary" sx={{
   lineHeight: 1.6,
   display: "-webkit-box",
-  WebkitLineClamp: expanded ? "unset" : 5,
+  WebkitLineClamp: expanded ? "unset" : 3,
   WebkitBoxOrient: "vertical",
   overflow: "hidden",
 }}>
@@ -125,12 +128,15 @@ function startConversation(id) {
   }}
 >
   {expanded ? "See less" : "See more"}
+  
 </Typography>}
         </Box>
         {
           model==='Hotel' &&<Box sx={{ p: 4, display: 'flex', justifyContent: 'center' }}>
       <AirbnbDatePicker availableDates={availableDates} />
     </Box>}
+
+
       </Box>
 
       {

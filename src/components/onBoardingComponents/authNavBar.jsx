@@ -20,7 +20,6 @@ import { Message } from "@mui/icons-material";
 import { AccountCircle } from "@mui/icons-material";
 const HostNavbar = () => {
   const navigate = useNavigate();
-    const [lang, setLang] = useState("EN");
 
     const token = localStorage.getItem("token");
   const [anchorEl, setAnchorEl] = useState(null);
@@ -148,23 +147,7 @@ const HostNavbar = () => {
           >
             <MenuItem onClick={handleProfile}>Profile</MenuItem>
             <Divider />
-            <MenuItem >   
-            <Select
-                value={lang}
-                onChange={(e) => setLang(e.target.value)}
-                variant="outlined"
-                size="small"
-                sx={{
-                  fontSize: 14,
-                  fontWeight: 500,
-                  "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-                }}
-                IconComponent={ExpandMoreIcon}
-              >
-                <MenuItem value="EN">EN</MenuItem>
-                <MenuItem value="AR">AR</MenuItem>
-                <MenuItem value="FR">FR</MenuItem>
-              </Select></MenuItem>
+          
             <Divider />
             <MenuItem onClick={handleLogout}>Logout</MenuItem>
           </Menu>

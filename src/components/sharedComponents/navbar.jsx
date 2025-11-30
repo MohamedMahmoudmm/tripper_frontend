@@ -133,7 +133,7 @@ const switchRole = async (role) => {
             src={logo}
             alt="Tripper Logo"
             sx={{ height: 40, cursor: "pointer" }}
-            onClick={() => navigate("/home")}
+            onClick={() => navigate("")}
           />
 
           <Box
@@ -162,23 +162,8 @@ const switchRole = async (role) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                       <Message sx={{ color: "#f27244", fontSize: 27 }} onClick={() => navigate("/chat")} cursor="pointer"/>
             
-            <Select
-              value={lang}
-              onChange={(e) => setLang(e.target.value)}
-              size="small"
-              variant="outlined"
-              IconComponent={ExpandMoreIcon}
-              sx={{
-                minWidth: 70,
-                "& .MuiOutlinedInput-notchedOutline": { border: "none" },
-              }}
-            >
-              <MenuItem value="EN">EN</MenuItem>
-              <MenuItem value="AR">AR</MenuItem>
-              <MenuItem value="FR">FR</MenuItem>
-            </Select>
+          
 
-            {/* ✅ Switch To Host Button */}
             { 
             token &&
            ( user?.activeRole === "guest" && !user.role.includes("host") ? (
