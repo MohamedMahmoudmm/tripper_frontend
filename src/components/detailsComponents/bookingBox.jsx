@@ -20,7 +20,6 @@ import {
   RadioGroup,
   FormControlLabel,
   FormControl,
-  Chip,
   Grid,
   useTheme,
   alpha,

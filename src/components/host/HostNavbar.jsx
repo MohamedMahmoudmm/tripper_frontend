@@ -4,11 +4,7 @@ import {
   Toolbar,
   Box,
   Button,
-  Avatar,
   IconButton,
-  Menu,
-  MenuItem,
-  Divider,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import { Message } from "@mui/icons-material";
@@ -16,6 +12,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import logo from "../../assets/navImage.png";
 import authService from "../../services/authservice";
 import { AccountCircle } from "@mui/icons-material";
+
 const HostNavbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -143,15 +140,14 @@ const HostNavbar = () => {
           <Message sx={{ color: "#f27244", fontSize: 28 }} onClick={() => navigate("/host/chat")} cursor="pointer"/>
           {/* Switch to Guest */}
           <Button
-            variant="text"
             onClick={() => switchRole("host")}
-            sx={{
-              textTransform: "none",
-              color: "black",
-              fontSize: 14,
-              fontWeight: 500,
-              "&:hover": { backgroundColor: "rgba(0,0,0,0.04)" },
-            }}
+            variant="text"
+                sx={{
+                  color: "#f27244",
+                  fontWeight: 600,
+                  textTransform: "none",
+                  "&:hover": { textDecoration: "underline" },
+                }}
           >
             Switch to Guest
           </Button>
@@ -163,43 +159,21 @@ const HostNavbar = () => {
               >
                 <AccountCircle sx={{ color: "#333" }} />
               </IconButton>
-
-          {/* Menu Icon */}
-          <IconButton
-            onClick={handleMenuOpen}
-            sx={{
-              border: "1px solid #ddd",
-              borderRadius: "50%",
-              "&:hover": { backgroundColor: "#f7f7f7" },
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          {/* Dropdown Menu */}
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleMenuClose}
-            disableScrollLock
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-            PaperProps={{
-              sx: {
-                mt: 1.2,
-                borderRadius: 2,
-                boxShadow: "0px 4px 15px rgba(0,0,0,0.1)",
-                minWidth: 170,
-              },
-            }}
-          >
-            <MenuItem onClick={handleProfile}>Profile</MenuItem>
-            <Divider />
-            <MenuItem   onClick={() => {
-                  authService.logout();
-                  navigate("/login");   
-                }}>Logout</MenuItem>
-          </Menu>
+          <Button
+              variant="text"
+              sx={{
+                color: "#f27244",
+                fontWeight: 600,
+                textTransform: "none",
+                "&:hover": { textDecoration: "underline" },
+              }}
+              onClick={() => {
+                authService.logout();
+                navigate("/login");   
+              }}
+            >
+              Logout
+            </Button>
         </Box>
       </Toolbar>
     </AppBar>

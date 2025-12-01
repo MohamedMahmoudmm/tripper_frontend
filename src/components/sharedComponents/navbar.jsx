@@ -5,7 +5,6 @@ import {
   IconButton,
   Box,
   Button,
-  Select,
   MenuItem,
   Menu,
   Dialog,
@@ -17,7 +16,6 @@ import {
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import AccountCircle from "@mui/icons-material/AccountCircle";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { useNavigate, useLocation } from "react-router-dom";
 import authService from "../../services/authservice";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
@@ -25,7 +23,6 @@ import logo from "../../assets/navImage.png";
 import { Message } from "@mui/icons-material";
 import toast from "react-hot-toast";
 const Navbar = () => {
-  const [lang, setLang] = useState("EN");
   const [anchorEl, setAnchorEl] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
@@ -44,7 +41,7 @@ const Navbar = () => {
     { label: "Experiences", path: "/experiences" },
     { label: "Favourites", path: "/favourites" },
     { label: "Places", path: "/places" },
-    { label: "My Trips", path: "/my-trips" },
+    { label: "Trips", path: "/my-trips" },
   ];
 const switchRole = async (role) => {
   console.log("Selected role:", role);
@@ -54,11 +51,13 @@ const switchRole = async (role) => {
     if (role === "guest" && user.role.includes("host")) {
       // Switch from guest → host
       const response = await authService.swichRole({ newRole: "host" });
+      console.log("Role switch response:", response);
       
       // ✅ Token and user already saved in authService.swichRole
       
       // Update local user state
       const updatedUser = authService.getAuthData().user;
+      console.log("Updated user after role switch:", updatedUser);
       
       navigate("/host/listings");
       window.location.reload(); // Refresh to apply new token
@@ -66,6 +65,7 @@ const switchRole = async (role) => {
     } else if (role === "host" && user.role.includes("guest")) {
       // Switch from host → guest
       const response = await authService.swichRole({ newRole: "guest" });
+      console.log("Role switch response:", response);
       
       // ✅ Token and user already saved
       
@@ -84,10 +84,6 @@ const switchRole = async (role) => {
   const handleNavigate = (path) => {
     navigate(path);
     handleMenuClose();
-  };
-  const checkUserRoleOndatabase = async() => {
-    
-    
   };
 
   // 🔹 رفع البطاقة

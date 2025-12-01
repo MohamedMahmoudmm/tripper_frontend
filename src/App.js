@@ -21,6 +21,8 @@ import CityExperiencePage from "./pages/cityExperincePage";
 
 import ProfilePage from "./pages/ProfilePage";
 import PaymentPage from "./pages/paymentPage";
+import RegisterPage from "./pages/registerPage";
+import HostProfile from "./pages/hostProfile";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token'); // or your specific token key
@@ -28,12 +30,12 @@ const ProtectedRoute = ({ children }) => {
 };
 const ProtectedHostRoute = ({ children }) => {
   const userString = localStorage.getItem('user');
-    const user = userString ? JSON.parse(userString) : null;
+  const user = userString ? JSON.parse(userString) : null;
   return user.activeRole === "host" ? children : <Navigate to="/home" replace />;
 };
 function AppContent() {
   const location = useLocation();
-  const hideNavbarRoutes = ["/", "/login"];
+  const hideNavbarRoutes = ["/", "/login", "/signup"];
   const isHostRoute = location.pathname.startsWith("/host");
 
 
@@ -46,11 +48,12 @@ function AppContent() {
       <Routes>
         <Route path="/" element={<OnboardingPage />} />
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<RegisterPage />} />
 
         <Route path="/home" element={<HomePage />} />
         {/* <Route path="/profile" element={<ProtectedRoute><GuestProfile /></ProtectedRoute>} /> */}
         <Route path="/guest/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-        <Route path="/experiences" element={<ExperiencePage /> } />
+        <Route path="/experiences" element={<ExperiencePage />} />
         <Route path="/favourites" element={<FavouritePage />} />
         <Route path="/places" element={<Places />} />
         <Route path="/my-trips" element={<MyTrips />} />
@@ -61,15 +64,18 @@ function AppContent() {
         <Route path="/host/*" element={<ProtectedHostRoute><HostRoutes /></ProtectedHostRoute>} />
         <Route path="/city/:city" element={<CityHotelsPage />} />
         <Route path="/experience-city/:city" element={<CityExperiencePage />} />
-   <Route path="/payment" element={<PaymentPage />} />
-      <Route path="/payment/:reservationId" element={<PaymentPage />} />
+        <Route path="/payment" element={<PaymentPage />} />
+        <Route path="/payment/:reservationId" element={<PaymentPage />} />
 
-   
+
+
+
 
       </Routes>
     </>
   );
 }
+
 
 export default function App() {
   return (
