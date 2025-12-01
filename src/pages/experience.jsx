@@ -12,8 +12,20 @@ import {
   CircularProgress,
   Typography,
   Alert,
+  Grid,
+  useTheme,
+  useMediaQuery,
+  Chip,
+  Collapse,
+  Button,
 } from "@mui/material";
-
+import {
+  FilterList as FilterListIcon,
+  Clear as ClearIcon,
+  LocationOn as LocationOnIcon,
+  AttachMoney as AttachMoneyIcon,
+  Search as SearchIcon,
+} from "@mui/icons-material";
 export default function ExperiencePage() {
   const [cityExperiences, setCityExperiences] = useState({});
   const [loading, setLoading] = useState(true);
@@ -21,7 +33,11 @@ export default function ExperiencePage() {
   const [selectedCity, setSelectedCity] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState([0, 5000]);
-  const [maxPrice, setMaxPrice] = useState(5000);
+  const [maxPrice, setMaxPrice] = useState(5000); 
+   const theme = useTheme();
+
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [showFilters, setShowFilters] = useState(true);
 
   useEffect(() => {
     const fetchExperiences = async () => {
@@ -134,78 +150,185 @@ export default function ExperiencePage() {
   };
 
   const filteredData = getFilteredExperiences();
-
+  const hasActiveFilters = selectedCity !== "All" || 
+                          priceRange[0] !== 0 || 
+                          priceRange[1] !== maxPrice ||
+                          searchQuery !== "";
   return (
     <Box sx={{ pb: 6 }}>
       {/* FILTERS SECTION */}
+       {/* FILTERS SECTION */}
       <Box
         sx={{
-          mt: 3,
-          mb: 4,
+          mt: 2,
+          mb: 2,
           px: { xs: 2, md: 6 },
         }}
       >
-        <Box sx={{ mb: 3 }}>
-          <SearchBar
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search experiences by name..."
-            onClear={() => setSearchQuery("")}
-          />
-        </Box>
-
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: 3,
-            flexDirection: { xs: "column", md: "row" },
-          }}
-        >
-          <Box sx={{ flex: { xs: "1", md: "0 0 40%" } }}>
-            <FormControl
+        {/* Filter Header with Toggle (Mobile) */}
+        {isMobile && (
+          <Box sx={{ mb: 2 }}>
+            <Button
               fullWidth
+              variant="outlined"
+              startIcon={<FilterListIcon />}
+              onClick={() => setShowFilters(!showFilters)}
               sx={{
-                backgroundColor: "white",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                borderRadius: "8px",
+                borderColor: "#f27244",
+                color: "#f27244",
+                borderRadius: "12px",
+                py: 1.5,
+                fontWeight: 600,
+                "&:hover": {
+                  borderColor: "#d96135",
+                  backgroundColor: "rgba(242, 114, 68, 0.04)",
+                },
               }}
             >
-              <InputLabel id="city-select-label">Select City</InputLabel>
-              <Select
-                labelId="city-select-label"
-                value={selectedCity}
-                label="Select City"
-                onChange={(e) => setSelectedCity(e.target.value)}
-                sx={{
-                  "& .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "transparent",
-                  },
-                  "&:hover .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#f27244",
-                  },
-                  "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                    borderColor: "#f27244",
-                  },
-                }}
-              >
-                {cities.map((city, index) => (
-                  <MenuItem key={index} value={city}>
-                    {city}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              {showFilters ? "Hide Filters" : "Show Filters"}
+              {hasActiveFilters && (
+                <Chip
+                  label={filteredData.reduce((acc, item) => acc + item.hotels.length, 0)}
+                  size="small"
+                  sx={{
+                    ml: 1,
+                    backgroundColor: "#f27244",
+                    color: "white",
+                    height: "20px",
+                  }}
+                />
+              )}
+            </Button>
           </Box>
+        )}
 
-          <Box sx={{ flex: { xs: "1", md: "0 0 40%" } }}>
-            <PriceFilter
-              value={priceRange}
-              maxPrice={maxPrice}
-              onChange={(newRange) => setPriceRange(newRange)}
-            />
-          </Box>
-        </Box>
+        <Collapse in={showFilters || !isMobile}>
+          {/* Combined Filters Box */}
+        
+            <Grid container spacing={3} alignItems="center" justifyContent="center">
+              {/* Search Field */}
+              <Grid item xs={12} md={4} >
+                
+                <SearchBar
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Hotel name, location..."
+                  onClear={() => setSearchQuery("")}
+                  fullWidth
+                  sx={{
+                    backgroundColor: "white",
+                    borderRadius: "12px",
+                    "& .MuiOutlinedInput-root": {
+                      borderRadius: "12px",
+                    },
+                  }}
+                />
+              </Grid>
+
+              {/* City Selection */}
+              <Grid item xs={12} md={4} >
+                
+                <FormControl
+                  fullWidth
+                  sx={{
+                    px: 1,
+                    backgroundColor: "white",
+                    borderRadius: "12px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    "&:hover": {
+                      boxShadow: "0 4px 12px rgba(242, 114, 68, 0.1)",
+                    },
+                  }}
+                >
+                  <InputLabel 
+                    id="city-select-label"
+                    sx={{
+                      "&.Mui-focused": {
+                        color: "#f27244",
+                      },
+                    }}
+                  >
+                    All Cities
+                  </InputLabel>
+                  <Select
+                    labelId="city-select-label"
+                    value={selectedCity}
+                    label="All Cities"
+                    onChange={(e) => setSelectedCity(e.target.value)}
+                    sx={{
+                      borderRadius: "12px",
+                      "& .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "transparent",
+                      },
+                      "&:hover .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "rgba(242, 114, 68, 0.3)",
+                      },
+                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+                        borderColor: "#f27244",
+                        borderWidth: "2px",
+                      },
+                    }}
+                    MenuProps={{
+                      PaperProps: {
+                        sx: {
+                          borderRadius: "12px",
+                          mt: 1,
+                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                        },
+                      },
+                    }}
+                  >
+                    {cities.map((city, index) => (
+                      <MenuItem 
+                        key={index} 
+                        value={city}
+                        sx={{
+                          "&:hover": {
+                            backgroundColor: "rgba(242, 114, 68, 0.08)",
+                          },
+                          "&.Mui-selected": {
+                            backgroundColor: "rgba(242, 114, 68, 0.12)",
+                            fontWeight: 600,
+                          },
+                        }}
+                      >
+                        {city}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+
+              {/* Price Range */}
+              <Grid item xs={12} md={4} >
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    mb: 1,
+                    fontWeight: 600,
+                    color: "#333",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                  }}
+                >
+                  <AttachMoneyIcon sx={{ fontSize: 18, color: "#f27244" }} />
+                  Price Range
+                </Typography>
+                
+                  <PriceFilter
+                    value={priceRange}
+                    maxPrice={maxPrice}
+                    onChange={(newRange) => setPriceRange(newRange)}
+                    compact
+                  />
+              </Grid>
+            </Grid>
+
+           
+        </Collapse>
+
+      
       </Box>
 
       {/* Filtered Experiences */}

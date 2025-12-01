@@ -6,24 +6,10 @@ export default function PriceFilter({ value, maxPrice, onChange }) {
     <Box
       sx={{
         width: "100%",
-        backgroundColor: "white",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        borderRadius: "8px",
         p: 2.5,
       }}
     >
-      <Typography
-        sx={{
-          mb: 2,
-          fontWeight: 600,
-          textAlign: "center",
-          color: "#333",
-          fontSize: "0.95rem",
-        }}
-      >
-        Price Range
-      </Typography>
-
+      
       <Box
         sx={{
           display: "flex",
