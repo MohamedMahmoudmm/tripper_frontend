@@ -1,7 +1,7 @@
-import { Box, TextField, InputAdornment, Paper } from "@mui/material";
+import { Box, TextField, InputAdornment, IconButton, Popover, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ClearIcon from "@mui/icons-material/Clear";
-import { IconButton } from "@mui/material";
+import { useState } from "react";
 
 export default function SearchBar({
   value,
@@ -9,26 +9,68 @@ export default function SearchBar({
   placeholder = "Search...",
   onClear,
 }) {
+  const [anchorEl, setAnchorEl] = useState(null);
+
+  const handleClick = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    if (!value) {
+      setAnchorEl(null);
+    }
+  };
+
+  const open = Boolean(anchorEl);
+
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", mb: 3 }}>
-      <Paper
-        elevation={3}
+    <>
+      <Button
+        onClick={handleClick}
+        size="small"
+        startIcon={<SearchIcon sx={{ fontSize: 18 }} />}
         sx={{
-          p: 0.5,
-          borderRadius: "40px",
-          display: "flex",
-          alignItems: "center",
-          width: "100%",
-          maxWidth: 500,
-          background: "#ffffff",
-          transition: "box-shadow 0.3s ease",
+          color: "#666",
+          textTransform: "none",
+          fontSize: "0.875rem",
+          fontWeight: 500,
+          px: 1.5,
+          py: 0.75,
+          minWidth: "auto",
           "&:hover": {
-            boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
+            bgcolor: "#f5f5f5",
+          },
+        }}
+      >
+        Search
+      </Button>
+
+      <Popover
+        open={open}
+        anchorEl={anchorEl}
+        onClose={handleClose}
+        anchorOrigin={{
+          vertical: "bottom",
+          horizontal: "left",
+        }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "left",
+        }}
+        PaperProps={{
+          sx: {
+            mt: 1,
+            borderRadius: "12px",
+            boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+            width: 320,
+            p: 2,
           },
         }}
       >
         <TextField
+          autoFocus
           fullWidth
+          size="small"
           variant="outlined"
           placeholder={placeholder}
           value={value}
@@ -36,9 +78,7 @@ export default function SearchBar({
           InputProps={{
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon
-                  sx={{ color: "#f27244", opacity: 0.8, fontSize: 26 }}
-                />
+                <SearchIcon sx={{ color: "#f27244", fontSize: 20 }} />
               </InputAdornment>
             ),
             endAdornment: value && (
@@ -49,35 +89,28 @@ export default function SearchBar({
                     onChange({ target: { value: "" } });
                     if (onClear) onClear();
                   }}
-                  sx={{ color: "#666" }}
+                  sx={{ padding: "4px" }}
                 >
-                  <ClearIcon fontSize="small" />
+                  <ClearIcon sx={{ fontSize: 18 }} />
                 </IconButton>
               </InputAdornment>
             ),
-            sx: {
-              borderRadius: "40px",
-              "& fieldset": { border: "none" },
-            },
           }}
           sx={{
-            "& .MuiInputBase-input": {
-              padding: "12px 14px",
-              fontSize: "0.95rem",
-              fontWeight: 500,
-            },
             "& .MuiOutlinedInput-root": {
-              "&:hover": {
-                backgroundColor: "#fef5f2",
+              "& fieldset": {
+                borderColor: "#e0e0e0",
               },
-              "&.Mui-focused": {
-                backgroundColor: "#fef5f2",
-                boxShadow: "0 0 0 3px rgba(242, 114, 68, 0.1)",
+              "&:hover fieldset": {
+                borderColor: "#f27244",
+              },
+              "&.Mui-focused fieldset": {
+                borderColor: "#f27244",
               },
             },
           }}
         />
-      </Paper>
-    </Box>
+      </Popover>
+    </>
   );
 }

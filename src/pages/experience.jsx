@@ -5,24 +5,21 @@ import PriceFilter from "../components/sharedComponents/PriceFilter";
 import SearchBar from "../components/sharedComponents/SearchBar";
 import {
   Box,
-  FormControl,
   Select,
   MenuItem,
-  InputLabel,
   CircularProgress,
   Typography,
   Alert,
-  Grid,
-  useTheme,
-  useMediaQuery,
-  Chip,
-  Collapse,
   Button,
+  Stack,
+  Divider,
 } from "@mui/material";
 import {
-  FilterList as FilterListIcon,
-  AttachMoney as AttachMoneyIcon,
+  Clear as ClearIcon,
+  LocationOn as LocationIcon,
+  Sort as SortIcon,
 } from "@mui/icons-material";
+
 export default function ExperiencePage() {
   const [cityExperiences, setCityExperiences] = useState({});
   const [loading, setLoading] = useState(true);
@@ -30,11 +27,8 @@ export default function ExperiencePage() {
   const [selectedCity, setSelectedCity] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [priceRange, setPriceRange] = useState([0, 5000]);
-  const [maxPrice, setMaxPrice] = useState(5000); 
-   const theme = useTheme();
-
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const [showFilters, setShowFilters] = useState(true);
+  const [maxPrice, setMaxPrice] = useState(5000);
+  const [sortBy, setSortBy] = useState("default");
 
   useEffect(() => {
     const fetchExperiences = async () => {
@@ -60,7 +54,9 @@ export default function ExperiencePage() {
           if (!acc[cityDisplay]) acc[cityDisplay] = [];
 
           acc[cityDisplay].push({
-            image: exp.images?.[0] || "https://via.placeholder.com/300x200?text=No+Image",
+            image:
+              exp.images?.[0] ||
+              "https://via.placeholder.com/300x200?text=No+Image",
             title: exp.name,
             rating: exp.starRating || 4.8,
             price: `${Number(exp.price) || 0} ج.م / person`,
@@ -71,7 +67,6 @@ export default function ExperiencePage() {
           return acc;
         }, {});
 
-        // Calculate prices
         const allPrices = all
           .map((e) => Number(e.price) || 0)
           .filter((p) => p > 0);
@@ -95,7 +90,6 @@ export default function ExperiencePage() {
     fetchExperiences();
   }, []);
 
-  // Loading State
   if (loading) {
     return (
       <Box
@@ -111,7 +105,6 @@ export default function ExperiencePage() {
     );
   }
 
-  // Error State
   if (error) {
     return (
       <Box sx={{ px: { xs: 2, md: 6 }, py: 4 }}>
@@ -124,9 +117,8 @@ export default function ExperiencePage() {
 
   const cities = ["All", ...Object.keys(cityExperiences)];
 
-  // Filter experiences
   const getFilteredExperiences = () => {
-    return Object.keys(cityExperiences)
+    let result = Object.keys(cityExperiences)
       .filter((city) => selectedCity === "All" || city === selectedCity)
       .map((city) => {
         const filtered = cityExperiences[city].filter((exp) => {
@@ -144,216 +136,286 @@ export default function ExperiencePage() {
         return { city, experiences: filtered };
       })
       .filter((item) => item.experiences.length > 0);
+
+    // Apply sorting
+    if (sortBy === "price_low") {
+      result.forEach((item) => {
+        item.experiences.sort((a, b) => a.numericPrice - b.numericPrice);
+      });
+    } else if (sortBy === "price_high") {
+      result.forEach((item) => {
+        item.experiences.sort((a, b) => b.numericPrice - a.numericPrice);
+      });
+    } else if (sortBy === "rating") {
+      result.forEach((item) => {
+        item.experiences.sort((a, b) => b.rating - a.rating);
+      });
+    }
+
+    return result;
   };
 
   const filteredData = getFilteredExperiences();
-  const hasActiveFilters = selectedCity !== "All" || 
-                          priceRange[0] !== 0 || 
-                          priceRange[1] !== maxPrice ||
-                          searchQuery !== "";
+  const hasActiveFilters =
+    selectedCity !== "All" ||
+    priceRange[0] !== 0 ||
+    priceRange[1] !== maxPrice ||
+    searchQuery !== "" ||
+    sortBy !== "default";
+
+  const handleClearFilters = () => {
+    setSelectedCity("All");
+    setPriceRange([0, maxPrice]);
+    setSearchQuery("");
+    setSortBy("default");
+  };
+
   return (
-    <Box sx={{ pb: 6 }}>
-      {/* FILTERS SECTION */}
-       {/* FILTERS SECTION */}
+    <Box sx={{ pb: 6, minHeight: "100vh" }}>
+      {/* MINIMAL FILTERS BAR */}
       <Box
         sx={{
-          mt: 2,
-          mb: 2,
+          position: "sticky",
+          top: 64,
+          zIndex: 100,
+          bgcolor: "white",
+          borderBottom: "1px solid #e0e0e0",
+          py: 1,
           px: { xs: 2, md: 6 },
+          boxShadow: "0 1px 3px rgba(0,0,0,0.05)",
         }}
       >
-        {/* Filter Header with Toggle (Mobile) */}
-        {isMobile && (
-          <Box sx={{ mb: 2 }}>
-            <Button
-              fullWidth
-              variant="outlined"
-              startIcon={<FilterListIcon />}
-              onClick={() => setShowFilters(!showFilters)}
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          justifyContent="flex-end"
+          sx={{
+            overflowX: "auto",
+            "&::-webkit-scrollbar": { display: "none" },
+          }}
+        >
+          {/* Search */}
+          <SearchBar
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search experiences..."
+            onClear={() => setSearchQuery("")}
+          />
+
+          <Divider orientation="vertical" flexItem />
+
+          {/* City Filter */}
+          <Button
+            size="small"
+            startIcon={<LocationIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              color: "#666",
+              textTransform: "none",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              px: 1.5,
+              py: 0.5,
+              minWidth: "auto",
+              whiteSpace: "nowrap",
+              borderRadius: 0,
+            }}
+          >
+            <Select
+              value={selectedCity}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              variant="standard"
+              disableUnderline
               sx={{
-                borderColor: "#f27244",
-                color: "#f27244",
-                borderRadius: "12px",
-                py: 1.5,
-                fontWeight: 600,
-                "&:hover": {
-                  borderColor: "#d96135",
-                  backgroundColor: "rgba(242, 114, 68, 0.04)",
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "#666",
+                "& .MuiSelect-select": {
+                  padding: 0,
+                  paddingRight: "20px !important",
+                  "&:focus": {
+                    bgcolor: "transparent",
+                  },
+                },
+                "& .MuiSelect-icon": {
+                  right: 0,
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    borderRadius: "8px",
+                    mt: 1,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  },
                 },
               }}
             >
-              {showFilters ? "Hide Filters" : "Show Filters"}
-              {hasActiveFilters && (
-                <Chip
-                  label={filteredData.reduce((acc, item) => acc + item.hotels.length, 0)}
-                  size="small"
+              {cities.map((city, index) => (
+                <MenuItem
+                  key={index}
+                  value={city}
                   sx={{
-                    ml: 1,
-                    backgroundColor: "#f27244",
-                    color: "white",
-                    height: "20px",
-                  }}
-                />
-              )}
-            </Button>
-          </Box>
-        )}
-
-        <Collapse in={showFilters || !isMobile}>
-          {/* Combined Filters Box */}
-        
-            <Grid container spacing={3} alignItems="center" justifyContent="center">
-              {/* Search Field */}
-              <Grid item xs={12} md={4} >
-                
-                <SearchBar
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Hotel name, location..."
-                  onClear={() => setSearchQuery("")}
-                  fullWidth
-                  sx={{
-                    backgroundColor: "white",
-                    borderRadius: "12px",
-                    "& .MuiOutlinedInput-root": {
-                      borderRadius: "12px",
-                    },
-                  }}
-                />
-              </Grid>
-
-              {/* City Selection */}
-              <Grid item xs={12} md={4} >
-                
-                <FormControl
-                  fullWidth
-                  sx={{
-                    px: 1,
-                    backgroundColor: "white",
-                    borderRadius: "12px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.05)",
+                    fontSize: "0.875rem",
                     "&:hover": {
-                      boxShadow: "0 4px 12px rgba(242, 114, 68, 0.1)",
+                      bgcolor: "#f5f5f5",
                     },
                   }}
                 >
-                  <InputLabel 
-                    id="city-select-label"
-                    sx={{
-                      "&.Mui-focused": {
-                        color: "#f27244",
-                      },
-                    }}
-                  >
-                    All Cities
-                  </InputLabel>
-                  <Select
-                    labelId="city-select-label"
-                    value={selectedCity}
-                    label="All Cities"
-                    onChange={(e) => setSelectedCity(e.target.value)}
-                    sx={{
-                      borderRadius: "12px",
-                      "& .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "transparent",
-                      },
-                      "&:hover .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "rgba(242, 114, 68, 0.3)",
-                      },
-                      "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
-                        borderColor: "#f27244",
-                        borderWidth: "2px",
-                      },
-                    }}
-                    MenuProps={{
-                      PaperProps: {
-                        sx: {
-                          borderRadius: "12px",
-                          mt: 1,
-                          boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-                        },
-                      },
-                    }}
-                  >
-                    {cities.map((city, index) => (
-                      <MenuItem 
-                        key={index} 
-                        value={city}
-                        sx={{
-                          "&:hover": {
-                            backgroundColor: "rgba(242, 114, 68, 0.08)",
-                          },
-                          "&.Mui-selected": {
-                            backgroundColor: "rgba(242, 114, 68, 0.12)",
-                            fontWeight: 600,
-                          },
-                        }}
-                      >
-                        {city}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
+                  {city}
+                </MenuItem>
+              ))}
+            </Select>
+          </Button>
 
-              {/* Price Range */}
-              <Grid item xs={12} md={4} >
-                <Typography
-                  variant="subtitle2"
-                  sx={{
-                    mb: 1,
-                    fontWeight: 600,
-                    color: "#333",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 0.5,
-                  }}
-                >
-                  <AttachMoneyIcon sx={{ fontSize: 18, color: "#f27244" }} />
-                  Price Range
-                </Typography>
-                
-                  <PriceFilter
-                    value={priceRange}
-                    maxPrice={maxPrice}
-                    onChange={(newRange) => setPriceRange(newRange)}
-                    compact
-                  />
-              </Grid>
-            </Grid>
+          <Divider orientation="vertical" flexItem />
 
-           
-        </Collapse>
+          {/* Price Filter */}
+          <PriceFilter
+            value={priceRange}
+            maxPrice={maxPrice}
+            onChange={(newRange) => setPriceRange(newRange)}
+          />
 
-      
+          <Divider orientation="vertical" flexItem />
+
+          {/* Sort */}
+          <Button
+            size="small"
+            startIcon={<SortIcon sx={{ fontSize: 18 }} />}
+            sx={{
+              color: "#666",
+              textTransform: "none",
+              fontSize: "0.875rem",
+              fontWeight: 500,
+              px: 1.5,
+              py: 0.5,
+              minWidth: "auto",
+              whiteSpace: "nowrap",
+              borderRadius: 0,
+            }}
+          >
+            <Select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              variant="standard"
+              disableUnderline
+              sx={{
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                color: "#666",
+                "& .MuiSelect-select": {
+                  padding: 0,
+                  paddingRight: "20px !important",
+                  "&:focus": {
+                    bgcolor: "transparent",
+                  },
+                },
+                "& .MuiSelect-icon": {
+                  right: 0,
+                },
+              }}
+              MenuProps={{
+                PaperProps: {
+                  sx: {
+                    borderRadius: "8px",
+                    mt: 1,
+                    boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                  },
+                },
+              }}
+            >
+              <MenuItem value="default" sx={{ fontSize: "0.875rem" }}>
+                Default
+              </MenuItem>
+              <MenuItem value="price_low" sx={{ fontSize: "0.875rem" }}>
+                Price: Low to High
+              </MenuItem>
+              <MenuItem value="price_high" sx={{ fontSize: "0.875rem" }}>
+                Price: High to Low
+              </MenuItem>
+              <MenuItem value="rating" sx={{ fontSize: "0.875rem" }}>
+                Highest Rated
+              </MenuItem>
+            </Select>
+          </Button>
+
+          {hasActiveFilters && (
+            <>
+              <Divider orientation="vertical" flexItem />
+              <Button
+                size="small"
+                startIcon={<ClearIcon sx={{ fontSize: 16 }} />}
+                onClick={handleClearFilters}
+                sx={{
+                  color: "#999",
+                  textTransform: "none",
+                  fontSize: "0.8rem",
+                  fontWeight: 500,
+                  px: 1.5,
+                  py: 0.5,
+                  minWidth: "auto",
+                  whiteSpace: "nowrap",
+                  borderRadius: 0,
+                  "&:hover": {
+                    bgcolor: "#fff5f5",
+                    color: "#f27244",
+                  },
+                }}
+              >
+                Clear
+              </Button>
+            </>
+          )}
+        </Stack>
       </Box>
 
-      {/* Filtered Experiences */}
-      {filteredData.length === 0 ? (
-        <Box
-          sx={{
-            textAlign: "center",
-            py: 8,
-            px: 2,
-          }}
-        >
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No experiences found
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Try adjusting your filters or search query
-          </Typography>
-        </Box>
-      ) : (
-        filteredData.map(({ city, experiences }) => (
-          <Box key={city} sx={{ mb: 6 }}>
-            <PopularHomesCarousel
-              homes={experiences}
-              title={`Popular Experiences in ${city}`}
-            />
+      {/* RESULTS SECTION */}
+      <Box sx={{ mt: 3 }}>
+        {filteredData.length === 0 ? (
+          <Box
+            sx={{
+              textAlign: "center",
+              py: 8,
+              px: 2,
+            }}
+          >
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              No experiences found
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+              Try adjusting your filters
+            </Typography>
+            {hasActiveFilters && (
+              <Button
+                variant="outlined"
+                startIcon={<ClearIcon />}
+                onClick={handleClearFilters}
+                sx={{
+                  borderColor: "#f27244",
+                  color: "#f27244",
+                  textTransform: "none",
+                  "&:hover": {
+                    borderColor: "#d96135",
+                    bgcolor: "rgba(242, 114, 68, 0.04)",
+                  },
+                }}
+              >
+                Clear All Filters
+              </Button>
+            )}
           </Box>
-        ))
-      )}
+        ) : (
+          filteredData.map(({ city, experiences }) => (
+            <Box key={city} sx={{ mb: 4 }}>
+              <PopularHomesCarousel
+                homes={experiences}
+                title={`Popular Experiences in ${city}`}
+              />
+            </Box>
+          ))
+        )}
+      </Box>
     </Box>
   );
 }
