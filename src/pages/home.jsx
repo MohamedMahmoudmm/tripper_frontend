@@ -15,18 +15,14 @@ import {
   Chip,
   Button,
   Collapse,
-  IconButton,
   useMediaQuery,
   useTheme,
   Grid,
-  Paper,
 } from "@mui/material";
 import {
   FilterList as FilterListIcon,
   Clear as ClearIcon,
-  LocationOn as LocationOnIcon,
   AttachMoney as AttachMoneyIcon,
-  Search as SearchIcon,
 } from "@mui/icons-material";
 
 const HomePage = () => {

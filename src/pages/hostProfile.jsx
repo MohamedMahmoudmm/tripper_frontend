@@ -11,11 +11,11 @@ import {
   CardContent,
   Chip,
   Skeleton,
-  Divider,
   Stack,
   Paper,
   Tab,
   Tabs,
+  Tooltip, Button
 } from "@mui/material";
 import {
   Verified as VerifiedIcon,
@@ -28,6 +28,7 @@ import {
   CalendarMonth as CalendarIcon,
 } from "@mui/icons-material";
 import axiosInstance from "../axiousInstance/axoiusInstance";
+import MessageIcon from '@mui/icons-material/Message';
 
 export default function HostProfile() {
   const { hostId } = useParams();
@@ -38,47 +39,82 @@ export default function HostProfile() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
 
+  const currentUser = JSON.parse(localStorage.getItem("user") || "null");
+  const myId = currentUser?._id;
+
   useEffect(() => {
-    if (hostId) {
-      fetchHostData();
+    if (!hostId) return;
+
+    const fetchHostData = async () => {
+      try {
+        setLoading(true);
+
+        const [hostRes, hotelsRes, experiencesRes] = await Promise.all([
+          axiosInstance.get(`/user/profile/${hostId}`),
+          axiosInstance.get(`/hotel/by-host/${hostId}`),
+          axiosInstance.get(`/experiance/by-host/${hostId}`),
+        ]);
+
+        setHost(hostRes.data.data || hostRes.data);
+        setHotels(hotelsRes.data || []);
+        setExperiences(experiencesRes.data || []);
+      } catch (err) {
+        console.error("Error fetching host data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHostData();
+
+    // لو اليوزر هو الـ Host نفسه → يتحول لصفحته الشخصية
+    if (myId && myId === hostId) {
+      navigate("/guest/profile", { replace: true });
     }
-    const currentUserId = JSON.parse(localStorage.getItem("user"))?._id;
-
-const isMyProfile = currentUserId === hostId;
-if (isMyProfile) {
-  navigate("/guest/profile");
-}
-  }, [hostId]);
-
-  const fetchHostData = async () => {
-    try {
-      setLoading(true);
-
-      // Fetch host profile
-      const hostRes = await axiosInstance.get(`/user/profile/${hostId}`);
-      setHost(hostRes.data.data || hostRes.data);
-
-      // Fetch host's hotels
-      const hotelsRes = await axiosInstance.get(`/hotel/host/${hostId}`);
-      setHotels(hotelsRes.data || []);
-
-      // Fetch host's experiences
-      const experiencesRes = await axiosInstance.get(`/experiance/host/${hostId}`);
-      setExperiences(experiencesRes.data || []);
-    } catch (err) {
-      console.error("Error fetching host data:", err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [hostId, myId, navigate]);
 
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
 
   const handleCardClick = (id, model) => {
-    navigate(`/${model}/${id}`);
+    navigate(`/${model}/details/${id}`);
   };
+
+  // فتح واتساب
+  const openWhatsApp = (phone) => {
+    const cleaned = phone.replace(/[^0-9]/g, "");
+    let number = cleaned;
+    if (cleaned.startsWith("0")) {
+      number = "2" + cleaned.substring(1); // لو مصري
+    } else if (!cleaned.startsWith("20") && cleaned.length === 11) {
+      number = "2" + cleaned;
+    }
+    window.open(`https://wa.me/${number}`, "_blank");
+  };
+
+  // بدء محادثة
+  const startConversation = () => {
+    if (!myId) {
+      navigate("/login");
+      return;
+    }
+    if (myId === hostId) return;
+
+    axiosInstance
+      .post("conversation/startConversation", {
+        receiverid: [hostId],
+      })
+      .then((res) => {
+        const convId = res.data.data.conversation._id;
+        navigate("/chat", { state: { convid: convId } });
+      })
+      .catch((err) => {
+        console.error("Error starting chat:", err);
+      });
+  };
+
+
 
   const renderPropertyCard = (item, model) => {
     const price = item.price || 0;
@@ -146,6 +182,9 @@ if (isMyProfile) {
     </Card>
   );
 
+  const totalProperties = hotels.length + experiences.length;
+  const joinDate = host ? new Date(host.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long' }) : '';
+
   if (loading) {
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -183,18 +222,12 @@ if (isMyProfile) {
     );
   }
 
-  const totalProperties = hotels.length + experiences.length;
-  const joinDate = host.createdAt
-    ? new Date(host.createdAt).toLocaleDateString("en-US", {
-        month: "long",
-        year: "numeric",
-      })
-    : "N/A";
+
 
   return (
     <Box sx={{ backgroundColor: "#fafafa", minHeight: "100vh", py: 4 }}>
       <Container maxWidth="lg">
-        {/* Host Header */}
+        {/* Header */}
         <Paper
           elevation={0}
           sx={{
@@ -207,7 +240,6 @@ if (isMyProfile) {
             overflow: "hidden",
           }}
         >
-          {/* Background Pattern */}
           <Box
             sx={{
               position: "absolute",
@@ -216,8 +248,7 @@ if (isMyProfile) {
               width: "300px",
               height: "300px",
               opacity: 0.1,
-              background:
-                "radial-gradient(circle, white 1px, transparent 1px)",
+              background: "radial-gradient(circle, white 1px, transparent 1px)",
               backgroundSize: "20px 20px",
             }}
           />
@@ -226,18 +257,18 @@ if (isMyProfile) {
             display="flex"
             flexDirection={{ xs: "column", md: "row" }}
             alignItems={{ xs: "center", md: "flex-start" }}
-            gap={3}
+            gap={4}
             position="relative"
             zIndex={1}
           >
             <Avatar
               src={host.image || undefined}
               sx={{
-                width: 120,
-                height: 120,
-                border: "4px solid white",
-                boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-                fontSize: 48,
+                width: 140,
+                height: 140,
+                border: "5px solid white",
+                boxShadow: "0 8px 25px rgba(0,0,0,0.3)",
+                fontSize: 56,
                 fontWeight: "bold",
               }}
             >
@@ -246,7 +277,7 @@ if (isMyProfile) {
 
             <Box flex={1} textAlign={{ xs: "center", md: "left" }}>
               <Box display="flex" alignItems="center" gap={1} justifyContent={{ xs: "center", md: "flex-start" }}>
-                <Typography variant="h4" fontWeight="bold">
+                <Typography variant="h3" fontWeight="bold">
                   {host.name}
                 </Typography>
                 {host.role === "host" && (
@@ -255,7 +286,7 @@ if (isMyProfile) {
                     label="Verified Host"
                     size="small"
                     sx={{
-                      backgroundColor: "rgba(255,255,255,0.2)",
+                      backgroundColor: "rgba(255,255,255,0.25)",
                       color: "white",
                       fontWeight: "bold",
                       backdropFilter: "blur(10px)",
@@ -264,55 +295,72 @@ if (isMyProfile) {
                 )}
               </Box>
 
+              {/* Contact Info مع روابط تفاعلية */}
               <Stack
                 direction={{ xs: "column", sm: "row" }}
-                spacing={2}
-                mt={2}
-                divider={<Divider orientation="vertical" flexItem sx={{ bgcolor: "rgba(255,255,255,0.3)" }} />}
+                spacing={3}
+                mt={3}
+                alignItems="center"
                 justifyContent={{ xs: "center", md: "flex-start" }}
               >
                 {host.email && (
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <EmailIcon fontSize="small" />
-                    <Typography variant="body2">{host.email}</Typography>
-                  </Box>
+                  <Tooltip title="Send Email">
+                    <Button
+                      startIcon={<EmailIcon />}
+                      href={`mailto:${host.email}`}
+                      sx={{ color: "white", textTransform: "none" }}
+                    >
+                      {host.email}
+                    </Button>
+                  </Tooltip>
                 )}
+
                 {host.phone && (
-                  <Box display="flex" alignItems="center" gap={1}>
-                    <PhoneIcon fontSize="small" />
-                    <Typography variant="body2">{host.phone}</Typography>
-                  </Box>
+                  <Tooltip title="Chat on WhatsApp">
+                    <Button
+                      startIcon={<PhoneIcon />}
+                      onClick={() => openWhatsApp(host.phone)}
+                      sx={{ color: "white", textTransform: "none" }}
+                    >
+                      {host.phone}
+                    </Button>
+                  </Tooltip>
+                )}
+
+                {/* زرار الشات */}
+                {myId && myId !== hostId && (
+                  <Button
+                    variant="contained"
+                    startIcon={<MessageIcon />}
+                    onClick={startConversation}
+                    sx={{
+                      backgroundColor: "rgba(255,255,255,0.25)",
+                      backdropFilter: "blur(10px)",
+                      "&:hover": { backgroundColor: "rgba(255,255,255,0.35)" },
+                    }}
+                  >
+                    Message Host
+                  </Button>
                 )}
               </Stack>
 
-              <Stack direction="row" spacing={3} mt={3} justifyContent={{ xs: "center", md: "flex-start" }}>
-                <Box>
-                  <Typography variant="h5" fontWeight="bold">
-                    {totalProperties}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Properties
-                  </Typography>
+              {/* الإحصائيات */}
+              <Stack direction="row" spacing={4} mt={4} justifyContent={{ xs: "center", md: "flex-start" }}>
+                <Box textAlign="center">
+                  <Typography variant="h5" fontWeight="bold">{totalProperties}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>Properties</Typography>
                 </Box>
-                <Box>
-                  <Typography variant="h5" fontWeight="bold">
-                    {hotels.length}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Hotels
-                  </Typography>
+                <Box textAlign="center">
+                  <Typography variant="h5" fontWeight="bold">{hotels.length}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>Hotels</Typography>
                 </Box>
-                <Box>
-                  <Typography variant="h5" fontWeight="bold">
-                    {experiences.length}
-                  </Typography>
-                  <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                    Experiences
-                  </Typography>
+                <Box textAlign="center">
+                  <Typography variant="h5" fontWeight="bold">{experiences.length}</Typography>
+                  <Typography variant="body2" sx={{ opacity: 0.9 }}>Experiences</Typography>
                 </Box>
               </Stack>
 
-              <Box display="flex" alignItems="center" gap={1} mt={2} justifyContent={{ xs: "center", md: "flex-start" }}>
+              <Box display="flex" alignItems="center" gap={1} mt={3} justifyContent={{ xs: "center", md: "flex-start" }}>
                 <CalendarIcon fontSize="small" />
                 <Typography variant="body2" sx={{ opacity: 0.9 }}>
                   Joined {joinDate}
@@ -324,86 +372,62 @@ if (isMyProfile) {
 
         {/* About Section */}
         {host.bio && (
-          <Paper elevation={0} sx={{ p: 3, borderRadius: 3, mb: 4 }}>
-            <Typography variant="h6" fontWeight="bold" gutterBottom>
+          <Paper elevation={0} sx={{ p: 4, borderRadius: 3, mb: 4 }}>
+            <Typography variant="h5" fontWeight="bold" gutterBottom>
               About {host.name}
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" color="text.secondary" sx={{ lineHeight: 1.8 }}>
               {host.bio}
             </Typography>
           </Paper>
         )}
 
-        {/* Properties Section */}
+        {/* Tabs للفنادق والتجارب */}
         <Paper elevation={0} sx={{ borderRadius: 3, overflow: "hidden" }}>
           <Box sx={{ borderBottom: 1, borderColor: "divider", bgcolor: "white" }}>
-            <Tabs
-              value={activeTab}
-              onChange={handleTabChange}
-              variant="fullWidth"
-              sx={{
-                "& .MuiTab-root": {
-                  fontWeight: 600,
-                  fontSize: "1rem",
-                },
-              }}
-            >
-              <Tab
-                icon={<HomeIcon />}
-                iconPosition="start"
-                label={`Hotels (${hotels.length})`}
-              />
-              <Tab
-                icon={<ExploreIcon />}
-                iconPosition="start"
-                label={`Experiences (${experiences.length})`}
-              />
+            <Tabs value={activeTab} onChange={handleTabChange} centered>
+              <Tab icon={<HomeIcon />} label={`Hotels (${hotels.length})`} />
+              <Tab icon={<ExploreIcon />} label={`Experiences (${experiences.length})`} />
             </Tabs>
           </Box>
 
-          <Box sx={{ p: 3 }}>
-            {/* Hotels Tab */}
+          <Box sx={{ p: 4 }}>
             {activeTab === 0 && (
-              <>
-                {hotels.length > 0 ? (
-                  <Grid container spacing={3}>
-                    {hotels.map((hotel) => (
-                      <Grid item xs={12} sm={6} md={4} key={hotel._id}>
-                        {renderPropertyCard(hotel, "hotel")}
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Box textAlign="center" py={8}>
-                    <HomeIcon sx={{ fontSize: 64, color: "grey.400", mb: 2 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      No hotels listed yet
-                    </Typography>
-                  </Box>
-                )}
-              </>
+              hotels.length > 0 ? (
+                <Grid container spacing={3}>
+                  {hotels.map((hotel) => (
+                    <Grid item xs={12} sm={6} md={4} key={hotel._id}>
+                      {renderPropertyCard(hotel, "hotel")}
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box textAlign="center" py={10}>
+                  <HomeIcon sx={{ fontSize: 80, color: "grey.400", mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    No hotels listed yet
+                  </Typography>
+                </Box>
+              )
             )}
 
-            {/* Experiences Tab */}
             {activeTab === 1 && (
-              <>
-                {experiences.length > 0 ? (
-                  <Grid container spacing={3}>
-                    {experiences.map((exp) => (
-                      <Grid item xs={12} sm={6} md={4} key={exp._id}>
-                        {renderPropertyCard(exp, "experiance")}
-                      </Grid>
-                    ))}
-                  </Grid>
-                ) : (
-                  <Box textAlign="center" py={8}>
-                    <ExploreIcon sx={{ fontSize: 64, color: "grey.400", mb: 2 }} />
-                    <Typography variant="h6" color="text.secondary">
-                      No experiences listed yet
-                    </Typography>
-                  </Box>
-                )}
-              </>
+              experiences.length > 0 ? (
+                <Grid container spacing={3}>
+                  {experiences.map((exp) => (
+                    <Grid item xs={12} sm={6} md={4} key={exp._id}>
+                      {renderPropertyCard(exp, "experiance")}
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <Box textAlign="center" py={10}>
+                  <ExploreIcon sx={{ fontSize: 80, color: "grey.400", mb: 2 }} />
+                  <Typography variant="h6" color="text.secondary">
+                    No experiences listed yet
+                  </Typography>
+                </Box>
+              )
             )}
           </Box>
         </Paper>

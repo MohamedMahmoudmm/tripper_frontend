@@ -21,10 +21,7 @@ import {
 } from "@mui/material";
 import {
   FilterList as FilterListIcon,
-  Clear as ClearIcon,
-  LocationOn as LocationOnIcon,
   AttachMoney as AttachMoneyIcon,
-  Search as SearchIcon,
 } from "@mui/icons-material";
 export default function ExperiencePage() {
   const [cityExperiences, setCityExperiences] = useState({});

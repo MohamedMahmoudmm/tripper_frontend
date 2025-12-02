@@ -59,5 +59,11 @@ const authService = {
     });
     return res.data.data;
   },
+
+
+   getHostProfile: async (hostId) => {
+    const res = await axiosInstance.get(`/user/profile/${hostId}`);
+    return res.data.data;
+  },
 };
 export default authService;
