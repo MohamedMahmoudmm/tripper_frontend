@@ -86,7 +86,7 @@ export default function App() {
         <Toaster
           position="top-right"
           toastOptions={{
-            duration: 4000,
+            duration: 1500,
             style: {
               borderRadius: "12px",
               fontWeight: 600,

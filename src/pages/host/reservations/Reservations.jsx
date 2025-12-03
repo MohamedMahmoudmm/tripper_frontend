@@ -71,8 +71,8 @@ const Reservations = () => {
               "& .Mui-selected": { color: "#f27244" },
             }}
           >
-            <Tab label="🏨 Hotel Reservations" />
-            <Tab label="🎯 Experience Reservations" />
+            <Tab label=" Hotel Reservations" />
+            <Tab label=" Experience Reservations" />
           </Tabs>
 
           {/* Content */}

@@ -7,8 +7,11 @@ import {
   Button,
   Typography,
   Grid,
+  CircularProgress,
 } from "@mui/material";
 import { toast } from "react-hot-toast";
+import SaveIcon from "@mui/icons-material/Save";
+import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import experienceService from "../../../../../services/experince.service";
 import { basicInfoUpdateSchema } from "../../../validation/experienceSchema";
 
@@ -22,12 +25,19 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
   });
 
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({}); 
+  const [errors, setErrors] = useState({});
   const [isDirty, setIsDirty] = useState(false);
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" }); 
+    const { name, value } = e.target;
+    
+    // Prevent negative price
+    if (name === "price" && Number(value) < 0) {
+      return;
+    }
+
+    setForm({ ...form, [name]: value });
+    setErrors({ ...errors, [name]: "" });
     setIsDirty(true);
   };
 
@@ -42,7 +52,6 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
         city: form.city,
       };
 
-      
       await basicInfoUpdateSchema.validate(basicInfoData, {
         abortEarly: false,
       });
@@ -60,74 +69,126 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
       );
 
       onUpdate(res);
+      setIsDirty(false);
       toast.success("Basic info updated successfully!");
     } catch (err) {
       if (err.name === "ValidationError") {
-        
         const fieldErrors = {};
         err.inner.forEach((e) => {
           fieldErrors[e.path] = e.message;
         });
         setErrors(fieldErrors);
+        toast.error("Please fix the errors before saving");
       } else {
         console.error(err);
-        toast.error("Failed to update basic info.");
+        toast.error("Failed to update basic info");
       }
     } finally {
       setLoading(false);
-      setIsDirty(false);
-
     }
   };
 
   return (
-    <Card elevation={3}>
-      <CardContent>
-        <Typography variant="h5" fontWeight="bold" mb={2} gutterBottom>
-          Basic Information
-        </Typography>
+    <Card
+      elevation={0}
+      sx={{
+        border: "1px solid #e0e0e0",
+        borderRadius: 3,
+        transition: "all 0.3s ease",
+        "&:hover": {
+          boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
+        },
+      }}
+    >
+      <CardContent sx={{ p: 4 }}>
+        {/* Header */}
+        <Box display="flex" alignItems="center" mb={3}>
+          <Box
+            sx={{
+              bgcolor: "#FF385C",
+              p: 1,
+              borderRadius: 2,
+              mr: 2,
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <InfoOutlinedIcon sx={{ color: "white", fontSize: 24 }} />
+          </Box>
+          <Typography variant="h5" fontWeight="700" color="#222">
+            Basic Information
+          </Typography>
+        </Box>
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
+        <Grid container spacing={3}>
+          {/* Name Field */}
+          <Grid item xs={12} md={8}>
             <TextField
-              label="Name"
+              label="Experience Name"
               name="name"
               fullWidth
               value={form.name}
               onChange={handleChange}
               error={!!errors.name}
-              helperText={errors.name}
+              helperText={errors.name || "Give your experience a clear, descriptive name"}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "#FF385C" },
+                  "&.Mui-focused fieldset": { borderColor: "#FF385C" },
+                },
+              }}
             />
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          {/* Price Field */}
+          <Grid item xs={12} md={4}>
             <TextField
-              label="Price"
+              label="Price (USD)"
               name="price"
               type="number"
               fullWidth
               value={form.price}
               onChange={handleChange}
-              inputProps={{ min: 0 }}
+              inputProps={{ min: 0, step: 1 }}
               error={!!errors.price}
-              helperText={errors.price}
+              helperText={errors.price || "Per person"}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "#FF385C" },
+                  "&.Mui-focused fieldset": { borderColor: "#FF385C" },
+                },
+              }}
             />
           </Grid>
 
+          {/* Description Field */}
           <Grid item xs={12}>
             <TextField
               label="Description"
               name="description"
               fullWidth
               multiline
-              rows={3}
+              rows={4}
               value={form.description}
               onChange={handleChange}
               error={!!errors.description}
-              helperText={errors.description}
+              helperText={
+                errors.description ||
+                `${form.description.length} characters - Describe what makes your experience unique`
+              }
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "#FF385C" },
+                  "&.Mui-focused fieldset": { borderColor: "#FF385C" },
+                },
+              }}
             />
           </Grid>
 
+          {/* Country Field */}
           <Grid item xs={12} md={6}>
             <TextField
               label="Country"
@@ -137,9 +198,17 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
               onChange={handleChange}
               error={!!errors.country}
               helperText={errors.country}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "#FF385C" },
+                  "&.Mui-focused fieldset": { borderColor: "#FF385C" },
+                },
+              }}
             />
           </Grid>
 
+          {/* City Field */}
           <Grid item xs={12} md={6}>
             <TextField
               label="City"
@@ -149,16 +218,44 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
               onChange={handleChange}
               error={!!errors.city}
               helperText={errors.city}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "#FF385C" },
+                  "&.Mui-focused fieldset": { borderColor: "#FF385C" },
+                },
+              }}
             />
           </Grid>
         </Grid>
 
-        <Box mt={3} display="flex" justifyContent="flex-end">
+        {/* Save Button */}
+        <Box mt={4} display="flex" justifyContent="flex-end">
           <Button
             variant="contained"
-            color="primary"
             onClick={handleSave}
             disabled={loading || !isDirty}
+            startIcon={
+              loading ? (
+                <CircularProgress size={20} color="inherit" />
+              ) : (
+                <SaveIcon />
+              )
+            }
+            sx={{
+              bgcolor: "#FF385C",
+              px: 4,
+              py: 1.5,
+              borderRadius: 2,
+              textTransform: "none",
+              fontSize: "16px",
+              fontWeight: 600,
+              "&:hover": { bgcolor: "#E31C5F" },
+              "&:disabled": {
+                bgcolor: "#ccc",
+                color: "#666",
+              },
+            }}
           >
             {loading ? "Saving..." : "Save Changes"}
           </Button>

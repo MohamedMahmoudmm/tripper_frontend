@@ -7,8 +7,9 @@ import {
   Box,
   CircularProgress,
   Button,
+  Stack,
 } from "@mui/material";
-import { ArrowBackIosNew } from "@mui/icons-material";
+import { ArrowBackIosNew, Edit } from "@mui/icons-material";
 import { useForm, FormProvider } from "react-hook-form";
 import { useNavigate, useParams } from "react-router-dom";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -29,7 +30,6 @@ const EditHotel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasRooms, setHasRooms] = useState(false);
-  const [originalPhotos, setOriginalPhotos] = useState([]);
 
   const methods = useForm({
     resolver: yupResolver(editHotelSchema),
@@ -52,12 +52,9 @@ const EditHotel = () => {
       try {
         const hotel = await hotelService.getHotelById(id);
 
-        
         const roomsExist = hotel.rooms && hotel.rooms.length > 0;
         setHasRooms(roomsExist);
-        setOriginalPhotos(hotel.images || []);
 
-        // normalize amenities
         let normalizedAmenities = [];
         (hotel.amenities || []).forEach((a) => {
           if (typeof a === "string") {
@@ -115,15 +112,15 @@ const EditHotel = () => {
       };
 
       await hotelService.updateHotel(id, payload);
-      
-    if (data.photos && data.photos.length > 0) {
-      const formData = new FormData();
-      data.photos.forEach((file) => {
-        formData.append("images", file);
-      });
-      
-      await hotelService.updateHotelImages(id, formData);
-    }
+
+      if (data.photos && data.photos.length > 0) {
+        const formData = new FormData();
+        data.photos.forEach((file) => {
+          formData.append("images", file);
+        });
+
+        await hotelService.updateHotelImages(id, formData);
+      }
       toast.success("Hotel updated successfully!");
       setTimeout(() => navigate("/host/listings"), 1200);
     } catch (err) {
@@ -138,76 +135,185 @@ const EditHotel = () => {
       <HostLayout>
         <Box
           display="flex"
+          flexDirection="column"
           justifyContent="center"
           alignItems="center"
           minHeight="70vh"
+          gap={3}
         >
-          <CircularProgress />
+          <CircularProgress size={60} sx={{ color: "#667eea" }} />
+          <Typography variant="h6" color="text.secondary">
+            Loading property details...
+          </Typography>
         </Box>
       </HostLayout>
     );
 
   return (
     <HostLayout>
-      <Container maxWidth="md">
-        <Paper
-          elevation={3}
-          sx={{ p: { xs: 2, sm: 4 }, borderRadius: 4, position: "relative" }}
-        >
-          <Button
-            startIcon={<ArrowBackIosNew />}
-            onClick={() => navigate(-1)}
-            sx={{
-              position: "absolute",
-              top: 20,
-              left: 20,
-              color: "#f27244",
-              fontWeight: 600,
-              textTransform: "none",
-              "&:hover": { color: "#034959" },
-            }}
-          >
-            Back
-          </Button>
-
-          <Typography
-            variant="h4"
-            fontWeight="bold"
-            gutterBottom
-            textAlign="center"
-            color="#034959"
-          >
-            ✏️ Edit Hotel
-          </Typography>
-
-          <Divider sx={{ mb: 4 }} />
-
-          <FormProvider {...methods}>
-            <Box
-              component="form"
-              onSubmit={methods.handleSubmit(onSubmit)}
-              noValidate
+      {/* Hero Header */}
+      <Box
+        sx={{
+          background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+          py: { xs: 4, md: 6 },
+          mb: 4,
+          position: "relative",
+          overflow: "hidden",
+        }}
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: -50,
+            right: -50,
+            width: 300,
+            height: 300,
+            borderRadius: "50%",
+            background: "rgba(255,255,255,0.1)",
+          }}
+        />
+        <Container maxWidth="lg">
+          <Stack direction="row" alignItems="center" justifyContent="space-between">
+            <Box sx={{ position: "relative", zIndex: 1 }}>
+              <Stack direction="row" alignItems="center" spacing={2} mb={1}>
+                <Edit sx={{ fontSize: 40, color: "#fff" }} />
+                <Typography 
+                  variant="h3" 
+                  fontWeight="bold" 
+                  color="#fff" 
+                  sx={{ fontSize: { xs: "2rem", md: "3rem" } }}
+                >
+                  Edit Property
+                </Typography>
+              </Stack>
+              <Typography 
+                variant="body1" 
+                sx={{ 
+                  color: "rgba(255,255,255,0.9)", 
+                  fontSize: { xs: "0.95rem", md: "1.1rem" } 
+                }}
+              >
+                Update your property details and keep your listing fresh
+              </Typography>
+            </Box>
+            <Button
+              startIcon={<ArrowBackIosNew />}
+              onClick={() => navigate(-1)}
+              sx={{
+                color: "#fff",
+                backgroundColor: "rgba(255,255,255,0.2)",
+                fontWeight: 600,
+                textTransform: "none",
+                px: 3,
+                py: 1.2,
+                borderRadius: 2,
+                backdropFilter: "blur(10px)",
+                border: "1px solid rgba(255,255,255,0.3)",
+                "&:hover": {
+                  backgroundColor: "rgba(255,255,255,0.3)",
+                },
+              }}
             >
-              <Paper sx={{ p: 3, mb: 3 }}>
-                <ListingDetailsForm />
-              </Paper>
+              Back
+            </Button>
+          </Stack>
+        </Container>
+      </Box>
 
-              <Paper sx={{ p: 3, mb: 3 }}>
-                <AmenitiesForm />
-              </Paper>
+      <Container maxWidth="lg">
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 3,
+            overflow: "hidden",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+            mb: 4,
+          }}
+        >
+          <FormProvider {...methods}>
+            <Box component="form" onSubmit={methods.handleSubmit(onSubmit)} noValidate>
+              <Box sx={{ p: { xs: 3, md: 5 } }}>
+                <Stack spacing={5}>
+                  {/* Section 1: Property Details */}
+                  <Box>
+                    <Typography variant="overline" color="text.secondary" fontWeight="600" mb={1} display="block">
+                      SECTION 1
+                    </Typography>
+                    <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, border: "2px solid #E8E8E8", borderRadius: 3, backgroundColor: "#FAFAFA" }}>
+                      <ListingDetailsForm />
+                    </Paper>
+                  </Box>
 
-              {methods.watch("rooms")?.length > 0 && (
-                <Paper sx={{ p: 3, mb: 3 }}>
-                  <RoomsForm showRooms={true} />
-                </Paper>
-              )}
+                  <Divider sx={{ my: 2 }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight="600" sx={{ px: 2 }}>
+                      •••
+                    </Typography>
+                  </Divider>
 
-              <Paper sx={{ p: 3, mb: 3 }}>
-                <PhotosUploader />
-              </Paper>
+                  {/* Section 2: Amenities */}
+                  <Box>
+                    <Typography variant="overline" color="text.secondary" fontWeight="600" mb={1} display="block">
+                      SECTION 2
+                    </Typography>
+                    <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, border: "2px solid #E8E8E8", borderRadius: 3, backgroundColor: "#FAFAFA" }}>
+                      <AmenitiesForm />
+                    </Paper>
+                  </Box>
 
-              <Box textAlign="center">
-                <SubmitSection loading={saving} />
+                  {/* Section 3: Rooms */}
+                  {methods.watch("rooms")?.length > 0 && (
+                    <>
+                      <Divider sx={{ my: 2 }}>
+                        <Typography variant="caption" color="text.secondary" fontWeight="600" sx={{ px: 2 }}>
+                          •••
+                        </Typography>
+                      </Divider>
+
+                      <Box>
+                        <Typography variant="overline" color="text.secondary" fontWeight="600" mb={1} display="block">
+                          SECTION 3
+                        </Typography>
+                        <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, border: "2px solid #E8E8E8", borderRadius: 3, backgroundColor: "#FAFAFA" }}>
+                          <RoomsForm showRooms={true} />
+                        </Paper>
+                      </Box>
+                    </>
+                  )}
+
+                  <Divider sx={{ my: 2 }}>
+                    <Typography variant="caption" color="text.secondary" fontWeight="600" sx={{ px: 2 }}>
+                      •••
+                    </Typography>
+                  </Divider>
+
+                  {/* Section 4: Photos */}
+                  <Box>
+                    <Typography variant="overline" color="text.secondary" fontWeight="600" mb={1} display="block">
+                      {methods.watch("rooms")?.length > 0 ? "SECTION 4" : "SECTION 3"}
+                    </Typography>
+                    <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, border: "2px solid #E8E8E8", borderRadius: 3, backgroundColor: "#FAFAFA" }}>
+                      <PhotosUploader />
+                    </Paper>
+                  </Box>
+                </Stack>
+
+                {/* Submit Section */}
+                <Box
+                  sx={{
+                    mt: 6,
+                    pt: 4,
+                    borderTop: "2px dashed #E0E0E0",
+                    textAlign: "center",
+                  }}
+                >
+                  <Typography variant="h6" fontWeight="bold" mb={1} color="#222">
+                    Save Your Changes
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" mb={3}>
+                    Review your updates before saving the property listing
+                  </Typography>
+                  <SubmitSection loading={saving} />
+                </Box>
               </Box>
             </Box>
           </FormProvider>

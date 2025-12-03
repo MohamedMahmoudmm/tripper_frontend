@@ -6,180 +6,380 @@ import {
   Grid,
   Card,
   CardMedia,
+  alpha,
+  Stack,
+  Chip,
   IconButton,
-  Snackbar,
-  Alert,
 } from "@mui/material";
-import { Close } from "@mui/icons-material";
+import {
+  Close,
+  CloudUpload,
+  Delete,
+  Image as ImageIcon,
+} from "@mui/icons-material";
 import { useFormContext } from "react-hook-form";
+import { toast } from "react-hot-toast";
 
 const StepPhotos = () => {
-  const { setValue } = useFormContext();
+  const {
+    setValue,
+    setError,
+    clearErrors,
+    formState: { errors },
+  } = useFormContext();
+  
   const [previewUrls, setPreviewUrls] = useState([]);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const [photoFiles, setPhotoFiles] = useState([]); // Store actual files
+  const [touched, setTouched] = useState(false);
   const fileInputRef = useRef(null);
-   
+
   const handleFileChange = (e) => {
     const files = Array.from(e.target.files);
     if (files.length === 0) return;
 
+    setTouched(true);
+
+    // Validation: max 10 photos
+    if (photoFiles.length + files.length > 10) {
+      setError("photos", {
+        type: "manual",
+        message: "Maximum 10 photos allowed",
+      });
+      toast.error("Maximum 10 photos allowed");
+      return;
+    }
+
+    // Validation: file size (max 5MB per image)
+    const oversizedFiles = files.filter((file) => file.size > 5 * 1024 * 1024);
+    if (oversizedFiles.length > 0) {
+      setError("photos", {
+        type: "manual",
+        message: "Some images are too large (max 5MB per image)",
+      });
+      toast.error("Some images are too large (max 5MB per image)");
+      return;
+    }
+
+    // Create URLs for preview
     const newUrls = files.map((file) => URL.createObjectURL(file));
-    setValue("photos", files);
-    setPreviewUrls(newUrls);
+    const allUrls = [...previewUrls, ...newUrls];
+    
+    // Store actual files
+    const allFiles = [...photoFiles, ...files];
 
-         
+    setValue("photos", allFiles, { shouldValidate: false }); // Store FILES not URLs
+    setPreviewUrls(allUrls);
+    setPhotoFiles(allFiles);
+    clearErrors("photos");
+
     e.target.value = "";
-
-    setSnackbar({
-      open: true,
-      message: `${files.length} photo${files.length > 1 ? "s" : ""} selected`,
-      severity: "success",
-    });
   };
 
   const handleRemovePhoto = (index) => {
-    setPreviewUrls((prev) => {
-      const updated = prev.filter((_, i) => i !== index);
-      setValue("photos", updated);
-      return updated;
-    });
-    setSnackbar({
-      open: true,
-      message: "Photo removed successfully",
-      severity: "info",
+    const updatedUrls = previewUrls.filter((_, i) => i !== index);
+    const updatedFiles = photoFiles.filter((_, i) => i !== index);
+    
+    setValue("photos", updatedFiles, { shouldValidate: false }); // Update with FILES
+    setPreviewUrls(updatedUrls);
+    setPhotoFiles(updatedFiles);
+    
+    // Only show error if user tried to remove and list became empty
+    if (updatedFiles.length === 0 && touched) {
+      setError("photos", {
+        type: "manual",
+        message: "Please upload at least one photo",
+      });
+    } else {
+      clearErrors("photos");
+    }
+  };
+
+  const handleClearAll = () => {
+    setValue("photos", [], { shouldValidate: false });
+    setPreviewUrls([]);
+    setPhotoFiles([]);
+    setTouched(true);
+    setError("photos", {
+      type: "manual",
+      message: "Please upload at least one photo",
     });
   };
 
-  
-  const handleClearAll = () => {
-    setValue("photos", []);
-    setPreviewUrls([]);
-    setSnackbar({
-      open: true,
-      message: "All photos cleared",
-      severity: "warning",
-    });
+  const handleUploadClick = () => {
+    setTouched(true);
+    fileInputRef.current?.click();
   };
 
   return (
-    <Box
-      sx={{
-        p: 3,
-        backgroundColor: "#fafafa",
-        borderRadius: 3,
-        boxShadow: 1,
-      }}
-    >
-      <Typography
-        variant="h6"
-        fontWeight="bold"
-        mb={3}
-        textAlign="center"
-        color="#f27244"
-      >
-        Upload Experience Photos
-      </Typography>
+    <Box>
+      {/* Header */}
+      <Box mb={4} textAlign="center">
+        <Typography variant="h4" fontWeight="bold" color="#034959" gutterBottom>
+          Upload Photos
+        </Typography>
+        <Typography variant="body1" color="text.secondary">
+          Add high-quality images to showcase your experience
+        </Typography>
+      </Box>
 
-      {/* Upload & Clear Buttons */}
-      <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 3 }}>
-        <Button
-          variant="contained"
-          component="label"
+      {/* Upload Area */}
+      <Box
+        sx={{
+          border: `2px dashed ${
+            touched && errors.photos ? "#d32f2f" : "#e0e0e0"
+          }`,
+          borderRadius: 3,
+          p: 4,
+          mb: 3,
+          backgroundColor: alpha("#034959", 0.02),
+          textAlign: "center",
+          cursor: "pointer",
+          transition: "all 0.3s ease",
+          "&:hover": {
+            borderColor: touched && errors.photos ? "#d32f2f" : "#034959",
+            backgroundColor: alpha("#034959", 0.05),
+          },
+        }}
+        onClick={handleUploadClick}
+      >
+        <CloudUpload sx={{ fontSize: 60, color: "#034959", mb: 2 }} />
+        <Typography variant="h6" fontWeight="bold" color="#034959" gutterBottom>
+          Click to upload or drag and drop
+        </Typography>
+        <Typography variant="body2" color="text.secondary" mb={2}>
+          PNG, JPG, JPEG (Max 5MB per image)
+        </Typography>
+
+        <Stack
+          direction="row"
+          spacing={1}
+          justifyContent="center"
+          alignItems="center"
+        >
+          <Chip
+            label={`${previewUrls.length}/5 photos`}
+            color={previewUrls.length > 0 ? "primary" : "default"}
+            size="small"
+          />
+        </Stack>
+
+        <input
+          type="file"
+          hidden
+          multiple
+          accept="image/*"
+          onChange={handleFileChange}
+          ref={fileInputRef}
+        />
+      </Box>
+
+      {/* Validation Error - Only show if touched */}
+      {touched && errors.photos && (
+        <Typography
+          variant="body2"
+          color="error"
           sx={{
-            bgcolor: "#f27244",
-            "&:hover": { bgcolor: "#e05f33" },
-            textTransform: "none",
+            mb: 3,
+            textAlign: "center",
+            fontWeight: 500,
           }}
         >
-          Choose Images
-          <input
-            type="file"
-            hidden
-            multiple
-            accept="image/*"
-            onChange={handleFileChange}
-            ref={fileInputRef}
-          />
-        </Button>
+          {errors.photos.message}
+        </Typography>
+      )}
 
-        {previewUrls.length > 0 && (
+      {/* Action Buttons */}
+      {previewUrls.length > 0 && (
+        <Box sx={{ display: "flex", justifyContent: "center", gap: 2, mb: 3 }}>
+          <Button
+            variant="contained"
+            startIcon={<CloudUpload />}
+            onClick={handleUploadClick}
+            sx={{
+              bgcolor: "#034959",
+              "&:hover": { bgcolor: "#023342" },
+              textTransform: "none",
+              fontWeight: 600,
+            }}
+          >
+            Add More Photos
+          </Button>
+
           <Button
             variant="outlined"
             color="error"
-            sx={{ textTransform: "none" }}
+            startIcon={<Delete />}
+            sx={{ textTransform: "none", fontWeight: 600 }}
             onClick={handleClearAll}
           >
             Clear All
           </Button>
-        )}
-      </Box>
-
-      {/* Preview */}
-      {previewUrls.length > 0 ? (
-        <Grid container spacing={2} justifyContent="center">
-          {previewUrls.map((url, idx) => (
-            <Grid item xs={6} sm={4} md={3} key={idx}>
-              <Box sx={{ position: "relative" }}>
-                <Card
-                  sx={{
-                    borderRadius: 2,
-                    overflow: "hidden",
-                    boxShadow: 2,
-                    transition: "0.3s",
-                    "&:hover": { transform: "scale(1.05)" },
-                  }}
-                >
-                  <CardMedia
-                    component="img"
-                    image={url}
-                    alt={`preview-${idx}`}
-                    sx={{ height: 160, objectFit: "cover" }}
-                  />
-                </Card>
-                <IconButton
-                  size="small"
-                  color="error"
-                  onClick={() => handleRemovePhoto(idx)}
-                  sx={{
-                    position: "absolute",
-                    top: 6,
-                    right: 6,
-                    bgcolor: "white",
-                    boxShadow: 1,
-                    "&:hover": { bgcolor: "#ffe5e5" },
-                  }}
-                >
-                  <Close fontSize="small" />
-                </IconButton>
-              </Box>
-            </Grid>
-          ))}
-        </Grid>
-      ) : (
-        <Typography
-          color="text.secondary"
-          textAlign="center"
-          sx={{ mt: 3, fontStyle: "italic" }}
-        >
-          No photos selected yet.
-        </Typography>
+        </Box>
       )}
 
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={3000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      {/* Preview Grid */}
+      {previewUrls.length > 0 ? (
+        <Box>
+          <Typography
+            variant="h6"
+            fontWeight="bold"
+            color="#034959"
+            mb={2}
+            textAlign="center"
+          >
+            Preview ({previewUrls.length})
+          </Typography>
+
+          <Grid container spacing={2}>
+            {previewUrls.map((url, idx) => (
+              <Grid item xs={6} sm={4} md={3} key={idx}>
+                <Box
+                  sx={{
+                    position: "relative",
+                    "&:hover .delete-btn": {
+                      opacity: 1,
+                    },
+                  }}
+                >
+                  <Card
+                    elevation={2}
+                    sx={{
+                      borderRadius: 3,
+                      overflow: "hidden",
+                      transition: "transform 0.3s ease",
+                      "&:hover": {
+                        transform: "scale(1.03)",
+                      },
+                    }}
+                  >
+                    <CardMedia
+                      component="img"
+                      image={url}
+                      alt={`preview-${idx}`}
+                      sx={{
+                        height: 180,
+                        objectFit: "cover",
+                      }}
+                    />
+
+                    {/* Image Number Badge */}
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        bottom: 8,
+                        left: 8,
+                        bgcolor: "rgba(0,0,0,0.7)",
+                        color: "white",
+                        px: 1.5,
+                        py: 0.5,
+                        borderRadius: 2,
+                        fontSize: "0.75rem",
+                        fontWeight: 600,
+                      }}
+                    >
+                      #{idx + 1}
+                    </Box>
+
+                    {/* Cover Badge */}
+                    {idx === 0 && (
+                      <Chip
+                        label="Cover"
+                        size="small"
+                        sx={{
+                          position: "absolute",
+                          top: 8,
+                          left: 8,
+                          bgcolor: "rgba(3, 73, 89, 0.9)",
+                          color: "white",
+                          fontWeight: "bold",
+                        }}
+                      />
+                    )}
+                  </Card>
+
+                  {/* Delete Button */}
+                  <IconButton
+                    className="delete-btn"
+                    size="small"
+                    onClick={() => handleRemovePhoto(idx)}
+                    sx={{
+                      position: "absolute",
+                      top: 8,
+                      right: 8,
+                      bgcolor: "rgba(255,255,255,0.95)",
+                      color: "#d32f2f",
+                      opacity: 0,
+                      transition: "opacity 0.3s ease",
+                      boxShadow: 2,
+                      "&:hover": {
+                        bgcolor: "#ffe5e5",
+                        transform: "scale(1.1)",
+                      },
+                    }}
+                  >
+                    <Close fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
+      ) : (
+        <Box
+          sx={{
+            textAlign: "center",
+            py: 6,
+            px: 3,
+            backgroundColor: alpha("#e0e0e0", 0.2),
+            borderRadius: 3,
+          }}
+        >
+          <ImageIcon sx={{ fontSize: 80, color: "#bdbdbd", mb: 2 }} />
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No photos yet
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Click the upload area above to add your first photo
+          </Typography>
+        </Box>
+      )}
+
+      {/* Tips Section */}
+      <Box
+        sx={{
+          mt: 4,
+          p: 3,
+          backgroundColor: alpha("#034959", 0.05),
+          borderRadius: 2,
+          borderLeft: "4px solid #034959",
+        }}
       >
-        <Alert severity={snackbar.severity} variant="filled">
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
+        <Typography
+          variant="subtitle2"
+          fontWeight="bold"
+          color="#034959"
+          gutterBottom
+        >
+          📸 Photo Tips
+        </Typography>
+        <Grid container spacing={1}>
+          <Grid item xs={12} md={4}>
+            <Typography variant="body2" color="text.secondary">
+              ✓ Use high-resolution images
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Typography variant="body2" color="text.secondary">
+              ✓ Show different angles & moments
+            </Typography>
+          </Grid>
+          <Grid item xs={12} md={4}>
+            <Typography variant="body2" color="text.secondary">
+              ✓ First photo is your cover image
+            </Typography>
+          </Grid>
+        </Grid>
+      </Box>
     </Box>
   );
 };

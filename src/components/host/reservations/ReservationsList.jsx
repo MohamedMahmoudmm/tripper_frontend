@@ -20,10 +20,16 @@ import {
   Card,
   CardContent,
   Stack,
-  useMediaQuery,
-  useTheme,
+  Pagination,
+  MenuItem,
+  Select,
+  FormControl,
+  InputLabel,
+  Alert,
+  PaginationItem,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { CheckCircle, Cancel, Visibility } from "@mui/icons-material";
 
 const statusColors = {
   pending: "warning",
@@ -40,245 +46,331 @@ const ReservationsList = ({
   onReject,
   detailsBasePath,
   fields,
+  pagination,
+  onPageChange,
+  onStatusFilterChange,
+  statusFilter,
+  onItemsPerPageChange,
+  error
 }) => {
   const navigate = useNavigate();
-  const theme = useTheme();
-  const isSmall = useMediaQuery(theme.breakpoints.down("md"));
-
   const [selectedRes, setSelectedRes] = useState(null);
   const [dialogType, setDialogType] = useState(null);
-  const [statusFilter, setStatusFilter] = useState("all");
-
-  const filteredReservations = reservations.filter((r) =>
-    statusFilter === "all" ? true : r.status === statusFilter
-  );
+  const [actionLoading, setActionLoading] = useState(false);
 
   const handleConfirm = async () => {
     if (!selectedRes) return;
-
-    if (dialogType === "accept") {
-      await onAccept(selectedRes);
-    } else if (dialogType === "reject") {
-      await onReject(selectedRes);
+    try {
+      setActionLoading(true);
+      if (dialogType === "accept") {
+        await onAccept(selectedRes);
+      } else if (dialogType === "reject") {
+        await onReject(selectedRes);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setActionLoading(false);
+      setDialogType(null);
+      setSelectedRes(null);
     }
-
-    setDialogType(null);
-    setSelectedRes(null);
   };
 
   return (
     <Fade in timeout={400}>
-      <Box p={3} maxWidth="1200px" mx="auto" width="100%">
-        {/* Title */}
-        <Typography
-          variant={isSmall ? "h5" : "h4"}
-          fontWeight="bold"
-          color="#034959"
-          textAlign="center"
-          mb={3}
-        >
-          {title}
-        </Typography>
-
-        {/* Filter */}
-        <Box mb={2} display="flex" justifyContent="flex-end">
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            style={{
-              padding: "8px",
-              borderRadius: "8px",
-              border: "1px solid #ccc",
-              fontWeight: "bold",
-            }}
+      <Box p={{ xs: 2, md: 3 }} maxWidth="1400px" mx="auto" width="100%">
+        {/* Header */}
+        <Box mb={4}>
+          <Typography
+            variant="h4"
+            fontWeight="bold"
+            color="#034959"
+            textAlign="center"
+            mb={1}
           >
-            <option value="all">All</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="cancelled">Cancelled</option>
-            <option value="completed">Completed</option>
-          </select>
+            {title}
+          </Typography>
+          {pagination && (
+            <Typography variant="body2" color="text.secondary" textAlign="center">
+              Showing {((pagination.currentPage - 1) * pagination.itemsPerPage) + 1} - {Math.min(pagination.currentPage * pagination.itemsPerPage, pagination.totalItems)} of {pagination.totalItems} reservations
+            </Typography>
+          )}
         </Box>
 
-        {loading ? (
-          <Box display="flex" justifyContent="center" mt={8}>
-            <CircularProgress sx={{ color: "#FF385C" }} />
-          </Box>
-        ) : filteredReservations.length === 0 ? (
-          <Typography textAlign="center" color="text.secondary" mt={4}>
-            No reservations found.
-          </Typography>
-        ) : isSmall ? (
-          // MOBILE VIEW
-          <Stack spacing={2}>
-            {filteredReservations.map((res) => (
-              <Card key={res._id} sx={{ p: 2, borderRadius: 3 }}>
-                <CardContent>
-                  {fields.map((f) => (
-                    <Typography key={f.key} variant="body2" mb={0.5}>
-                      {f.label}: {f.render ? f.render(res) : res[f.key]}
-                    </Typography>
-                  ))}
+        {/* Filters */}
+        <Paper elevation={2} sx={{ p: 2, mb: 3, borderRadius: 3 }}>
+          <Stack direction={{ xs: "column", sm: "row" }} spacing={2} alignItems="center" justifyContent="space-between">
+            <FormControl sx={{ minWidth: 200 }}>
+              <InputLabel>Status Filter</InputLabel>
+              <Select
+                value={statusFilter || "all"}
+                onChange={(e) => onStatusFilterChange && onStatusFilterChange(e.target.value)}
+                label="Status Filter"
+              >
+                <MenuItem value="all">All Status</MenuItem>
+                <MenuItem value="pending">Pending</MenuItem>
+                <MenuItem value="confirmed">Confirmed</MenuItem>
+                <MenuItem value="cancelled">Cancelled</MenuItem>
+              </Select>
+            </FormControl>
 
-                  <Chip
-                    label={res.status}
-                    color={statusColors[res.status]}
-                    sx={{ mt: 1, textTransform: "capitalize" }}
-                  />
-
-                  {/* ACTIONS */}
-                  <Stack spacing={1.2} mt={2}>
-                    {res.status === "pending" && (
-                      <>
-                        <Button
-                          variant="contained"
-                          sx={{ backgroundColor: "#4CAF50" }}
-                          onClick={() => {
-                            setSelectedRes(res);
-                            setDialogType("accept");
-                          }}
-                        >
-                          Accept
-                        </Button>
-
-                        <Button
-                          variant="contained"
-                          sx={{ backgroundColor: "#D32F2F" }}
-                          onClick={() => {
-                            setSelectedRes(res);
-                            setDialogType("reject");
-                          }}
-                        >
-                          Reject
-                        </Button>
-                      </>
-                    )}
-
-                    <Button
-                      variant="outlined"
-                      onClick={() => navigate(`${detailsBasePath}/${res._id}`)}
-                    >
-                      Details
-                    </Button>
-                  </Stack>
-                </CardContent>
-              </Card>
-            ))}
+            {onItemsPerPageChange && (
+              <FormControl sx={{ minWidth: 150 }}>
+                <InputLabel>Items per page</InputLabel>
+                <Select
+                  value={pagination?.itemsPerPage || 10}
+                  onChange={(e) => onItemsPerPageChange(e.target.value)}
+                  label="Items per page"
+                >
+                  <MenuItem value={5}>5</MenuItem>
+                  <MenuItem value={10}>10</MenuItem>
+                  <MenuItem value={20}>20</MenuItem>
+                  <MenuItem value={50}>50</MenuItem>
+                </Select>
+              </FormControl>
+            )}
           </Stack>
-        ) : (
-          // DESKTOP TABLE
-          <Box sx={{ overflowX: filteredReservations.length > 0 ? "auto" : "visible" }}>
-            <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
-              <Table sx={{ minWidth: 700, width: "100%" }}>
-                <TableHead>
-                  <TableRow sx={{ backgroundColor: "#FFF8F8" }}>
-                    {fields.map((f) => (
-                      <TableCell key={f.key} sx={{ fontWeight: "bold" }}>
-                        {f.label}
-                      </TableCell>
-                    ))}
-                    <TableCell sx={{ fontWeight: "bold" }}>Status</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Action</TableCell>
-                    <TableCell sx={{ fontWeight: "bold" }}>Details</TableCell>
-                  </TableRow>
-                </TableHead>
+        </Paper>
 
-                <TableBody>
-                  {filteredReservations.map((res) => (
-                    <TableRow key={res._id} hover>
+        {/* Error Alert */}
+        {error && (
+          <Alert severity="error" sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
+
+        {/* Loading */}
+        {loading ? (
+          <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+            <CircularProgress sx={{ color: "#FF385C" }} size={60} />
+          </Box>
+        ) : reservations.length === 0 ? (
+          <Paper elevation={1} sx={{ p: 6, textAlign: "center", borderRadius: 3 }}>
+            <Typography variant="h6" color="text.secondary">
+              No reservations found
+            </Typography>
+            <Typography variant="body2" color="text.secondary" mt={1}>
+              Try adjusting your filters
+            </Typography>
+          </Paper>
+        ) : (
+          <>
+            {/* Desktop Table */}
+            <Box sx={{ display: { xs: "none", md: "block" } }}>
+              <TableContainer component={Paper} elevation={2} sx={{ borderRadius: 3 }}>
+                <Table>
+                  <TableHead>
+                    <TableRow sx={{ backgroundColor: "#f5f5f5" }}>
                       {fields.map((f) => (
-                        <TableCell key={f.key}>
-                          {f.render ? f.render(res) : res[f.key]}
+                        <TableCell key={f.key} sx={{ fontWeight: "bold", fontSize: "0.95rem" }}>
+                          {f.label}
                         </TableCell>
                       ))}
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "0.95rem" }}>Status</TableCell>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "0.95rem", textAlign: "center" }}>Actions</TableCell>
+                      <TableCell sx={{ fontWeight: "bold", fontSize: "0.95rem", textAlign: "center" }}>Details</TableCell>
+                    </TableRow>
+                  </TableHead>
 
-                      <TableCell>
+                  <TableBody>
+                    {reservations.map((res) => (
+                      <TableRow key={res._id} hover sx={{ "&:hover": { backgroundColor: "#fafafa" } }}>
+                        {fields.map((f) => (
+                          <TableCell key={f.key}>
+                            {f.render ? f.render(res) : res[f.key]}
+                          </TableCell>
+                        ))}
+
+                        <TableCell>
+                          <Chip
+                            label={res.status}
+                            color={statusColors[res.status]}
+                            size="small"
+                            sx={{ textTransform: "capitalize", fontWeight: 600 }}
+                          />
+                        </TableCell>
+
+                        {/* Actions column with icons */}
+                        <TableCell sx={{ textAlign: "center" }}>
+                          <Stack direction="row" spacing={1} justifyContent="center">
+                            {res.status === "pending" && (
+                              <>
+                                <CheckCircle
+                                  color="success"
+                                  sx={{ cursor: "pointer" }}
+                                  onClick={() => {
+                                    setSelectedRes(res);
+                                    setDialogType("accept");
+                                  }}
+                                />
+                                <Cancel
+                                  color="error"
+                                  sx={{ cursor: "pointer" }}
+                                  onClick={() => {
+                                    setSelectedRes(res);
+                                    setDialogType("reject");
+                                  }}
+                                />
+                              </>
+                            )}
+                          </Stack>
+                        </TableCell>
+
+                        {/* Details column */}
+                        <TableCell sx={{ textAlign: "center" }}>
+                          <Visibility
+                            color="primary"
+                            sx={{ cursor: "pointer" }}
+                            onClick={() => navigate(`${detailsBasePath}/${res._id}`)}
+                          />
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </Box>
+
+            {/* Mobile Cards */}
+            <Box sx={{ display: { xs: "block", md: "none" } }}>
+              <Stack spacing={2}>
+                {reservations.map((res) => (
+                  <Card key={res._id} elevation={2} sx={{ borderRadius: 3 }}>
+                    <CardContent>
+                      {fields.map((f) => (
+                        <Typography key={f.key} variant="body2" mb={0.5}>
+                          <strong>{f.label}:</strong> {f.render ? f.render(res) : res[f.key]}
+                        </Typography>
+                      ))}
+
+                      <Box mt={1} mb={2}>
                         <Chip
                           label={res.status}
                           color={statusColors[res.status]}
-                          sx={{ textTransform: "capitalize" }}
+                          size="small"
+                          sx={{ textTransform: "capitalize", fontWeight: 600 }}
                         />
-                      </TableCell>
+                      </Box>
 
-                      <TableCell>
-                        {res.status === "pending" ? (
-                          <Stack direction="row" spacing={1}>
-                            <Button
-                              variant="contained"
-                              size="small"
-                              sx={{ backgroundColor: "#4CAF50" }}
+                      <Stack direction="row" spacing={1}>
+                        {res.status === "pending" && (
+                          <>
+                            <CheckCircle
+                              color="success"
+                              sx={{ cursor: "pointer" }}
                               onClick={() => {
                                 setSelectedRes(res);
                                 setDialogType("accept");
                               }}
-                            >
-                              Accept
-                            </Button>
-
-                            <Button
-                              variant="contained"
-                              size="small"
-                              sx={{ backgroundColor: "#D32F2F" }}
+                            />
+                            <Cancel
+                              color="error"
+                              sx={{ cursor: "pointer" }}
                               onClick={() => {
                                 setSelectedRes(res);
                                 setDialogType("reject");
                               }}
-                            >
-                              Reject
-                            </Button>
-                          </Stack>
-                        ) : (
-                          "-"
+                            />
+                          </>
                         )}
-                      </TableCell>
 
-                      <TableCell>
-                        <Button
-                          variant="outlined"
-                          size="small"
-                          onClick={() =>
-                            navigate(`${detailsBasePath}/${res._id}`)
-                          }
-                        >
-                          Details
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          </Box>
+                        <Visibility
+                          color="primary"
+                          sx={{ cursor: "pointer" }}
+                          onClick={() => navigate(`${detailsBasePath}/${res._id}`)}
+                        />
+                      </Stack>
+                    </CardContent>
+                  </Card>
+                ))}
+              </Stack>
+            </Box>
+
+            {/* Pagination */}
+            {pagination && pagination.totalPages > 1 && (
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  py: 3,
+                }}
+              >
+                <Pagination
+                  count={pagination.totalPages}
+                  page={pagination.currentPage}
+                  onChange={(e, page) => onPageChange && onPageChange(page)}
+                  size="large"
+                  siblingCount={2}
+                  renderItem={(item) => (
+                    <PaginationItem
+                      {...item}
+                      sx={{
+                        borderRadius: "10px",
+                        mx: 0.7,
+                        px: 2,
+                        fontWeight: 600,
+                        border: "1px solid #d1d1d1",
+                        transition: "0.25s ease",
+                        "&:hover": {
+                          backgroundColor: "#e8f4f6",
+                          borderColor: "#034959",
+                        },
+                        "&.Mui-selected": {
+                          backgroundColor: "#034959 !important",
+                          borderColor: "#034959 !important",
+                          color: "#fff !important",
+                          boxShadow: "0px 4px 10px rgba(0,0,0,0.2)",
+                        },
+                      }}
+                    />
+                  )}
+                />
+              </Box>
+            )}
+          </>
         )}
 
-        {/* DIALOG */}
-        <Dialog open={dialogType !== null} onClose={() => setDialogType(null)}>
-          <DialogTitle sx={{ fontWeight: "bold" }}>
-            {dialogType === "accept"
-              ? "Confirm Reservation"
-              : "Reject Reservation"}
+        {/* Confirmation Dialog */}
+        <Dialog 
+          open={dialogType !== null} 
+          onClose={() => !actionLoading && setDialogType(null)}
+          maxWidth="sm"
+          fullWidth
+        >
+          <DialogTitle sx={{ fontWeight: "bold", fontSize: "1.25rem" }}>
+            {dialogType === "accept" ? "Confirm Reservation" : "Reject Reservation"}
           </DialogTitle>
 
           <DialogContent>
             <Typography>
               Are you sure you want to{" "}
-              <b>{dialogType === "accept" ? "accept" : "reject"}</b> this
-              reservation?
+              <strong style={{ color: dialogType === "accept" ? "#4CAF50" : "#D32F2F" }}>
+                {dialogType === "accept" ? "accept" : "reject"}
+              </strong>{" "}
+              this reservation?
             </Typography>
           </DialogContent>
 
-          <DialogActions>
-            <Button onClick={() => setDialogType(null)}>Cancel</Button>
+          <DialogActions sx={{ p: 2 }}>
+            <Button 
+              onClick={() => setDialogType(null)}
+              disabled={actionLoading}
+            >
+              Cancel
+            </Button>
 
             <Button
               variant="contained"
               sx={{
-                backgroundColor:
-                  dialogType === "accept" ? "#4CAF50" : "#D32F2F",
+                backgroundColor: dialogType === "accept" ? "#4CAF50" : "#D32F2F",
+                "&:hover": {
+                  backgroundColor: dialogType === "accept" ? "#45a049" : "#c62828"
+                }
               }}
               onClick={handleConfirm}
+              disabled={actionLoading}
             >
-              Yes
+              {actionLoading ? <CircularProgress size={24} /> : "Confirm"}
             </Button>
           </DialogActions>
         </Dialog>
