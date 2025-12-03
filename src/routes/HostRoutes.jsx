@@ -2,13 +2,9 @@ import React from "react";
 import { Routes, Route } from "react-router-dom";
 import HostLayout from "../components/host/HostLayout";
 import MyListings from "../pages/host/MyListings";
-import HostProfile from "../pages/host/HostProfile";
 import Reservations from "../pages/host/reservations/Reservations";
 import Dashboard from "../pages/host/Dashboard";
 import EditProfile from "../pages/host/EditProfile";
-import TopAttractions from "../pages/host/Places";
-import Places from "../pages/host/Places";
-
 import AddHotel from "../pages/host/hotel/AddHotel";
 import EditHotel from "../pages/host/hotel/EditHotel";
 import AddExperienceWizard from "../pages/host/experiences/add-experience/AddExperienceWizard";

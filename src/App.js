@@ -25,6 +25,13 @@ import About from "./pages/About";
 import Contact from "./pages/Contact";
 import Privacy from "./pages/Privacy";
 import Terms from "./pages/Terms";
+import EmailVerificationPage from "./pages/EmailVerificationPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
+import Blog from "./pages/Blog";
+import Careers from "./pages/Careers";
+import FAQ from "./pages/FAQ";
+import Help from "./pages/Help";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem('token');
@@ -39,7 +46,7 @@ const ProtectedHostRoute = ({ children }) => {
 
 function AppContent() {
   const location = useLocation();
-  const hideNavbarRoutes = ["/", "/login", "/signup"];
+  const hideNavbarRoutes = ["/", "/login", "/signup", "/verify-email", "/forgot-password", "/reset-password"];
   const isHostRoute = location.pathname.startsWith("/host");
 
   return (
@@ -73,6 +80,18 @@ function AppContent() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
+        <Route path="/verify-email" element={<EmailVerificationPage />} />
+
+        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+
+                
+                <Route path="/Blog" element={<Blog />} />
+                <Route path="/Careers" element={<Careers />} />
+                <Route path="/Faq" element={<FAQ />} />
+                <Route path="/Help" element={<Help />} />
+
+
       </Routes>
     </>
   );

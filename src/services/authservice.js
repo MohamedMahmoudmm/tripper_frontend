@@ -65,5 +65,15 @@ const authService = {
     const res = await axiosInstance.get(`/user/profile/${hostId}`);
     return res.data.data;
   },
+
+  forgotPassword: async (data) => {
+  const res = await axiosInstance.post("/user/forgot-password", data);
+  return res.data;
+},
+
+resetPassword: async (data) => {
+  const res = await axiosInstance.post("/user/reset-password", data);
+  return res.data;
+},
 };
 export default authService;

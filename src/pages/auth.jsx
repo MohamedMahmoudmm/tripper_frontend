@@ -116,7 +116,6 @@ export default function LoginPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
         py: 4,
       }}
     >
@@ -217,6 +216,7 @@ export default function LoginPage() {
                   fontWeight: 600,
                 }}
                 disabled={loading}
+                onClick={() => navigate("/forgot-password")}
               >
                 Forgot Password?
               </Button>

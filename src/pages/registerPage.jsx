@@ -282,7 +282,6 @@ export default function RegisterPage() {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "linear-gradient(135deg, #f093fb 0%, #f5576c 100%)",
         py: 4,
       }}
     >

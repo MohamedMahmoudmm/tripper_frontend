@@ -30,6 +30,7 @@ const EditHotel = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [hasRooms, setHasRooms] = useState(false);
+  console.log("Has rooms:", hasRooms);
 
   const methods = useForm({
     resolver: yupResolver(editHotelSchema),
