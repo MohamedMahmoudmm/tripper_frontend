@@ -51,10 +51,12 @@ export default function MyTrips() {
     });
   };
 
-  const handleCardClick = (reservation) => {
-    setSelectedReservation(reservation);
-    setOpenDialog(true);
-  };
+const handleCardClick = (reservation) => {
+  console.log("Full Reservation Data:", reservation);
+  console.log("Rooms Array:", reservation.rooms);
+  setSelectedReservation(reservation);
+  setOpenDialog(true);
+};
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -433,47 +435,123 @@ export default function MyTrips() {
             </Box>
 
             {/* Guest Information */}
-            {selectedReservation.guestData && (
-              <>
-                <Divider />
-                <Box>
-                  <Typography
-                    variant="subtitle2"
-                    color="text.secondary"
-                    gutterBottom
-                    sx={{ textTransform: "uppercase", letterSpacing: 1, fontWeight: 600 }}
-                  >
-                    Guest Information
-                  </Typography>
-                  <Stack spacing={1.5} mt={1}>
-                    <Box display="flex" alignItems="center" gap={2}>
-                      <Avatar sx={{ bgcolor: "primary.main", width: 48, height: 48 }}>
-                        {selectedReservation.guestData.name?.[0]?.toUpperCase()}
-                      </Avatar>
-                      <Box flex={1}>
-                        <Typography variant="body1" fontWeight="600" gutterBottom>
-                          {selectedReservation.guestData.name}
+           {/* Rooms & Guests Information */}
+{selectedReservation.rooms && selectedReservation.rooms.length > 0 && (
+  <>
+    <Divider />
+    <Box>
+      <Typography
+        variant="subtitle2"
+        color="text.secondary"
+        gutterBottom
+        sx={{ textTransform: "uppercase", letterSpacing: 1, fontWeight: 600 }}
+      >
+        Rooms & Guests Information
+      </Typography>
+      <Stack spacing={3} mt={2}>
+        {selectedReservation.rooms.map((roomData, roomIdx) => (
+          <Card key={roomIdx} sx={{ p: 2, bgcolor: "grey.50" }}>
+            <Typography variant="subtitle1" fontWeight="600" gutterBottom>
+              Room {roomIdx + 1} × {roomData.roomCount}
+            </Typography>
+            
+            <Divider sx={{ my: 1.5 }} />
+            
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Guests ({roomData.guestsData.length}):
+            </Typography>
+            
+            <Stack spacing={2} mt={1}>
+              {roomData.guestsData.map((guest, guestIdx) => (
+                <Box 
+                  key={guestIdx} 
+                  display="flex" 
+                  alignItems="center" 
+                  gap={2}
+                  sx={{ 
+                    p: 1.5, 
+                    bgcolor: "white", 
+                    borderRadius: 2,
+                    border: "1px solid",
+                    borderColor: "grey.200"
+                  }}
+                >
+                  <Avatar sx={{ bgcolor: "primary.main", width: 40, height: 40 }}>
+                    {guest.name?.[0]?.toUpperCase()}
+                  </Avatar>
+                  <Box flex={1}>
+                    <Typography variant="body1" fontWeight="600">
+                      {guest.name}
+                    </Typography>
+                    {guest.email && (
+                      <Box display="flex" alignItems="center" gap={0.5} mt={0.5}>
+                        <EmailIcon fontSize="small" sx={{ fontSize: 16 }} color="action" />
+                        <Typography variant="caption" color="text.secondary">
+                          {guest.email}
                         </Typography>
-                        <Box display="flex" alignItems="center" gap={1} mb={0.5}>
-                          <EmailIcon fontSize="small" color="action" />
-                          <Typography variant="body2" color="text.secondary">
-                            {selectedReservation.guestData.email}
-                          </Typography>
-                        </Box>
-                        {selectedReservation.guestData.phone && (
-                          <Box display="flex" alignItems="center" gap={1}>
-                            <PhoneIcon fontSize="small" color="action" />
-                            <Typography variant="body2" color="text.secondary">
-                              {selectedReservation.guestData.phone}
-                            </Typography>
-                          </Box>
-                        )}
                       </Box>
-                    </Box>
-                  </Stack>
+                    )}
+                    {guest.phone && (
+                      <Box display="flex" alignItems="center" gap={0.5} mt={0.3}>
+                        <PhoneIcon fontSize="small" sx={{ fontSize: 16 }} color="action" />
+                        <Typography variant="caption" color="text.secondary">
+                          {guest.phone}
+                        </Typography>
+                      </Box>
+                    )}
+                  </Box>
                 </Box>
-              </>
+              ))}
+            </Stack>
+          </Card>
+        ))}
+      </Stack>
+    </Box>
+  </>
+)}
+
+{/* Guest Information - For old single guest bookings */}
+{selectedReservation.guestData && !selectedReservation.rooms && (
+  <>
+    <Divider />
+    <Box>
+      <Typography
+        variant="subtitle2"
+        color="text.secondary"
+        gutterBottom
+        sx={{ textTransform: "uppercase", letterSpacing: 1, fontWeight: 600 }}
+      >
+        Guest Information
+      </Typography>
+      <Stack spacing={1.5} mt={1}>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Avatar sx={{ bgcolor: "primary.main", width: 48, height: 48 }}>
+            {selectedReservation.guestData.name?.[0]?.toUpperCase()}
+          </Avatar>
+          <Box flex={1}>
+            <Typography variant="body1" fontWeight="600" gutterBottom>
+              {selectedReservation.guestData.name}
+            </Typography>
+            <Box display="flex" alignItems="center" gap={1} mb={0.5}>
+              <EmailIcon fontSize="small" color="action" />
+              <Typography variant="body2" color="text.secondary">
+                {selectedReservation.guestData.email}
+              </Typography>
+            </Box>
+            {selectedReservation.guestData.phone && (
+              <Box display="flex" alignItems="center" gap={1}>
+                <PhoneIcon fontSize="small" color="action" />
+                <Typography variant="body2" color="text.secondary">
+                  {selectedReservation.guestData.phone}
+                </Typography>
+              </Box>
             )}
+          </Box>
+        </Box>
+      </Stack>
+    </Box>
+  </>
+)}
 
             {/* Payment Information */}
             <Divider />

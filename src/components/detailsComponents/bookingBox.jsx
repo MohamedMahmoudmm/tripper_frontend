@@ -17,43 +17,40 @@ import {
   Card,
   CardContent,
   Radio,
-  RadioGroup,
-  FormControlLabel,
-  FormControl,
   Grid,
   useTheme,
   alpha,
+  Divider,
+  Chip,
 } from "@mui/material";
 import { 
   Close as CloseIcon, 
   CheckCircle as CheckCircleIcon,
   ChevronLeft,
   ChevronRight,
+  Delete as DeleteIcon,
+  Add as AddIcon,
+  Person as PersonIcon,
 } from "@mui/icons-material";
 import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format, addMonths, subMonths, isSameDay, isWithinInterval, isBefore, isAfter, startOfDay } from 'date-fns';
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 
-// Integrated Calendar Component
+// Integrated Calendar Component (نفس الكود اللي كان موجود)
 const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) => {
   const theme = useTheme();
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [hoveredDate, setHoveredDate] = useState(null);
 
   const isDateAvailable = (date) => {
-    // Normalize the date to start of day for accurate comparison
     const checkDate = startOfDay(date);
-    
-    // If loading or no data yet, disable all dates
     if (availableDates.length === 0) return false;
     
-    // Check if date falls within any available range
     return availableDates.some(range => {
       const rangeStart = startOfDay(range.start);
       const rangeEnd = startOfDay(range.end);
       
-      // Date must be >= start and <= end (inclusive on both sides)
       return (
         (isAfter(checkDate, rangeStart) || isSameDay(checkDate, rangeStart)) &&
         (isBefore(checkDate, rangeEnd) || isSameDay(checkDate, rangeEnd))
@@ -98,15 +95,11 @@ const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) =
     if (!isDateAvailable(normalizedDate)) return;
 
     if (!selectedRange.start || (selectedRange.start && selectedRange.end)) {
-      // First click or restart selection
       onDateSelect({ start: normalizedDate, end: null });
     } else {
-      // Second click - set end date
       if (isBefore(normalizedDate, selectedRange.start)) {
-        // If clicked date is before start, swap them
         onDateSelect({ start: normalizedDate, end: selectedRange.start });
       } else {
-        // Normal case: clicked date is after start
         onDateSelect({ start: selectedRange.start, end: normalizedDate });
       }
     }
@@ -214,7 +207,6 @@ const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) =
 
   return (
     <Box>
-      {/* Calendar Navigation */}
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
         <IconButton onClick={() => navigateMonths('prev')}>
           <ChevronLeft />
@@ -234,7 +226,6 @@ const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) =
         </IconButton>
       </Box>
 
-      {/* Calendar Grid */}
       <Grid container spacing={4}>
         <Grid item xs={12} sm={6}>
           <DateCalendar
@@ -297,7 +288,6 @@ const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) =
         </Grid>
       </Grid>
 
-      {/* Clear dates button */}
       {selectedRange.start && (
         <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
           <Button
@@ -325,20 +315,21 @@ export default function BookingBox({ place, model }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
-  const [selectedRoom, setSelectedRoom] = useState(null);
-  const [roomCount, setRoomCount] = useState(1);
-  const [guests, setGuests] = useState(1);
+  // Date selection
   const [selectedRange, setSelectedRange] = useState({ start: null, end: null });
   const [availableDates, setAvailableDates] = useState([]);
 
-  const [bookingForSelf, setBookingForSelf] = useState(true);
-  const [guestName, setGuestName] = useState("");
-  const [guestEmail, setGuestEmail] = useState("");
-  const [guestPhone, setGuestPhone] = useState("");
+  // Multi-room management
+  const [selectedRooms, setSelectedRooms] = useState([]);
+  
+  // Current room being added
+  const [currentRoom, setCurrentRoom] = useState(null);
+  const [currentRoomCount, setCurrentRoomCount] = useState(1);
+  const [currentGuests, setCurrentGuests] = useState([{ name: "", email: "", phone: "" }]);
 
-  const steps = ["Place & Room Details", "Guest Information", "Confirmation"];
+  const steps = ["Select Dates", "Add Rooms", "Review & Confirm", "Success"];
 
-  // Fetch available dates from API
+  // Fetch available dates
   const fetchAvailableDates = async (hotelId, roomId = null) => {
     try {
       const params = new URLSearchParams({ hotelId });
@@ -346,8 +337,6 @@ export default function BookingBox({ place, model }) {
       
       const res = await axiosInstance.get(`/api/reservations/availableDates?${params}`);
       
-      // The API returns an array of ranges: [{ start, end }, ...]
-      // Convert date strings to Date objects and normalize times
       const ranges = res.data.map(range => ({
         start: startOfDay(new Date(range.start)),
         end: startOfDay(new Date(range.end))
@@ -363,17 +352,74 @@ export default function BookingBox({ place, model }) {
   useEffect(() => {
     if (open && place?._id) {
       const loadDates = async () => {
-        setAvailableDates([]); // Clear old data
-        const roomIdToFetch = selectedRoom?._id || null;
-        const ranges = await fetchAvailableDates(place._id, roomIdToFetch);
+        setAvailableDates([]);
+        const ranges = await fetchAvailableDates(place._id);
         setAvailableDates(ranges);
       };
       loadDates();
     }
-  }, [open, place?._id, selectedRoom?._id]);
+  }, [open, place?._id]);
 
   const handleDateSelect = (range) => {
     setSelectedRange(range);
+  };
+
+  const handleAddGuest = () => {
+    if (currentRoom && currentGuests.length < currentRoom.maxGuests * currentRoomCount) {
+      setCurrentGuests([...currentGuests, { name: "", email: "", phone: "" }]);
+    }
+  };
+
+  const handleRemoveGuest = (index) => {
+    if (currentGuests.length > 1) {
+      setCurrentGuests(currentGuests.filter((_, i) => i !== index));
+    }
+  };
+
+  const handleGuestChange = (index, field, value) => {
+    const updated = [...currentGuests];
+    updated[index][field] = value;
+    setCurrentGuests(updated);
+  };
+
+  const handleAddRoom = () => {
+    // Validation
+    if (!currentRoom) {
+      setMessage("Please select a room");
+      return;
+    }
+
+    if (currentGuests.length === 0) {
+      setMessage("Please add at least one guest");
+      return;
+    }
+
+    // Check all guests have name and phone
+    const allValid = currentGuests.every(g => g.name.trim() && g.phone.trim());
+    if (!allValid) {
+      setMessage("Please fill name and phone for all guests");
+      return;
+    }
+
+    // Add room to selection
+    setSelectedRooms([
+      ...selectedRooms,
+      {
+        room: currentRoom,
+        roomCount: currentRoomCount,
+        guestsData: [...currentGuests]
+      }
+    ]);
+
+    // Reset current selection
+    setCurrentRoom(null);
+    setCurrentRoomCount(1);
+    setCurrentGuests([{ name: "", email: "", phone: "" }]);
+    setMessage("");
+  };
+
+  const handleRemoveRoom = (index) => {
+    setSelectedRooms(selectedRooms.filter((_, i) => i !== index));
   };
 
   const handleNext = () => {
@@ -382,16 +428,13 @@ export default function BookingBox({ place, model }) {
         setMessage("Please select check-in and check-out dates");
         return;
       }
-      if (!selectedRoom && place.rooms && place.rooms.length > 0) {
-        setMessage("Please select a room");
-        return;
-      }
-    } else if (activeStep === 1 && !bookingForSelf) {
-      if (!guestName || !guestPhone) {
-        setMessage("Please fill all guest details");
+    } else if (activeStep === 1) {
+      if (selectedRooms.length === 0) {
+        setMessage("Please add at least one room");
         return;
       }
     }
+    
     setMessage("");
     setActiveStep((prev) => prev + 1);
   };
@@ -402,62 +445,30 @@ export default function BookingBox({ place, model }) {
   };
 
   const handleReserve = async () => {
-    if(JSON.parse(localStorage.getItem("user"))===null){
+    if (JSON.parse(localStorage.getItem("user")) === null) {
       setMessage("Please login to make a reservation.");
       return;
     }
-    try {  
-      if (!bookingForSelf) {
-        if (!guestName || !guestPhone) {
-          setMessage("Please fill all guest details before confirming.");
-          return;
-        }
-      }
-      
+
+    try {
       setLoading(true);
       setMessage("");
 
-      const checkIn = selectedRange.start;
-      const checkOut = selectedRange.end;
-
-      let payload = {
-        guestsCount: guests,
-        roomCount: 1,
+      const payload = {
+        hotelId: place._id,
+        rooms: selectedRooms.map(item => ({
+          roomId: item.room._id,
+          roomCount: item.roomCount,
+          guestsData: item.guestsData
+        })),
+        checkIn: selectedRange.start,
+        checkOut: selectedRange.end,
       };
-
-      if (model.toLowerCase() === "hotel") {
-        payload.hotelId = place._id;
-        if (selectedRoom) {
-          payload.roomId = selectedRoom._id;
-          payload.roomCount = roomCount;
-        }
-        payload.checkIn = checkIn;
-        payload.checkOut = checkOut;
-      } else if (model.toLowerCase() === "experiance") {
-        payload.experienceId = place._id;
-        payload.checkIn = checkIn;
-        payload.checkOut = null;
-      }
-
-      if (!bookingForSelf) {
-        payload.guestData = {
-          name: guestName,
-          email: guestEmail,
-          phone: guestPhone,
-        };
-      }
 
       const res = await axiosInstance.post("/api/reservations", payload);
       console.log("Reservation created:", res.data);
       setLoading(false);
-      
-      // For experience, show success message
-      if (model.toLowerCase() === "experiance") {
-        setMessage("✅ Reservation created successfully.");
-      } else {
-        // For hotel, move to success step in wizard
-        handleNext();
-      }
+      handleNext(); // Move to success step
     } catch (err) {
       console.error(err);
       setMessage(err.response?.data?.message || "❌ Failed to create reservation.");
@@ -470,11 +481,10 @@ export default function BookingBox({ place, model }) {
     setActiveStep(0);
     setMessage("");
     setSelectedRange({ start: null, end: null });
-    setSelectedRoom(null);
-    setBookingForSelf(true);
-    setGuestName("");
-    setGuestEmail("");
-    setGuestPhone("");
+    setSelectedRooms([]);
+    setCurrentRoom(null);
+    setCurrentRoomCount(1);
+    setCurrentGuests([{ name: "", email: "", phone: "" }]);
   };
 
   const formatDate = (date) => {
@@ -491,8 +501,15 @@ export default function BookingBox({ place, model }) {
 
   const calculateTotal = () => {
     const nights = calculateNights();
-    const pricePerNight = selectedRoom?.price || place.price;
-    return nights * pricePerNight * roomCount;
+    return selectedRooms.reduce((total, item) => {
+      return total + (nights * item.room.price * item.roomCount);
+    }, 0);
+  };
+
+  const getTotalGuests = () => {
+    return selectedRooms.reduce((total, item) => {
+      return total + item.guestsData.length;
+    }, 0);
   };
 
   return (
@@ -529,12 +546,12 @@ export default function BookingBox({ place, model }) {
         <Dialog
           open={open}
           onClose={handleClose}
-          maxWidth="md"
+          maxWidth="lg"
           fullWidth
           PaperProps={{
             sx: {
               borderRadius: 3,
-              minHeight: "600px",
+              minHeight: "700px",
             }
           }}
         >
@@ -557,104 +574,13 @@ export default function BookingBox({ place, model }) {
           </DialogTitle>
 
           <DialogContent>
-            {/* Step 1: Place & Room Details */}
+            {/* Step 0: Select Dates */}
             {activeStep === 0 && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
                   {place.name} - {place.address.city}, {place.address.country}
                 </Typography>
-                {place.rooms.length <= 0 && (
-                  <Typography variant="h6" fontWeight={600} sx={{ mb: 2, color: "blue" }}>
-                    {place.price}$ For One Night
-                  </Typography>
-                )}
                 
-                {/* Room Selection */}
-                {place.rooms && place.rooms.length > 0 && (
-                  <>
-                    <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
-                      Available Rooms
-                    </Typography>
-                    
-                    {place.rooms.map((room) => (
-                      <Card
-                        key={room._id}
-                        sx={{
-                          mb: 2,
-                          cursor: "pointer",
-                          border: selectedRoom?._id === room._id ? "2px solid #f27244" : "1px solid #e0e0e0",
-                          transition: "all 0.3s",
-                          "&:hover": {
-                            boxShadow: 3,
-                          }
-                        }}
-                        onClick={() => {
-                          setSelectedRoom(room);
-                          //console.log(selectedRoom);
-                          
-                          setSelectedRange({ start: null, end: null });
-                        }}
-                      >
-                        <CardContent>
-                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
-                            <Box sx={{ flex: 1 }}>
-                              <Typography variant="h6" fontWeight={600}>
-                                {room.name}
-                              </Typography>
-                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                                {room.description}
-                              </Typography>
-                              <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
-                                {room.price} ج.م <Typography component="span" variant="body2">/ night</Typography>
-                              </Typography>
-                            </Box>
-                            <Radio checked={selectedRoom?._id === room._id} />
-                          </Box>
-                        </CardContent>
-                      </Card>
-                    ))}
-
-                    <Grid container spacing={2} sx={{ mt: 2, mb: 3 }}>
-                      {
-                        <Grid item xs={12} sm={6}>
-                        <TextField
-                          select
-                          label="Number of Rooms"
-                          value={roomCount}
-                          onChange={(e) => setRoomCount(Number(e.target.value))}
-                          fullWidth
-                        >
-                          {[1, 2, 3, 4, 5].map((num) => (
-                            <MenuItem key={num} value={num}>
-                              {num} {num === 1 ? "room" : "rooms"}
-                            </MenuItem>
-                          ))}
-                          </TextField>
-                        </Grid>}
-                      <Grid item xs={12} sm={6}>
-                        <TextField
-                          select
-                          label="Number of Guests"
-                          value={guests}
-                          onChange={(e) => setGuests(Number(e.target.value))}
-                          fullWidth
-                        >
-                          {selectedRoom &&
-                            Array.from({ length: selectedRoom.maxGuests }, (_, i) => i + 1).map(
-                              (num) => (
-                                <MenuItem key={num} value={num}>
-                                  {num} {num === 1 ? "guest" : "guests"}
-                                </MenuItem>
-                              )
-                            )}
-                        </TextField>
-                      </Grid>
-
-                    </Grid>
-                  </>
-                )}
-
-                {/* Date Selection with Calendar */}
                 <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
                   Select Your Dates
                 </Typography>
@@ -673,7 +599,7 @@ export default function BookingBox({ place, model }) {
                   </Typography>
                   <Typography variant="body1" fontWeight={600}>
                     {selectedRange.start && selectedRange.end
-                      ? `${formatDate(selectedRange.start)} - ${formatDate(selectedRange.end)}`
+                      ? `${formatDate(selectedRange.start)} - ${formatDate(selectedRange.end)} (${calculateNights()} nights)`
                       : selectedRange.start
                       ? `${formatDate(selectedRange.start)} - Select checkout date`
                       : "Click on calendar to select dates"}
@@ -685,106 +611,274 @@ export default function BookingBox({ place, model }) {
                   onDateSelect={handleDateSelect}
                   selectedRange={selectedRange}
                 />
+              </Box>
+            )}
 
-                {/* Show total when dates are selected */}
-                {selectedRange.start && selectedRange.end && (
-                  <Paper sx={{ p: 2, mt: 3, backgroundColor: "#e8f5e9" }}>
-                    <Typography variant="h6" fontWeight={600}>
-                      Total: {calculateTotal().toLocaleString()} ج.م
+            {/* Step 1: Add Rooms */}
+            {activeStep === 1 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography variant="h6" fontWeight={600} sx={{ mb: 2 }}>
+                  Add Rooms to Your Booking
+                </Typography>
+
+                {/* Added Rooms Summary */}
+                {selectedRooms.length > 0 && (
+                  <Box sx={{ mb: 3 }}>
+                    <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
+                      Selected Rooms ({selectedRooms.length})
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {calculateNights()} {calculateNights() === 1 ? "night" : "nights"} × {roomCount} {roomCount === 1 ? "room" : "rooms"}
-                    </Typography>
-                  </Paper>
+                    {selectedRooms.map((item, idx) => (
+                      <Card key={idx} sx={{ mb: 2, border: "1px solid #e0e0e0" }}>
+                        <CardContent>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="h6" fontWeight={600}>
+                                {item.room.name} × {item.roomCount}
+                              </Typography>
+                              <Box sx={{ display: "flex", gap: 2, mt: 1 }}>
+                                <Chip 
+                                  icon={<PersonIcon />} 
+                                  label={`${item.guestsData.length} guests`} 
+                                  size="small" 
+                                />
+                                <Chip 
+                                  label={`${item.room.price} ج.م/night`}
+                                  size="small"
+                                  color="primary"
+                                />
+                              </Box>
+                            </Box>
+                            <IconButton onClick={() => handleRemoveRoom(idx)} color="error">
+                              <DeleteIcon />
+                            </IconButton>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                    <Divider sx={{ my: 3 }} />
+                  </Box>
+                )}
+
+                {/* Add New Room Section */}
+                <Typography variant="subtitle1" fontWeight={600} sx={{ mb: 2 }}>
+                  {selectedRooms.length > 0 ? "Add Another Room" : "Select a Room"}
+                </Typography>
+
+                {/* Room Selection Cards */}
+                {place.rooms && place.rooms.length > 0 && (
+                  <Box sx={{ mb: 3 }}>
+                    {place.rooms.map((room) => (
+                      <Card
+                        key={room._id}
+                        sx={{
+                          mb: 2,
+                          cursor: "pointer",
+                          border: currentRoom?._id === room._id ? "2px solid #f27244" : "1px solid #e0e0e0",
+                          transition: "all 0.3s",
+                          "&:hover": {
+                            boxShadow: 3,
+                          }
+                        }}
+                        onClick={() => setCurrentRoom(room)}
+                      >
+                        <CardContent>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "start" }}>
+                            <Box sx={{ flex: 1 }}>
+                              <Typography variant="h6" fontWeight={600}>
+                                {room.name}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                {room.description}
+                              </Typography>
+                              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                                Max guests: {room.maxGuests} per room
+                              </Typography>
+                              <Typography variant="h6" color="primary" sx={{ mt: 2 }}>
+                                {room.price} ج.م <Typography component="span" variant="body2">/ night</Typography>
+                              </Typography>
+                            </Box>
+                            <Radio checked={currentRoom?._id === room._id} />
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Box>
+                )}
+
+                {/* Room Count & Guest Forms - Only show if room selected */}
+                {currentRoom && (
+                  <>
+                    <Grid container spacing={2} sx={{ mb: 3 }}>
+                      <Grid item xs={12} sm={6}>
+                        <TextField
+                          select
+                          label="Number of This Room Type"
+                          value={currentRoomCount}
+                          onChange={(e) => setCurrentRoomCount(Number(e.target.value))}
+                          fullWidth
+                        >
+                          {[1, 2, 3, 4, 5].map((num) => (
+                            <MenuItem key={num} value={num}>
+                              {num} {num === 1 ? "room" : "rooms"}
+                            </MenuItem>
+                          ))}
+                        </TextField>
+                      </Grid>
+                    </Grid>
+
+                    {/* Guest Information Forms */}
+                    <Box sx={{ mb: 2 }}>
+                      <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                        <Typography variant="subtitle1" fontWeight={600}>
+                          Guest Information ({currentGuests.length}/{currentRoom.maxGuests * currentRoomCount})
+                        </Typography>
+                        <Button
+                          startIcon={<AddIcon />}
+                          onClick={handleAddGuest}
+                          disabled={currentGuests.length >= currentRoom.maxGuests * currentRoomCount}
+                          sx={{ textTransform: "none" }}
+                        >
+                          Add Guest
+                        </Button>
+                      </Box>
+
+                      {currentGuests.map((guest, index) => (
+                        <Card key={index} sx={{ mb: 2, p: 2, backgroundColor: "#f9f9f9" }}>
+                          <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+                            <Typography variant="subtitle2" fontWeight={600}>
+                              Guest {index + 1}
+                            </Typography>
+                            {currentGuests.length > 1 && (
+                              <IconButton size="small" onClick={() => handleRemoveGuest(index)} color="error">
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            )}
+                          </Box>
+                          <Grid container spacing={2}>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                label="Full Name *"
+                                value={guest.name}
+                                onChange={(e) => handleGuestChange(index, "name", e.target.value)}
+                                fullWidth
+                                size="small"
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                label="Email"
+                                type="email"
+                                value={guest.email}
+                                onChange={(e) => handleGuestChange(index, "email", e.target.value)}
+                                fullWidth
+                                size="small"
+                              />
+                            </Grid>
+                            <Grid item xs={12} sm={4}>
+                              <TextField
+                                label="Phone *"
+                                value={guest.phone}
+                                onChange={(e) => handleGuestChange(index, "phone", e.target.value)}
+                                fullWidth
+                                size="small"
+                              />
+                            </Grid>
+                          </Grid>
+                        </Card>
+                      ))}
+                    </Box>
+
+                    {/* Add This Room Button */}
+                    <Button
+                      variant="contained"
+                      fullWidth
+                      onClick={handleAddRoom}
+                      sx={{
+                        py: 1.5,
+                        borderRadius: 2,
+                        backgroundColor: "#4caf50",
+                        "&:hover": { backgroundColor: "#45a049" },
+                        textTransform: "none",
+                        fontWeight: 600,
+                      }}
+                    >
+                      Add This Room to Booking
+                    </Button>
+                  </>
                 )}
               </Box>
             )}
 
-            {/* Step 2: Guest Information */}
-            {activeStep === 1 && (
+            {/* Step 2: Review & Confirm */}
+            {activeStep === 2 && (
               <Box sx={{ mt: 2 }}>
                 <Typography variant="h6" fontWeight={600} sx={{ mb: 3 }}>
-                  Guest Information
+                  Review Your Booking
                 </Typography>
 
-                <FormControl component="fieldset" sx={{ mb: 3 }}>
-                  <RadioGroup
-                    value={bookingForSelf ? "self" : "other"}
-                    onChange={(e) => setBookingForSelf(e.target.value === "self")}
-                  >
-                    <FormControlLabel
-                      value="self"
-                      control={<Radio />}
-                      label="I'm booking for myself"
-                    />
-                    <FormControlLabel
-                      value="other"
-                      control={<Radio />}
-                      label="I'm booking for someone else"
-                    />
-                  </RadioGroup>
-                </FormControl>
+                {/* Booking Summary */}
+                <Paper sx={{ p: 3, mb: 3, backgroundColor: "#f5f5f5" }}>
+                  <Typography variant="subtitle1" fontWeight={600} gutterBottom>
+                    {place.name}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {formatDate(selectedRange.start)} - {formatDate(selectedRange.end)} ({calculateNights()} nights)
+                  </Typography>
+                </Paper>
 
-                {!bookingForSelf && (
-                  <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
-                    <TextField
-                      label="Guest Full Name"
-                      value={guestName}
-                      onChange={(e) => setGuestName(e.target.value)}
-                      fullWidth
-                      required
-                    />
-                    <TextField
-                      label="Guest Email"
-                      type="email"
-                      value={guestEmail}
-                      onChange={(e) => setGuestEmail(e.target.value)}
-                      fullWidth
-                    />
-                    <TextField
-                      label="Guest Phone Number"
-                      value={guestPhone}
-                      onChange={(e) => setGuestPhone(e.target.value)}
-                      fullWidth
-                      required
-                    />
-                  </Box>
-                )}
+                {/* Rooms Breakdown */}
+                {selectedRooms.map((item, idx) => (
+                  <Card key={idx} sx={{ mb: 2 }}>
+                    <CardContent>
+                      <Typography variant="h6" fontWeight={600} gutterBottom>
+                        {item.room.name} × {item.roomCount}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary" gutterBottom>
+                        {item.room.price} ج.م × {calculateNights()} nights × {item.roomCount} rooms = {item.room.price * calculateNights() * item.roomCount} ج.م
+                      </Typography>
+                      <Divider sx={{ my: 2 }} />
+                      <Typography variant="subtitle2" fontWeight={600} gutterBottom>
+                        Guests ({item.guestsData.length}):
+                      </Typography>
+                      {item.guestsData.map((guest, guestIdx) => (
+                        <Typography key={guestIdx} variant="body2" color="text.secondary">
+                          {guestIdx + 1}. {guest.name} - {guest.phone} {guest.email && `- ${guest.email}`}
+                        </Typography>
+                      ))}
+                    </CardContent>
+                  </Card>
+                ))}
 
-                {bookingForSelf && (
-                  <Paper sx={{ p: 3, backgroundColor: "#e8f5e9", textAlign: "center" }}>
-                    <CheckCircleIcon sx={{ fontSize: 48, color: "#4caf50", mb: 1 }} />
-                    <Typography variant="body1" color="text.secondary">
-                      The reservation will be made under your account
-                    </Typography>
-                  </Paper>
-                )}
+                {/* Total Price */}
+                <Paper sx={{ p: 3, mt: 3, backgroundColor: "#e8f5e9" }}>
+                  <Typography variant="h5" fontWeight={700} color="#4caf50">
+                    Total: {calculateTotal().toLocaleString()} ج.م
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                    {calculateNights()} nights × {selectedRooms.length} room types × Total {getTotalGuests()} guests
+                  </Typography>
+                </Paper>
               </Box>
             )}
 
             {/* Step 3: Success */}
-            {activeStep === 2 && (
+            {activeStep === 3 && (
               <Box sx={{ mt: 4, textAlign: "center", py: 4 }}>
                 <CheckCircleIcon sx={{ fontSize: 80, color: "#4caf50", mb: 2 }} />
                 <Typography variant="h4" fontWeight={700} sx={{ mb: 2 }}>
                   Reservation Successful!
                 </Typography>
                 <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  Your reservation has been confirmed.
+                  Your reservation has been confirmed for {selectedRooms.length} room(s) with {getTotalGuests()} guest(s).
                 </Typography>
                 
-                <Paper sx={{ p: 3, maxWidth: 400, mx: "auto", textAlign: "left" }}>
+                <Paper sx={{ p: 3, maxWidth: 500, mx: "auto", textAlign: "left" }}>
                   <Typography variant="subtitle2" color="text.secondary" gutterBottom>
                     Booking Details
                   </Typography>
                   <Typography variant="body1" sx={{ mt: 1 }}>
                     <strong>Place:</strong> {place.name}
                   </Typography>
-                  {selectedRoom && (
-                    <Typography variant="body1">
-                      <strong>Room:</strong> {selectedRoom.name}
-                    </Typography>
-                  )}
                   <Typography variant="body1">
                     <strong>Check-in:</strong> {formatDate(selectedRange.start)}
                   </Typography>
@@ -792,7 +886,10 @@ export default function BookingBox({ place, model }) {
                     <strong>Check-out:</strong> {formatDate(selectedRange.end)}
                   </Typography>
                   <Typography variant="body1">
-                    <strong>Guests:</strong> {guests}
+                    <strong>Rooms:</strong> {selectedRooms.length} room type(s)
+                  </Typography>
+                  <Typography variant="body1">
+                    <strong>Total Guests:</strong> {getTotalGuests()}
                   </Typography>
                   <Typography variant="h6" sx={{ mt: 2, color: "#f27244" }}>
                     <strong>Total:</strong> {calculateTotal().toLocaleString()} ج.م
@@ -827,7 +924,7 @@ export default function BookingBox({ place, model }) {
             )}
 
             {/* Navigation Buttons */}
-            {activeStep < 2 && (
+            {activeStep < 3 && (
               <Box sx={{ display: "flex", justifyContent: "space-between", mt: 4 }}>
                 <Button
                   onClick={handleBack}
@@ -838,7 +935,7 @@ export default function BookingBox({ place, model }) {
                 </Button>
                 <Button
                   variant="contained"
-                  onClick={activeStep === 1 ? handleReserve : handleNext}
+                  onClick={activeStep === 2 ? handleReserve : handleNext}
                   disabled={loading}
                   sx={{
                     py: 1.2,
@@ -851,7 +948,7 @@ export default function BookingBox({ place, model }) {
                 >
                   {loading ? (
                     <CircularProgress size={24} color="inherit" />
-                  ) : activeStep === 1 ? (
+                  ) : activeStep === 2 ? (
                     "Confirm Reservation"
                   ) : (
                     "Next"
