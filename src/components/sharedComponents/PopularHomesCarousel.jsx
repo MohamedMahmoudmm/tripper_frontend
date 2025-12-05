@@ -12,7 +12,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import HomeCard from "./HomeCard";
 import { useNavigate } from "react-router-dom";
 
-const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) => {
+const PopularHomesCarousel = ({ homes = [], title = "Popular Properties" }) => {
   const scrollRef = useRef(null);
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -54,6 +54,7 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
     return () => ref && ref.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // استخراج اسم المدينة من الـ title
   const cityName = title.split("in ")[1]?.trim()?.toLowerCase() || "city";
 
   return (
@@ -86,25 +87,23 @@ const PopularHomesCarousel = ({ homes = [], title = "Popular Homes in Cairo" }) 
           {title}
         </Typography>
 
-     <Button
-  variant="outlined"
-  size="small"
-  sx={{
-    borderColor: "#f27244",
-    color: "#f27244",
-    borderRadius: "20px",
-    textTransform: "none",
-    "&:hover": { bgcolor: "#f27244", color: "white" },
-  }}
-  onClick={() => {
-    const isExperience = homes?.[0]?.model === "experiance";
-    const basePath = isExperience ? "/experience-city" : "/city";
-    navigate(`${basePath}/${cityName}`);
-  }}
->
-  View More
-</Button>
-
+        <Button
+          variant="outlined"
+          size="small"
+          sx={{
+            borderColor: "#f27244",
+            color: "#f27244",
+            borderRadius: "20px",
+            textTransform: "none",
+            "&:hover": { bgcolor: "#f27244", color: "white" },
+          }}
+          onClick={() => {
+            // التوجيه حسب نوع العقار
+            navigate(`/city/${cityName}`);
+          }}
+        >
+          View More
+        </Button>
       </Box>
 
       {showLeft && (

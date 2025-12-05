@@ -286,25 +286,25 @@ const AddHotel = () => {
                     </Paper>
                   </Box>
 
-                  {/* Section 3: Rooms (Hotels only) */}
-                  {methods.watch("type") === "hotel" && (
-                    <>
-                      <Divider sx={{ my: 2 }}>
-                        <Typography variant="caption" color="text.secondary" fontWeight="600" sx={{ px: 2 }}>
-                          STEP 3 OF 4
-                        </Typography>
-                      </Divider>
+                {/* Rooms Section - فقط للفنادق */}
+{methods.watch("type") === "hotel" && (
+  <>
+    <Divider sx={{ my: 2 }}>
+      <Typography variant="caption" color="text.secondary" fontWeight="600" sx={{ px: 2 }}>
+        STEP 3 OF 4
+      </Typography>
+    </Divider>
 
-                      <Box>
-                        <Typography variant="overline" color="text.secondary" fontWeight="600" mb={1} display="block">
-                          STEP 3
-                        </Typography>
-                        <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, border: "2px solid #E8E8E8", borderRadius: 3, backgroundColor: "#FAFAFA" }}>
-                          <RoomsForm />
-                        </Paper>
-                      </Box>
-                    </>
-                  )}
+    <Box>
+      <Typography variant="overline" color="text.secondary" fontWeight="600" mb={1} display="block">
+        STEP 3
+      </Typography>
+      <Paper elevation={0} sx={{ p: { xs: 3, md: 4 }, border: "2px solid #E8E8E8", borderRadius: 3, backgroundColor: "#FAFAFA" }}>
+        <RoomsForm />
+      </Paper>
+    </Box>
+  </>
+)}
 
                   <Divider sx={{ my: 2 }}>
                     <Typography variant="caption" color="text.secondary" fontWeight="600" sx={{ px: 2 }}>

@@ -11,8 +11,9 @@ export default function RoomsForm({ showRooms = false }) {
     name: "rooms",
   });
 
-  const shouldShow = type === "hotel" || showRooms;
-  if (!shouldShow) return null;
+const shouldShow = type === "hotel" || (showRooms === true && fields.length > 0);
+
+if (!shouldShow) return null;
 
   const handleRemoveRoom = (index) => {
   

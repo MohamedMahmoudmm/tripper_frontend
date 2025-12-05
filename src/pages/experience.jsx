@@ -118,41 +118,60 @@ export default function ExperiencePage() {
   const cities = ["All", ...Object.keys(cityExperiences)];
 
   const getFilteredExperiences = () => {
-    let result = Object.keys(cityExperiences)
-      .filter((city) => selectedCity === "All" || city === selectedCity)
-      .map((city) => {
-        const filtered = cityExperiences[city].filter((exp) => {
-          const matchesPrice =
-            exp.numericPrice >= priceRange[0] &&
-            exp.numericPrice <= priceRange[1];
-
-          const matchesSearch = exp.title
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
-
-          return matchesPrice && matchesSearch;
+    // نجمع كل التجارب من كل المدن
+    let allExperiences = [];
+    
+    Object.keys(cityExperiences).forEach((city) => {
+      cityExperiences[city].forEach((exp) => {
+        allExperiences.push({
+          ...exp,
+          city: city, // نضيف المدينة لكل تجربة
         });
+      });
+    });
 
-        return { city, experiences: filtered };
-      })
-      .filter((item) => item.experiences.length > 0);
+    // نطبق كل الفلاتر مع بعض
+    let filtered = allExperiences.filter((exp) => {
+      // فلتر المدينة
+      const matchesCity = selectedCity === "All" || exp.city === selectedCity;
+      
+      // فلتر السعر
+      const matchesPrice =
+        exp.numericPrice >= priceRange[0] &&
+        exp.numericPrice <= priceRange[1];
+      
+      // فلتر البحث
+      const matchesSearch = exp.title
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
 
-    // Apply sorting
+      // لازم يطابق كل الفلاتر
+      return matchesCity && matchesPrice && matchesSearch;
+    });
+
+    // نطبق الترتيب
     if (sortBy === "price_low") {
-      result.forEach((item) => {
-        item.experiences.sort((a, b) => a.numericPrice - b.numericPrice);
-      });
+      filtered.sort((a, b) => a.numericPrice - b.numericPrice);
     } else if (sortBy === "price_high") {
-      result.forEach((item) => {
-        item.experiences.sort((a, b) => b.numericPrice - a.numericPrice);
-      });
+      filtered.sort((a, b) => b.numericPrice - a.numericPrice);
     } else if (sortBy === "rating") {
-      result.forEach((item) => {
-        item.experiences.sort((a, b) => b.rating - a.rating);
-      });
+      filtered.sort((a, b) => b.rating - a.rating);
     }
 
-    return result;
+    // نرجع نجمعهم حسب المدينة تاني
+    const groupedResult = filtered.reduce((acc, exp) => {
+      if (!acc[exp.city]) {
+        acc[exp.city] = [];
+      }
+      acc[exp.city].push(exp);
+      return acc;
+    }, {});
+
+    // نحولهم للفورمات المطلوب
+    return Object.keys(groupedResult).map((city) => ({
+      city,
+      experiences: groupedResult[city],
+    }));
   };
 
   const filteredData = getFilteredExperiences();

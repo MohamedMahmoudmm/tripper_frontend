@@ -13,15 +13,20 @@ import {
   Button,
   Stack,
   Divider,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import {
   Clear as ClearIcon,
   LocationOn as LocationIcon,
   Sort as SortIcon,
+  Hotel as HotelIcon,
+  Home as VillaIcon,
+  Apartment as ApartmentIcon,
 } from "@mui/icons-material";
 
 const HomePage = () => {
-  const [cityHotels, setCityHotels] = useState({});
+  const [allProperties, setAllProperties] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedCity, setSelectedCity] = useState("All");
@@ -29,53 +34,45 @@ const HomePage = () => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [maxPrice, setMaxPrice] = useState(5000);
   const [sortBy, setSortBy] = useState("default");
+  const [propertyTypeTab, setPropertyTypeTab] = useState(0); // 0: All, 1: Hotels, 2: Villas, 3: Apartments
 
   useEffect(() => {
-    const fetchHotelsByCity = async () => {
+    const fetchProperties = async () => {
       try {
         setLoading(true);
         setError(null);
 
-        const allHotels = await hotelService.getAllHotels();
+        const allData = await hotelService.getAllHotels();
 
-        if (!allHotels || allHotels.length === 0) {
-          setCityHotels({});
+        if (!allData || allData.length === 0) {
+          setAllProperties([]);
           setLoading(false);
           return;
         }
 
-        const groupedByCity = allHotels.reduce((acc, hotel) => {
-          let city = hotel.address?.city || "Other";
-          city = city.trim().toLowerCase();
-          const cityDisplay = city.charAt(0).toUpperCase() + city.slice(1);
-
-          if (!acc[cityDisplay]) acc[cityDisplay] = [];
-
-          let displayPrice = hotel.price;
-          if (hotel.rooms && hotel.rooms.length > 0) {
-            const roomPrices = hotel.rooms.map((r) => r.price);
+        // نحول البيانات لفورمات موحد
+        const formatted = allData.map((item) => {
+          let displayPrice = item.price;
+          if (item.rooms && item.rooms.length > 0) {
+            const roomPrices = item.rooms.map((r) => r.price);
             displayPrice = Math.min(...roomPrices);
           }
 
-          acc[cityDisplay].push({
-            image:
-              hotel.images?.[0] ||
-              "https://via.placeholder.com/300x200?text=No+Image",
-            title: hotel.name,
-            rating: hotel.starRating || 4.5,
+          return {
+            image: item.images?.[0] || "https://via.placeholder.com/300x200?text=No+Image",
+            title: item.name,
+            rating: item.starRating || 4.5,
             price: `${displayPrice} ج.م / night`,
             numericPrice: displayPrice,
-            id: hotel._id,
+            id: item._id,
             model: "hotel",
-          });
+            city: item.address?.city?.trim() || "Other",
+            propertyType: item.propertyType || "hotel",
+          };
+        });
 
-          return acc;
-        }, {});
-
-        const allPrices = allHotels
-          .map((h) => Number(h.price) || 0)
-          .filter((p) => p > 0);
-
+        // حساب أقصى سعر
+        const allPrices = formatted.map((p) => p.numericPrice).filter((p) => p > 0);
         if (allPrices.length > 0) {
           const maxP = Math.max(...allPrices);
           const minP = Math.min(...allPrices);
@@ -83,16 +80,16 @@ const HomePage = () => {
           setPriceRange([minP, maxP]);
         }
 
-        setCityHotels(groupedByCity);
+        setAllProperties(formatted);
       } catch (err) {
-        console.error("Error loading hotels:", err);
-        setError("Failed to load hotels. Please try again later.");
+        console.error("Error loading properties:", err);
+        setError("Failed to load properties. Please try again later.");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchHotelsByCity();
+    fetchProperties();
   }, []);
 
   if (loading) {
@@ -120,47 +117,48 @@ const HomePage = () => {
     );
   }
 
-  const cities = ["All", ...Object.keys(cityHotels)];
+  // استخراج كل المدن الفريدة
+  const cities = ["All", ...new Set(allProperties.map((p) => p.city))];
 
-  const getFilteredHotels = () => {
-    let result = Object.keys(cityHotels)
-      .filter((city) => selectedCity === "All" || city === selectedCity)
-      .map((city) => {
-        const filteredHotels = cityHotels[city].filter((hotel) => {
-          const matchesPrice =
-            hotel.numericPrice >= priceRange[0] &&
-            hotel.numericPrice <= priceRange[1];
+  const getFilteredProperties = () => {
+    // تحديد نوع العقار بناءً على الـ Tab
+    const typeFilter = propertyTypeTab === 0 ? "all" 
+                     : propertyTypeTab === 1 ? "hotel"
+                     : propertyTypeTab === 2 ? "villa"
+                     : "apartment";
 
-          const matchesSearch = hotel.title
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase());
+    // نطبق كل الفلاتر
+    let filtered = allProperties.filter((property) => {
+      const matchesCity = selectedCity === "All" || property.city.toLowerCase() === selectedCity.toLowerCase();
+      const matchesPrice = property.numericPrice >= priceRange[0] && property.numericPrice <= priceRange[1];
+      const matchesSearch = property.title.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesType = typeFilter === "all" || property.propertyType === typeFilter;
 
-          return matchesPrice && matchesSearch;
-        });
+      return matchesCity && matchesPrice && matchesSearch && matchesType;
+    });
 
-        return { city, hotels: filteredHotels };
-      })
-      .filter((item) => item.hotels.length > 0);
-
-    // Apply sorting
+    // نطبق الترتيب
     if (sortBy === "price_low") {
-      result.forEach((item) => {
-        item.hotels.sort((a, b) => a.numericPrice - b.numericPrice);
-      });
+      filtered.sort((a, b) => a.numericPrice - b.numericPrice);
     } else if (sortBy === "price_high") {
-      result.forEach((item) => {
-        item.hotels.sort((a, b) => b.numericPrice - a.numericPrice);
-      });
+      filtered.sort((a, b) => b.numericPrice - a.numericPrice);
     } else if (sortBy === "rating") {
-      result.forEach((item) => {
-        item.hotels.sort((a, b) => b.rating - a.rating);
-      });
+      filtered.sort((a, b) => b.rating - a.rating);
     }
+
+    // نجمع حسب المدينة فقط
+    const result = {};
+    filtered.forEach((property) => {
+      if (!result[property.city]) {
+        result[property.city] = [];
+      }
+      result[property.city].push(property);
+    });
 
     return result;
   };
 
-  const filteredData = getFilteredHotels();
+  const filteredData = getFilteredProperties();
 
   const hasActiveFilters =
     selectedCity !== "All" ||
@@ -176,13 +174,72 @@ const HomePage = () => {
     setSortBy("default");
   };
 
+  const hasResults = Object.keys(filteredData).length > 0;
+
+  const tabLabels = ["All", "Hotels", "Villas", "Apartments"];
+  const tabIcons = [null, <HotelIcon />, <VillaIcon />, <ApartmentIcon />];
+
   return (
     <Box sx={{ pb: 6, minHeight: "100vh" }}>
-      {/* MINIMAL FILTERS BAR */}
+      {/* PROPERTY TYPE TABS */}
       <Box
         sx={{
           position: "sticky",
           top: 64,
+          zIndex: 101,
+          bgcolor: "white",
+          borderBottom: "2px solid #e0e0e0",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
+        }}
+      >
+        <Box sx={{ px: { xs: 2, md: 6 } }}>
+          <Tabs
+            value={propertyTypeTab}
+            onChange={(e, newValue) => setPropertyTypeTab(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+            sx={{
+              "& .MuiTab-root": {
+                textTransform: "none",
+                fontWeight: 600,
+                fontSize: "0.95rem",
+                minHeight: 56,
+                px: 3,
+                color: "#666",
+                transition: "all 0.3s ease",
+                "&:hover": {
+                  color: "#f27244",
+                  bgcolor: "rgba(242, 114, 68, 0.04)",
+                },
+              },
+              "& .Mui-selected": {
+                color: "#f27244 !important",
+                fontWeight: 700,
+              },
+              "& .MuiTabs-indicator": {
+                backgroundColor: "#f27244",
+                height: 3,
+              },
+            }}
+          >
+            {tabLabels.map((label, idx) => (
+              <Tab
+                key={idx}
+                label={label}
+                icon={tabIcons[idx]}
+                iconPosition="start"
+                sx={{ gap: 1 }}
+              />
+            ))}
+          </Tabs>
+        </Box>
+      </Box>
+
+      {/* FILTERS BAR */}
+      <Box
+        sx={{
+          position: "sticky",
+          top: 120,
           zIndex: 100,
           bgcolor: "white",
           borderBottom: "1px solid #e0e0e0",
@@ -201,11 +258,10 @@ const HomePage = () => {
             "&::-webkit-scrollbar": { display: "none" },
           }}
         >
-          {/* Search */}
           <SearchBar
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search hotels..."
+            placeholder="Search properties..."
             onClear={() => setSearchQuery("")}
           />
 
@@ -239,13 +295,9 @@ const HomePage = () => {
                 "& .MuiSelect-select": {
                   padding: 0,
                   paddingRight: "20px !important",
-                  "&:focus": {
-                    bgcolor: "transparent",
-                  },
+                  "&:focus": { bgcolor: "transparent" },
                 },
-                "& .MuiSelect-icon": {
-                  right: 0,
-                },
+                "& .MuiSelect-icon": { right: 0 },
               }}
               MenuProps={{
                 PaperProps: {
@@ -258,16 +310,7 @@ const HomePage = () => {
               }}
             >
               {cities.map((city, index) => (
-                <MenuItem
-                  key={index}
-                  value={city}
-                  sx={{
-                    fontSize: "0.875rem",
-                    "&:hover": {
-                      bgcolor: "#f5f5f5",
-                    },
-                  }}
-                >
+                <MenuItem key={index} value={city} sx={{ fontSize: "0.875rem" }}>
                   {city}
                 </MenuItem>
               ))}
@@ -276,7 +319,6 @@ const HomePage = () => {
 
           <Divider orientation="vertical" flexItem />
 
-          {/* Price Filter */}
           <PriceFilter
             value={priceRange}
             maxPrice={maxPrice}
@@ -313,13 +355,9 @@ const HomePage = () => {
                 "& .MuiSelect-select": {
                   padding: 0,
                   paddingRight: "20px !important",
-                  "&:focus": {
-                    bgcolor: "transparent",
-                  },
+                  "&:focus": { bgcolor: "transparent" },
                 },
-                "& .MuiSelect-icon": {
-                  right: 0,
-                },
+                "& .MuiSelect-icon": { right: 0 },
               }}
               MenuProps={{
                 PaperProps: {
@@ -331,18 +369,10 @@ const HomePage = () => {
                 },
               }}
             >
-              <MenuItem value="default" sx={{ fontSize: "0.875rem" }}>
-                Default
-              </MenuItem>
-              <MenuItem value="price_low" sx={{ fontSize: "0.875rem" }}>
-                Price: Low to High
-              </MenuItem>
-              <MenuItem value="price_high" sx={{ fontSize: "0.875rem" }}>
-                Price: High to Low
-              </MenuItem>
-              <MenuItem value="rating" sx={{ fontSize: "0.875rem" }}>
-                Highest Rated
-              </MenuItem>
+              <MenuItem value="default" sx={{ fontSize: "0.875rem" }}>Default</MenuItem>
+              <MenuItem value="price_low" sx={{ fontSize: "0.875rem" }}>Price: Low to High</MenuItem>
+              <MenuItem value="price_high" sx={{ fontSize: "0.875rem" }}>Price: High to Low</MenuItem>
+              <MenuItem value="rating" sx={{ fontSize: "0.875rem" }}>Highest Rated</MenuItem>
             </Select>
           </Button>
 
@@ -363,10 +393,7 @@ const HomePage = () => {
                   minWidth: "auto",
                   whiteSpace: "nowrap",
                   borderRadius: 0,
-                  "&:hover": {
-                    bgcolor: "#fff5f5",
-                    color: "#f27244",
-                  },
+                  "&:hover": { bgcolor: "#fff5f5", color: "#f27244" },
                 }}
               >
                 Clear
@@ -378,19 +405,13 @@ const HomePage = () => {
 
       {/* RESULTS SECTION */}
       <Box sx={{ mt: 3 }}>
-        {filteredData.length === 0 ? (
-          <Box
-            sx={{
-              textAlign: "center",
-              py: 8,
-              px: 2,
-            }}
-          >
+        {!hasResults ? (
+          <Box sx={{ textAlign: "center", py: 8, px: 2 }}>
             <Typography variant="h6" color="text.secondary" gutterBottom>
-              No hotels found
+              No properties found
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Try adjusting your filters
+              Try adjusting your filters or selecting a different property type
             </Typography>
             {hasActiveFilters && (
               <Button
@@ -412,14 +433,16 @@ const HomePage = () => {
             )}
           </Box>
         ) : (
-          filteredData.map(({ city, hotels }) => (
-            <Box key={city} sx={{ mb: 4 }}>
-              <PopularHomesCarousel
-                homes={hotels}
-                title={`Popular Hotels in ${city}`}
-              />
-            </Box>
-          ))
+          <>
+            {Object.keys(filteredData).map((city) => (
+              <Box key={city} sx={{ mb: 3 }}>
+                <PopularHomesCarousel
+                  homes={filteredData[city]}
+                  title={`Popular ${tabLabels[propertyTypeTab] === "All" ? "Properties" : tabLabels[propertyTypeTab]} in ${city}`}
+                />
+              </Box>
+            ))}
+          </>
         )}
       </Box>
     </Box>
