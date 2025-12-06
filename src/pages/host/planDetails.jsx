@@ -13,7 +13,6 @@ import {
   CircularProgress,
   Alert,
   Paper,
-  IconButton,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -42,11 +41,8 @@ const PlanDetails = () => {
   const [bookDialog, setBookDialog] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState(false);
 
-  useEffect(() => {
-    fetchPlanDetails();
-  }, [id]);
 
-  const fetchPlanDetails = async () => {
+   const fetchPlanDetails = async () => {
     try {
       setLoading(true);
       const response = await planService.getById(id);
@@ -59,6 +55,12 @@ const PlanDetails = () => {
     }
   };
 
+
+  useEffect(() => {
+    fetchPlanDetails();
+  }, [id]);
+
+ 
   const handleBookPlan = async () => {
     try {
       await planService.book(plan._id);

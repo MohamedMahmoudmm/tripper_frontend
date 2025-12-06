@@ -3,30 +3,21 @@ import {
   Box,
   Typography,
   Container,
-  Card,
-  CardContent,
-  Rating,
   Grid,
   useTheme,
   useMediaQuery,
-  IconButton,
   FormControl,
   Select,
   MenuItem,
   InputLabel,
-  Pagination,
   TextField,
   InputAdornment
 } from "@mui/material";
-import FavoriteIcon from "@mui/icons-material/Favorite";
-import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import SearchIcon from "@mui/icons-material/Search";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
-import { useNavigate } from "react-router-dom";
 import HomeCard from "../../components/sharedComponents/HomeCard";
 
 const Places = () => {
-  const [fav, setFav] = useState({});
   const [data, setData] = useState([]);
   const [selectedCity, setSelectedCity] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
@@ -35,11 +26,7 @@ const Places = () => {
 
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
-  const navigate = useNavigate();
 
-  const toggleFav = (id) => {
-    setFav((prev) => ({ ...prev, [id]: !prev[id] }));
-  };
 
   useEffect(() => {
     axiosInstance.get("/places").then((res) => {
@@ -54,9 +41,6 @@ const Places = () => {
     });
   }, []);
 
-const handleCardClick = (id) => {
-  navigate(`/places/details/${id}`); // Pass "places" as the model
-};
   // Get unique places/cities from data - جرب properties مختلفة
   const cities = [
     "All", 
@@ -90,7 +74,6 @@ const handleCardClick = (id) => {
   });
 
   // Pagination logic
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const startIndex = (currentPage - 1) * itemsPerPage;
   const endIndex = startIndex + itemsPerPage;
   const currentData = filteredData.slice(startIndex, endIndex);
@@ -106,10 +89,6 @@ const handleCardClick = (id) => {
     setCurrentPage(1);
   };
 
-  const handlePageChange = (event, value) => {
-    setCurrentPage(value);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
 
   return (
     <Container sx={{ py: { xs: 2, sm: 3 } }}>

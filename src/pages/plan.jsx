@@ -23,7 +23,6 @@ import {
   EventNote as PlanIcon,
   MoreVert as MoreIcon,
   Delete as DeleteIcon,
-  Edit as EditIcon,
   Visibility as ViewIcon,
   CheckCircle as BookedIcon,
   Schedule as DraftIcon,
@@ -101,6 +100,7 @@ const Plans = () => {
   const handleBookConfirm = async () => {
     try {
       const response = await planService.book(selectedPlan._id);
+      console.log("Plan booked:", response);
       setMessage("✅ Plan booked successfully! Check My Trips.");
       
       // Update plan status in list

@@ -14,8 +14,6 @@ import {
 import {
   ArrowBackIosNew,
   EditOutlined,
-  HomeOutlined,
-  NavigateNext,
 } from "@mui/icons-material";
 import experienceService from "../../../../services/experince.service";
 import BasicInfoSection from "./EditSections/BasicInfoSection";

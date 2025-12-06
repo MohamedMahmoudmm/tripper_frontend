@@ -22,7 +22,6 @@ import {
   Add as AddIcon,
   Hotel as HotelIcon,
   Explore as ExploreIcon,
-  CheckCircle as CheckIcon,
 } from "@mui/icons-material";
 import { LocalizationProvider, DatePicker } from "@mui/x-date-pickers";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";

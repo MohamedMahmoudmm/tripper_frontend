@@ -11,7 +11,6 @@ import PlaceDetailsPage from "./pages/host/PlaceDetails"; // ✅ Place details w
 import ChatPage from "./pages/ChatPage";
 import FavouritePage from "./pages/favourite";
 import ExperiencePage from "./pages/experience";
-import PlanPage from "./pages/plan";
 import HostRoutes from "./routes/HostRoutes";
 import Places from "./pages/host/Places";
 import MyTrips from "./pages/MyTrips";

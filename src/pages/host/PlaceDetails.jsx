@@ -3,24 +3,14 @@ import {
   Box,
   Typography,
   Container,
-  Card,
-  CardMedia,
-  CardContent,
-  Button,
   Grid,
-  Chip,
-  Divider,
   Tabs,
   Tab,
-  Rating,
   CircularProgress,
-  Fab,
 } from "@mui/material";
 import {
   Hotel as HotelIcon,
   Explore as ExploreIcon,
-  EventNote as PlanIcon,
-  Add as AddIcon,
 } from "@mui/icons-material";
 import { useParams, useNavigate } from "react-router-dom";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
