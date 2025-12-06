@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Typography, Paper } from "@mui/material";
 import GridImages from "../components/detailsComponents/gridImages";
 import PlaceOffers from "../components/detailsComponents/placeOffers";
 import PlaceReviews from "../components/detailsComponents/placeReviews";
@@ -32,26 +32,26 @@ export default function PlaceDetails() {
           // Fetch related items from the same city
           fetchRelatedItems(placeData.address?.city, model, id);
 
-          if(JSON.parse(localStorage.getItem("user"))){
+          if (JSON.parse(localStorage.getItem("user"))) {
+            model.toLocaleLowerCase() !== "places" &&
+              axiosInstance
+                .get(
+                  `/api/reservations/${
+                    model === "hotel" ? "hotel" : "experience"
+                  }/${id}`
+                )
+                .then((res) => {
+                  console.log("reserv");
 
-               model.toLocaleLowerCase() !== "places" &&
-            axiosInstance
-              .get(
-                `/api/reservations/${model === "hotel" ? "hotel" : "experience"}/${id}`
-              )
-              .then((res) => {
-                console.log("reserv");
-
-                if (res.data.length > 0) {
-                  setCanReview(true);
-                } else {
-                  setCanReview(false);
-                }
-              });
-          }   
-          else{
+                  if (res.data.length > 0) {
+                    setCanReview(true);
+                  } else {
+                    setCanReview(false);
+                  }
+                });
+          } else {
             setCanReview(false);
-          }    
+          }
         })
         .catch((err) => {
           console.log(err);
@@ -131,21 +131,49 @@ export default function PlaceDetails() {
 
   return (
     <Box sx={{ p: 4, backgroundColor: "#fafafa", minHeight: "100vh" }}>
-      <GridImages 
-        images={place.images} 
+      <GridImages
+        images={place.images}
         title={place.name}
         itemId={place._id}
         itemType={getItemType(model)}
-        location = {place.address}
+        location={place.address}
       />
       <DescriptonComponent place={place} model={formatModel(model)} />
+
+      {place.notes && place.notes.trim() !== "" && (
+        <Box sx={{ mt: 4 }}>
+          <Typography
+            variant="h6"
+            sx={{
+              mb: 1,
+              fontWeight: 600,
+              color: "text.primary",
+            }}
+          >
+            Special Notes
+          </Typography>
+
+          <Box>
+            <Typography
+              variant="body2"
+              sx={{
+                color: "text.secondary",
+                lineHeight: 1.8,
+                whiteSpace: "pre-line",
+                mb: 2,
+              }}
+            >
+              {place.notes}
+            </Typography>
+          </Box>
+        </Box>
+      )}
+
       {model === "hotel" ? (
         <PlaceOffers amenities={place.amenities} />
       ) : model === "experiance" ? (
         <WhatYoullDo activities={place.activities} />
       ) : null}
-
-      
 
       {/* Related Items Carousels */}
       {!loading && (
@@ -179,7 +207,6 @@ export default function PlaceDetails() {
               />
             </Box>
           )}
-    
 
           {/* Show More Experiences if current item is experience */}
           {relatedItems.experiences?.length > 0 && model === "experiance" && (
@@ -193,7 +220,12 @@ export default function PlaceDetails() {
         </Box>
       )}
       {
-        <PlaceReviews canReview={canReview} model={model==='places'?'Place':formatModel(model)} itemId={id} />}
+        <PlaceReviews
+          canReview={canReview}
+          model={model === "places" ? "Place" : formatModel(model)}
+          itemId={id}
+        />
+      }
 
       <FooterComponent />
     </Box>

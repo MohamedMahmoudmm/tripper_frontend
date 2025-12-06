@@ -7,6 +7,7 @@ import PublicIcon from "@mui/icons-material/Public";
 import LocationCityIcon from "@mui/icons-material/LocationCity";
 import HomeIcon from "@mui/icons-material/Home";
 import DescriptionIcon from "@mui/icons-material/Description";
+import NoteAltIcon from "@mui/icons-material/NoteAlt";
 
 const ListingDetailsForm = () => {
   const {
@@ -195,6 +196,37 @@ const ListingDetailsForm = () => {
           />
         </Grid>
 
+         {/* Notes */}
+        <Grid item xs={12}>
+          <TextField
+            label="Notes"
+            placeholder="Additional notes for guests"
+            {...register("notes")}
+            multiline
+            minRows={5}
+            fullWidth
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 2 }}>
+                  <NoteAltIcon sx={{ color: "#667eea" }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              "& .MuiOutlinedInput-root": {
+                borderRadius: 2,
+                "&.Mui-focused fieldset": {
+                  borderColor: "#667eea",
+                  borderWidth: 2,
+                },
+              },
+              "& .MuiInputLabel-root.Mui-focused": {
+                color: "#667eea",
+              },
+            }}
+          />
+        </Grid>
+
         {/* Description */}
         <Grid item xs={12}>
           <TextField
@@ -230,6 +262,8 @@ const ListingDetailsForm = () => {
             }}
           />
         </Grid>
+
+       
       </Grid>
     </Box>
   );
