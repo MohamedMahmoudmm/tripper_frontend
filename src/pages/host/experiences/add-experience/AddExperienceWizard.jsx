@@ -34,6 +34,7 @@ const AddExperienceWizard = () => {
     defaultValues: {
       name: "",
       description: "",
+      notes: "",
       price: "",
       country: "",
       city: "",
@@ -76,6 +77,7 @@ const AddExperienceWizard = () => {
       const formData = new FormData();
       formData.append("name", data.name);
       formData.append("description", data.description);
+      formData.append("notes", data.notes);
       formData.append("price", data.price);
       formData.append("address[country]", data.country);
       formData.append("address[city]", data.city);

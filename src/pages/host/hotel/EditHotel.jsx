@@ -37,6 +37,7 @@ const EditHotel = () => {
     defaultValues: {
       title: "",
       description: "",
+      notes: "",
       price: "",
       country: "",
       city: "",
@@ -73,6 +74,7 @@ const EditHotel = () => {
         methods.reset({
           title: hotel.name,
           description: hotel.description || "",
+          notes: hotel.notes || "",
           price: roomsExist ? null : hotel.price || null,
           country: hotel.address?.country || "",
           city: hotel.address?.city || "",
@@ -101,6 +103,7 @@ const EditHotel = () => {
       const payload = {
         name: data.title,
         description: data.description,
+        notes: data.notes,
         price: roomsExist ? 0 : Number(data.price),
         address: {
           country: data.country,
