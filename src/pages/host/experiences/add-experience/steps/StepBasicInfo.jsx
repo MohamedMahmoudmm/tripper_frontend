@@ -16,6 +16,7 @@ import {
   LocationCity,
   Event,
 } from "@mui/icons-material";
+import NoteAltIcon from "@mui/icons-material/NoteAlt";
 
 const StepBasicInfo = () => {
   const {
@@ -98,6 +99,24 @@ const StepBasicInfo = () => {
             startAdornment: (
               <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 2 }}>
                 <Description sx={{ color: "#034959" }} />
+              </InputAdornment>
+            ),
+          }}
+          sx={inputStyle}
+        />
+
+        {/* Special Notes */}
+        <TextField
+          label="Special Notes"
+          multiline
+          rows={5}
+          fullWidth
+          placeholder="Any special notes or instructions for your guests?"
+          {...register("notes")}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start" sx={{ alignSelf: "flex-start", mt: 2 }}>
+                <NoteAltIcon sx={{ color: "#034959" }} />
               </InputAdornment>
             ),
           }}
@@ -193,6 +212,8 @@ const StepBasicInfo = () => {
               sx={inputStyle}
             />
           </Grid>
+
+
         </Grid>
 
         {/* Tips */}

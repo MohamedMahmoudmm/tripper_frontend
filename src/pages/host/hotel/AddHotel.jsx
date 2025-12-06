@@ -32,6 +32,7 @@ const AddHotel = () => {
       type: "hotel",
       title: "",
       description: "",
+      notes: "",
       price: null,
       country: "",
       city: "",
@@ -64,11 +65,13 @@ const AddHotel = () => {
     const currentStreet = methods.getValues("street");
     const currentAmenities = methods.getValues("amenities");
     const currentPhotos = methods.getValues("photos");
+    const currentNotes = methods.getValues("notes");
     
     methods.reset({
       type: newType,
       title: currentTitle,
       description: currentDescription,
+      notes: currentNotes,
       country: currentCountry,
       city: currentCity,
       street: currentStreet,
@@ -95,6 +98,7 @@ const AddHotel = () => {
       formData.append("type", data.type);
       formData.append("name", data.title);
       formData.append("description", data.description);
+      formData.append("notes", data.notes || "");
       formData.append("price", data.type === "hotel" ? 0 : Number(data.price ?? 0));
 
       formData.append("address[country]", data.country || "Egypt");
