@@ -32,10 +32,10 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
           model === "experiance"
             ? "Experiance"
             : model === "hotel"
-            ? "Hotel"
-            : model === "place"
-            ? "Place"
-            : model;
+              ? "Hotel"
+              : model === "place"
+                ? "Place"
+                : model;
 
         const result = await favoriteService.checkFavorite(id, itemType);
         setIsFavorite(result.isFavorite);
@@ -67,13 +67,10 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
 
     try {
       const itemType =
-        model === "experiance"
-          ? "Experiance"
-          : model === "hotel"
-          ? "Hotel"
-          : model === "place"
-          ? "Place"
-          : model;
+        model === "experiance" || model === "Experiance" ? "Experiance" :
+          model === "hotel" || model === "Hotel" ? "Hotel" :
+            model === "place" || model === "Place" || model === "places" ? "Place" :
+              model;
 
       if (isFavorite) {
         await favoriteService.removeFavorite(id, itemType);
@@ -110,8 +107,17 @@ const HomeCard = ({ image, title, price, rating, model, id, onRemove }) => {
   };
 
   // Navigate to details page
+  const getDetailsRoute = (model, id) => {
+    if (model === "place" || model === "places") {
+      return `/places/details/${id}`;
+    }
+    if (model === "hotel") return `/hotel/details/${id}`;
+    if (model === "experiance") return `/experiance/details/${id}`;
+    return `/${model}/details/${id}`;
+  };
+
   const handleCardClick = () => {
-    navigate(`/${model}/details/${id}`);
+    navigate(getDetailsRoute(model, id));
   };
 
   return (

@@ -23,6 +23,7 @@ import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import SearchIcon from "@mui/icons-material/Search";
 import axiosInstance from "../../axiousInstance/axoiusInstance";
 import { useNavigate } from "react-router-dom";
+import HomeCard from "../../components/sharedComponents/HomeCard";
 
 const Places = () => {
   const [fav, setFav] = useState({});
@@ -53,10 +54,9 @@ const Places = () => {
     });
   }, []);
 
-  const handleCardClick = (id) => {
-    navigate(`/places/details/${id}`);
-  };
-
+const handleCardClick = (id) => {
+  navigate(`/places/details/${id}`); // Pass "places" as the model
+};
   // Get unique places/cities from data - جرب properties مختلفة
   const cities = [
     "All", 
@@ -197,161 +197,22 @@ const Places = () => {
 
       {/* Cards Grid */}
       <Grid container spacing={{ xs: 2, sm: 2, md: 2.5 }}>
-        {currentData.map((place) => (
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            lg={4}
-            key={place._id}
-            sx={{ display: "flex", width: "30%", flexGrow: 0 }}
-          >
-            <Card
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                height: "100%",
-                flexGrow: 1,
-                borderRadius: 2,
-                boxShadow: 2,
-                position: "relative",
-                transition: "0.25s",
-                cursor: "pointer",
-                "&:hover": {
-                  boxShadow: 4,
-                  transform: "translateY(-4px)",
-                },
-              }}
-              onClick={() => handleCardClick(place._id)}
-            >
-              {/* Favorite Button */}
-              <IconButton
-                onClick={(e) => {
-                  e.stopPropagation();
-                  toggleFav(place._id);
-                }}
-                sx={{
-                  position: "absolute",
-                  top: 8,
-                  right: 8,
-                  zIndex: 2,
-                  bgcolor: "rgba(255,255,255,0.9)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,1)" },
-                }}
-              >
-                {fav[place._id] ? (
-                  <FavoriteIcon color="error" />
-                ) : (
-                  <FavoriteBorderIcon />
-                )}
-              </IconButton>
+      {currentData.map((place) => (
+  <Grid item xs={12} sm={6} md={4} key={place._id}>
+ <HomeCard
+  id={place._id}
+  image={place.images?.[0]}
+  title={place.name}
+  price="View Details"
+  rating={place.starRating || 0}
+model="place"
+/>
+  </Grid>
+))}
 
-              {/* FIXED IMAGE AREA */}
-              <Box
-                sx={{
-                  width: "100%",
-                  height: { xs: 170, sm: 190, md: 210 }, 
-                  minHeight: { xs: 170, sm: 190, md: 210 },
-                  maxHeight: { xs: 170, sm: 190, md: 210 },
-                  backgroundImage: `url(${place.images?.[0] || ""})`,
-                  backgroundSize: "cover",
-                  backgroundPosition: "center",
-                  backgroundRepeat: "no-repeat",
-                  bgcolor: place.images?.[0] ? "transparent" : "grey.200",
-                }}
-              />
-
-              {/* Content */}
-              <CardContent
-                sx={{
-                  flexGrow: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  p: 2,
-                }}
-              >
-                {/* FIXED TITLE HEIGHT */}
-                <Typography
-                  fontWeight="bold"
-                  fontSize={{ xs: "0.9rem", sm: "1rem" }}
-                  mb={1}
-                  sx={{
-                    minHeight: "40px",
-                    display: "flex",
-                    alignItems: "center",
-                  }}
-                >
-                  {place.name}
-                </Typography>
-
-                <Box display="flex" alignItems="center" gap={0.5} mb={1}>
-                  <Rating
-                    value={place.starRating}
-                    readOnly
-                    size="small"
-                    precision={0.1}
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    {place.starRating}
-                  </Typography>
-                </Box>
-
-                {/* FIXED DESCRIPTION HEIGHT */}
-                <Typography
-                  variant="body2"
-                  sx={{
-                    color: "text.secondary",
-                    mb: 2,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                    minHeight: "40px",
-                  }}
-                >
-                  {place.description}
-                </Typography>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
       </Grid>
 
-      {/* Pagination */}
-      {filteredData.length > 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            justifyContent: "center",
-            mt: 4,
-            mb: 2,
-          }}
-        >
-          <Pagination
-            count={totalPages}
-            page={currentPage}
-            onChange={handlePageChange}
-            color="primary"
-            size={isMobile ? "small" : "medium"}
-            sx={{
-              "& .MuiPaginationItem-root": {
-                fontWeight: 500,
-              },
-              "& .Mui-selected": {
-                bgcolor: "#f27244 !important",
-                color: "white",
-                "&:hover": {
-                  bgcolor: "#034959 !important",
-                },
-              },
-            }}
-          />
-        </Box>
-      )}
-
-      {/* No Results Message */}
-      {filteredData.length === 0 && (
+        {filteredData.length === 0 && (
         <Box
           sx={{
             textAlign: "center",

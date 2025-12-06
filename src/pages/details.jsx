@@ -12,7 +12,7 @@ import WhatYoullDo from "../components/detailsComponents/experienceActivity";
 import hotelService from "../services/hotels.service";
 import experienceService from "../services/experince.service";
 
-export default function PlaceDetails() {
+export default function Details() {
   const [place, setPlace] = useState(null);
   const { model, id } = useParams();
   const [canReview, setCanReview] = useState(true);

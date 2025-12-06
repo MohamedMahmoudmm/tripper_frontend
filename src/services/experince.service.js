@@ -16,6 +16,11 @@ const experienceService = {
     return res.data;
   },
 
+    searchExperiencesByCity: async (city) => {
+    const res = await axiosInstance.get(`/experiance/search?city=${city}`);
+    return res.data;
+  },
+
      // Hosts 
   getHostExperiences: async () => {
     const res = await axiosInstance.get("/experiance/host");
@@ -28,12 +33,6 @@ const experienceService = {
     return res.data;
   },
 
-/*************  ✨ Windsurf Command ⭐  *************/
-  /**
-   * Deletes an experience by its id.
-   * @param {string} id - The id of the experience to delete.
-   * @returns {Promise<object>} - The response of the delete request.
-/*******  c0523b5d-4aa4-40b0-9e55-bc1f269f1a70  *******/  
   deleteExperience: async (id) => {
     const res = await axiosInstance.delete(`/experiance/${id}`);
     return res.data;
