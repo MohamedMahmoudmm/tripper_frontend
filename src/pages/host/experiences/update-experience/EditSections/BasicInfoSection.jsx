@@ -22,6 +22,7 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
     price: experience.price || 0,
     country: experience.address?.country || "",
     city: experience.address?.city || "",
+    notes: experience.notes || "",
   });
 
   const [loading, setLoading] = useState(false);
@@ -50,6 +51,7 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
         price: Number(form.price),
         country: form.country,
         city: form.city,
+        notes: form.notes,
       };
 
       await basicInfoUpdateSchema.validate(basicInfoData, {
@@ -218,6 +220,28 @@ const BasicInfoSection = ({ experience, onUpdate }) => {
               onChange={handleChange}
               error={!!errors.city}
               helperText={errors.city}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  borderRadius: 2,
+                  "&:hover fieldset": { borderColor: "#FF385C" },
+                  "&.Mui-focused fieldset": { borderColor: "#FF385C" },
+                },
+              }}
+            />
+          </Grid>
+
+          {/* Notes Field */}
+          <Grid item xs={12}>
+            <TextField
+              label="Notes"
+              name="notes"
+              fullWidth
+              multiline
+              rows={4}
+              value={form.notes}
+              onChange={handleChange}
+              error={!!errors.notes}
+              helperText={errors.notes}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 2,
