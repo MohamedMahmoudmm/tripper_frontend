@@ -21,7 +21,9 @@ import {
 
 const ListingCard = ({ listing, onEdit, onDelete, type }) => {
   // type should be 'hotel' or 'experience'
-  const isHotel = type === 'hotel';
+  // const isHotel = type === 'hotel';
+  const isHotel = listing.propertyType === "hotel";
+
   
   // Get minimum price
   const minPrice = isHotel && listing.rooms && listing.rooms.length > 0
@@ -109,7 +111,7 @@ const ListingCard = ({ listing, onEdit, onDelete, type }) => {
 
         {/* Type Badge */}
         <Chip
-          label={isHotel ? "Hotel" : "Experience"}
+          label={(listing?.propertyType || "Experience").toUpperCase()}
           size="small"
           sx={{
             position: "absolute",

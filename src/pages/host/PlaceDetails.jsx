@@ -70,6 +70,15 @@ const PlaceDetails = () => {
     });
   };
 
+const getPrice = (item) => {
+    if (item.propertyType === "hotel") {
+      if (item.rooms && item.rooms.length > 0) {
+        return Math.min(...item.rooms.map((r) => r.price));
+      }
+      return item.price ?? 0;
+    }
+    return item.price ?? 0;
+  };
 
   if (loading) {
     return (
@@ -139,7 +148,7 @@ const PlaceDetails = () => {
       id={hotel._id}
       image={hotel.images?.[0]}
       title={hotel.name}
-      price={`From ${hotel.price} EGP / night`}
+      price={`From ${getPrice(hotel)} EGP / night`}
       rating={hotel.starRating || 0}
       model="hotel"
     />

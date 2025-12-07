@@ -208,7 +208,7 @@ const handleCardClick = (reservation) => {
             <Box display="flex" alignItems="center" gap={1} mt={1}>
               <MoneyIcon fontSize="small" color="primary" />
               <Typography variant="h6" fontWeight="bold" color="primary">
-                ${price}
+                {price}
               </Typography>
             </Box>
           </Stack>

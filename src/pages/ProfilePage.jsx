@@ -170,7 +170,7 @@ const ProfilePage = () => {
               <ListItemText primary="Phone" secondary={user.phone} />
             </ListItem>
             <Divider />
-
+            {user.activeRole !== "guest" && (
             <ListItem>
               <ListItemIcon>
                 <VerifiedIcon
@@ -190,6 +190,7 @@ const ProfilePage = () => {
                 }
               />
             </ListItem>
+            )}
 
             {/* Host-specific Identity */}
             {user.activeRole === "host" && (

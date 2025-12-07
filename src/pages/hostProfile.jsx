@@ -114,11 +114,28 @@ export default function HostProfile() {
       });
   };
 
+  const getPrice = (item) => {
+  if (item.propertyType === "hotel") {
+    if (item.rooms && item.rooms.length > 0) {
+      
+      const validPrices = item.rooms.map(r => r.price).filter(p => p > 0);
+      if (validPrices.length > 0) {
+        return Math.min(...validPrices);
+      }
+    }
+    
+    return item.price ?? 0;
+  }
+  
+  return item.price ?? 0;
+};
 
 
   const renderPropertyCard = (item, model) => {
-    const price = item.price || 0;
-    const priceLabel = model === "hotel" ? `$${price}/night` : `$${price}`;
+    const price = getPrice(item);
+    const priceLabel =
+      item.propertyType === "hotel" ? `$${price}/night` : `$${price}`;
+
 
     return (
       <Card
