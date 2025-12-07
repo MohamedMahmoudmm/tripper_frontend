@@ -36,6 +36,7 @@ import { LocalizationProvider, DateCalendar } from '@mui/x-date-pickers';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { format, addMonths, subMonths, isSameDay, isWithinInterval, isBefore, isAfter, startOfDay } from 'date-fns';
 import axiosInstance from "../../axiousInstance/axoiusInstance";
+import { useNavigate } from "react-router-dom";
 
 // Integrated Calendar Component (نفس الكود اللي كان موجود)
 const BookingCalendar = ({ availableDates = [], onDateSelect, selectedRange }) => {
@@ -314,6 +315,7 @@ export default function BookingBox({ place, model }) {
   const [activeStep, setActiveStep] = useState(0);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const navigate = useNavigate();
 
   // Date selection
   const [selectedRange, setSelectedRange] = useState({ start: null, end: null });
@@ -326,6 +328,8 @@ export default function BookingBox({ place, model }) {
   const [currentRoom, setCurrentRoom] = useState(null);
   const [currentRoomCount, setCurrentRoomCount] = useState(1);
   const [currentGuests, setCurrentGuests] = useState([{ name: "", email: "", phone: "" }]);
+
+  const token = localStorage.getItem("token");
 
   const steps = ["Select Dates", "Add Rooms", "Review & Confirm", "Success"];
 
@@ -519,7 +523,7 @@ export default function BookingBox({ place, model }) {
         <Button
           variant="contained"
           size="large"
-          onClick={() => setOpen(true)}
+          onClick={() => token ? setOpen(true) : navigate("/login")}
           sx={{
             position: "fixed",
             bottom: 24,

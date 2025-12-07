@@ -160,6 +160,7 @@ export default function DescriptonComponent({ place, model }) {
             <AirbnbDatePicker availableDates={availableDates} />
           </Box>
         )}
+      
       </Box>
 
       {model.toLowerCase() === "hotel" ? (

@@ -7,14 +7,18 @@ import DescriptonComponent from "../components/detailsComponents/descriptionComp
 import PopularHomesCarousel from "../components/sharedComponents/PopularHomesCarousel";
 import { useEffect, useState } from "react";
 import axiosInstance from "../axiousInstance/axoiusInstance";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import WhatYoullDo from "../components/detailsComponents/experienceActivity";
 import hotelService from "../services/hotels.service";
 import experienceService from "../services/experince.service";
 
+
 export default function Details() {
   const [place, setPlace] = useState(null);
+  const [hotels, setHotels] = useState([]);
+  const [experiences, setExperiences] = useState([]);
   const { model, id } = useParams();
+  const navigate = useNavigate();
   const [canReview, setCanReview] = useState(true);
   const [relatedItems, setRelatedItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -59,6 +63,51 @@ export default function Details() {
     }
   }, [id, model]);
 
+  const handleCreatePlan = async () => {
+
+
+      const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+    }
+    try {
+      // Get the city from current place
+      const city = place.address?.city || place.location?.city || place.city;
+
+      let hotelsData = [];
+      let experiencesData = [];
+
+      if (city) {
+        // Fetch hotels in this city
+        const hotelsRes = await hotelService.searchHotelsByCity(city);
+        hotelsData = hotelsRes || [];
+
+        // Fetch experiences in this city
+        const expRes = await experienceService.searchExperiencesByCity(city);
+        experiencesData = expRes || [];
+      }
+
+      // Navigate to create plan page with place data
+      navigate("/plans/create", {
+        state: {
+          place,
+          hotels: hotelsData,
+          experiences: experiencesData,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching data for travel plan:", error);
+      // Navigate anyway with whatever data we have
+      navigate("/plans/create", {
+        state: {
+          place,
+          hotels: [],
+          experiences: [],
+        },
+      });
+    }
+  };
+
   const fetchRelatedItems = async (city, currentModel, currentId) => {
     if (!city) {
       setLoading(false);
@@ -76,14 +125,25 @@ export default function Details() {
             hotel.address?.city?.toLowerCase() === city.toLowerCase() &&
             hotel._id !== currentId
         )
-        .map((hotel) => ({
-          image: hotel.images?.[0] || "https://via.placeholder.com/150",
-          title: hotel.name,
-          rating: hotel.starRating || 4.5,
-          price: `${hotel.price} ج.م / night`,
-          id: hotel._id,
-          model: "hotel",
-        }));
+        .map((hotel) => {
+          // حساب السعر الصحيح من الغرف
+          let displayPrice = hotel.price || 0;
+          if (hotel.rooms && hotel.rooms.length > 0) {
+            const roomPrices = hotel.rooms.map((r) => r.price).filter(p => p > 0);
+            if (roomPrices.length > 0) {
+              displayPrice = Math.min(...roomPrices);
+            }
+          }
+          
+          return {
+            image: hotel.images?.[0] || "https://via.placeholder.com/150",
+            title: hotel.name,
+            rating: hotel.starRating || 4.5,
+            price: `${displayPrice} ج.م / night`,
+            id: hotel._id,
+            model: "hotel",
+          };
+        });
 
       // Fetch experiences
       const experiences = await experienceService.getAllExperiences();
@@ -101,6 +161,10 @@ export default function Details() {
           id: exp._id,
           model: "experiance",
         }));
+
+      // Store hotels and experiences for travel plan
+      setHotels(hotels);
+      setExperiences(experiences);
 
       // Group by model type
       allItems = {
@@ -137,6 +201,7 @@ export default function Details() {
         itemId={place._id}
         itemType={getItemType(model)}
         location={place.address}
+        onCreatePlan={handleCreatePlan}
       />
       <DescriptonComponent place={place} model={formatModel(model)} />
 
